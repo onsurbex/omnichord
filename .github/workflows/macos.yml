@@ -39,13 +39,17 @@ jobs:
           codesign --force --deep --sign - build/Omnichord_artefacts/Release/Standalone/Omnichord.app
           codesign --verify --deep --strict build/Omnichord_artefacts/Release/VST3/Omnichord.vst3
           codesign --verify --deep --strict build/Omnichord_artefacts/Release/Standalone/Omnichord.app
-      - name: Verify VST3 installation and replacement
-        env:
-          OMNICHORD_VST3_DIR: ${{ runner.temp }}/Omnichord plugin install test
+      - name: Create macOS PKG installer
+        run: bash scripts/build-macos-pkg.sh build .
+      - name: Verify PKG installation and replacement
         run: |
-          bash "scripts/Instalar Omnichord.command" "build/Omnichord_artefacts/Release/VST3/Omnichord.vst3"
-          bash "scripts/Instalar Omnichord.command" "build/Omnichord_artefacts/Release/VST3/Omnichord.vst3"
-          lipo "$OMNICHORD_VST3_DIR/Omnichord.vst3/Contents/MacOS/Omnichord" -verify_arch arm64 x86_64
+          sudo installer -pkg Omnichord-*.pkg -target /
+          sudo installer -pkg Omnichord-*.pkg -target /
+          codesign --verify --deep --strict --verbose=2 /Library/Audio/Plug-Ins/VST3/Omnichord.vst3
+          codesign --verify --deep --strict --verbose=2 /Applications/Omnichord.app
+          lipo /Library/Audio/Plug-Ins/VST3/Omnichord.vst3/Contents/MacOS/Omnichord -verify_arch arm64 x86_64
+          lipo /Applications/Omnichord.app/Contents/MacOS/Omnichord -verify_arch arm64 x86_64
+          pkgutil --pkg-info audio.chordharp.instrument.pkg
       - name: Package for testing
         run: |
           mkdir -p package
@@ -53,7 +57,6 @@ jobs:
           cp -R build/Omnichord_artefacts/Release/Standalone/Omnichord.app package/
           cp README.md package/
           cp THIRD_PARTY_NOTICES.md package/
-          cp "scripts/Instalar Omnichord.command" package/
           cp Assets/magic.xml package/
           cp build/Omnichord-preview.png package/
           cp build/Omnichord-midnight-preview.png package/
@@ -62,6 +65,7 @@ jobs:
         with:
           name: Omnichord-macOS-universal
           path: |
+            Omnichord-*.pkg
             Omnichord-macOS-universal.zip
             build/Omnichord-preview.png
             build/Omnichord-midnight-preview.png

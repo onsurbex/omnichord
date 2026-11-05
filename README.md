@@ -48,19 +48,25 @@ de edición de Foleys. Conservan el diseño de `Assets/magic.xml` y los temas.
 La firma es ad hoc, sin notarización de Apple; la carga en Ableton y la fidelidad
 respecto al instrumento real requieren una prueba manual en un Mac.
 
-Descomprime el paquete y abre **Instalar Omnichord.command**, situado junto a
-`Omnichord.vst3`. Comprueba la firma y copia el plugin a
-`~/Library/Audio/Plug-Ins/VST3/Omnichord.vst3`, reemplazando una instalación
-anterior. No necesita permisos de administrador. Después vuelve a explorar
-los plugins en Ableton Live. La compilación automática prueba la instalación
-y la sustitución en una carpeta temporal de macOS.
+El artefacto incluye **Omnichord-0.3.0.pkg**. Ábrelo con el instalador de macOS:
+instala el VST3 en `/Library/Audio/Plug-Ins/VST3/Omnichord.vst3` y la aplicación
+en `/Applications/Omnichord.app`. El asistente solicita permisos de administrador.
+Después vuelve a explorar los plugins en Ableton Live. La compilación automática
+comprueba el contenido del PKG, sus firmas y la instalación y reinstalación reales
+en un servidor de macOS. El VST3 y la app tienen firma ad hoc; el PKG no tiene
+certificado Developer ID Installer ni notarización de Apple.
 
-Para instalar una compilación local desde la carpeta del repositorio:
+Para generar el PKG de una compilación local, firma primero ambos bundles:
 
 ```sh
-bash "scripts/Instalar Omnichord.command" \
+codesign --force --deep --sign - \
   "build-release/Omnichord_artefacts/Release/VST3/Omnichord.vst3"
+codesign --force --deep --sign - \
+  "build-release/Omnichord_artefacts/Release/Standalone/Omnichord.app"
+bash scripts/build-macos-pkg.sh build-release .
 ```
+
+El empaquetado utiliza `pkgbuild`, `pkgutil` y Python 3.
 
 ## Tocar
 
