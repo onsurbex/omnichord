@@ -1,9 +1,10 @@
 #include "PluginEditor.h"
 #include "BinaryData.h"
+#include "KeyboardMapping.h"
 
 namespace {
 const juce::Colour ink(0xff263e38), cream(0xffeee6cf), accent(0xffb66b44);
-const char* noteNames[]{"C","C#","D","Eb","E","F","F#","G","Ab","A","Bb","B"};
+const char* noteNames[]{"C","Db","D","Eb","E","F","F#","G","Ab","A","Bb","B"};
 juce::Image embeddedLogo() {
     return juce::ImageCache::getFromMemory(BinaryData::BlinblinLogo_png,BinaryData::BlinblinLogo_pngSize);
 }
@@ -84,64 +85,18 @@ void StrumStrip::play(int y) {
 }
 
 namespace {
-class LogoView final : public juce::Component,private juce::Timer {
+class LogoView final : public juce::Component {
 public:
-    explicit LogoView(ChordHarpProcessor& p):processor(p),logo(embeddedLogo()) { refresh(); startTimerHz(10); }
+    explicit LogoView(ChordHarpProcessor&):logo(embeddedLogo()) {}
     void paint(juce::Graphics& g) override {
         g.setColour(juce::Colours::white);
-        if(logo.isValid()) g.drawImageWithin(logo,0,0,getWidth(),getHeight(),juce::RectanglePlacement::centred);
+        g.drawImageWithin(logo,0,0,getWidth(),getHeight(),juce::RectanglePlacement::centred);
     }
     void configure(foleys::GuiItem&) {}
     static std::vector<std::pair<juce::String,int>> colours() { return {}; }
     static std::vector<foleys::SettableProperty> properties(const juce::ValueTree&) { return {}; }
 private:
-    void timerCallback() override { refresh(); }
-    void refresh() {
-        const auto data=processor.state.state.getProperty("customLogo").toString();
-        if(data==encoded) return;
-        encoded=data;
-        juce::MemoryBlock bytes;
-        logo=bytes.fromBase64Encoding(encoded)?juce::ImageFileFormat::loadFrom(bytes.getData(),bytes.getSize()):juce::Image{};
-        if(!logo.isValid()) logo=embeddedLogo();
-        repaint();
-    }
-    ChordHarpProcessor& processor;
     juce::Image logo;
-    juce::String encoded;
-};
-
-class LogoPicker final : public juce::TextButton {
-public:
-    explicit LogoPicker(ChordHarpProcessor& p):processor(p) { onClick=[this] { choose(); }; }
-    void configure(foleys::GuiItem& item) { setButtonText(item.getProperty("text").toString()); }
-    static std::vector<std::pair<juce::String,int>> colours() {
-        return {{"button-color",juce::TextButton::buttonColourId},{"button-off-text",juce::TextButton::textColourOffId}};
-    }
-    static std::vector<foleys::SettableProperty> properties(const juce::ValueTree& node) {
-        return {{node,"text",foleys::SettableProperty::Text,"CAMBIAR LOGO",{}}};
-    }
-private:
-    void choose() {
-        chooser=std::make_unique<juce::FileChooser>("Selecciona tu logotipo (PNG o JPEG)",juce::File{},"*.png;*.jpg;*.jpeg");
-        const juce::Component::SafePointer<LogoPicker> safe(this);
-        chooser->launchAsync(juce::FileBrowserComponent::openMode|juce::FileBrowserComponent::canSelectFiles,
-            [safe](const juce::FileChooser& dialog) {
-                if(!safe) return;
-                const auto file=dialog.getResult(); if(!file.existsAsFile()) return;
-                juce::MemoryBlock bytes;
-                if(file.getSize()>8*1024*1024 || !file.loadFileAsData(bytes)) {
-                    juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,"Logo","Usa una imagen de menos de 8 MB."); return;
-                }
-                const auto image=juce::ImageFileFormat::loadFrom(bytes.getData(),bytes.getSize());
-                if(!image.isValid() || image.getWidth()>4096 || image.getHeight()>4096) {
-                    juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,"Logo","Usa un PNG o JPEG de hasta 4096 x 4096 píxeles."); return;
-                }
-                safe->processor.state.state.setProperty("customLogo",bytes.toBase64Encoding(),nullptr);
-                safe->processor.updateHostDisplay(juce::AudioProcessor::ChangeDetails{}.withNonParameterStateChanged(true));
-            });
-    }
-    ChordHarpProcessor& processor;
-    std::unique_ptr<juce::FileChooser> chooser;
 };
 
 class ChordDisplay final : public juce::Component,private juce::Timer {
@@ -232,7 +187,6 @@ std::unique_ptr<foleys::MagicGUIBuilder> createBuilder(ChordHarpProcessor& proce
     builder->registerLookAndFeel("BLINBLIN",std::move(look));
     builder->registerFactory("OmniStrum",&InstrumentItem<StrumStrip>::factory);
     builder->registerFactory("BlinblinLogo",&InstrumentItem<LogoView>::factory);
-    builder->registerFactory("LogoPicker",&InstrumentItem<LogoPicker>::factory);
     builder->registerFactory("ChordDisplay",&InstrumentItem<ChordDisplay>::factory);
     builder->registerFactory("Speaker",&InstrumentItem<Speaker>::factory);
     return builder;
@@ -240,4 +194,46 @@ std::unique_ptr<foleys::MagicGUIBuilder> createBuilder(ChordHarpProcessor& proce
 }
 
 ChordHarpEditor::ChordHarpEditor(ChordHarpProcessor& processor)
-    :foleys::MagicPluginEditor(processor.magicState,createBuilder(processor)) {}
+    :foleys::MagicPluginEditor(processor.magicState,createBuilder(processor)),processor(processor) {
+    setWantsKeyboardFocus(true);
+}
+ChordHarpEditor::~ChordHarpEditor() { releaseComputerKeys(); }
+void ChordHarpEditor::releaseComputerKeys() {
+    for(const auto& held:heldKeys) processor.magicState.getKeyboardState().noteOff(1,held.second,0);
+    heldKeys.clear();
+}
+void ChordHarpEditor::focusLost(FocusChangeType) { releaseComputerKeys(); }
+bool ChordHarpEditor::keyStateChanged(bool) {
+    bool handled=false;
+    for(auto it=heldKeys.begin();it!=heldKeys.end();) {
+        if(!juce::KeyPress::isKeyCurrentlyDown(it->first)) {
+            processor.magicState.getKeyboardState().noteOff(1,it->second,0);
+            it=heldKeys.erase(it); handled=true;
+        } else ++it;
+    }
+    return handled;
+}
+bool ChordHarpEditor::keyPressed(const juce::KeyPress& key) {
+    if(!processor.computerKeyboardEnabled() || getGUIBuilder().isEditModeOn()) return false;
+    if(key.getModifiers().isCommandDown() || key.getModifiers().isCtrlDown() || key.getModifiers().isAltDown()) return false;
+    const auto* focus=juce::Component::getCurrentlyFocusedComponent();
+    if(focus && (dynamic_cast<const juce::TextEditor*>(focus) || focus->findParentComponentOfClass<juce::TextEditor>()
+        || dynamic_cast<const juce::ComboBox*>(focus) || focus->findParentComponentOfClass<juce::ComboBox>())) return false;
+    const int code=key.getKeyCode();
+    if(code<0 || code>127) return false;
+    const int upper=juce::CharacterFunctions::toUpperCase(static_cast<juce::juce_wchar>(code));
+    const juce::String qualities("ZXC");
+    const int quality=qualities.indexOfChar(static_cast<juce::juce_wchar>(upper));
+    if(quality>=0) { processor.selectChord(quality*12+processor.selectedChord()%12); return true; }
+    const int column=juce::String("1234567890QP").indexOfChar(static_cast<juce::juce_wchar>(upper));
+    const int harp=juce::String("AWSEDFTGYHUJ").indexOfChar(static_cast<juce::juce_wchar>(upper));
+    int note=-1;
+    if(column>=0) note=36+(processor.selectedChord()/12)*12+column;
+    else if(harp>=0) note=72+harp;
+    if(note<0) return false;
+    if(heldKeys.find(upper)==heldKeys.end()) {
+        heldKeys.emplace(upper,note);
+        processor.magicState.getKeyboardState().noteOn(1,note,0.8f);
+    }
+    return true;
+}

@@ -28,31 +28,31 @@ jobs:
           -DCHORDHARP_PLUGIN_TESTS=ON
           -DCHORDHARP_GUI_EDITOR=ON
       - name: Build instrument and tests
-        run: cmake --build build --config Release --parallel 3 --target ChordHarp_VST3 ChordHarp_Standalone engine_tests processor_tests
+        run: cmake --build build --config Release --parallel 3 --target Omnichord_VST3 Omnichord_Standalone engine_tests processor_tests
       - name: Test engine and JUCE processor
         run: ctest --test-dir build -C Release --output-on-failure
       - name: Check universal binaries and local signatures
         run: |
-          lipo build/ChordHarp_artefacts/Release/VST3/ChordHarp.vst3/Contents/MacOS/ChordHarp -verify_arch arm64 x86_64
-          lipo build/ChordHarp_artefacts/Release/Standalone/ChordHarp.app/Contents/MacOS/ChordHarp -verify_arch arm64 x86_64
-          codesign --force --deep --sign - build/ChordHarp_artefacts/Release/VST3/ChordHarp.vst3
-          codesign --force --deep --sign - build/ChordHarp_artefacts/Release/Standalone/ChordHarp.app
-          codesign --verify --deep --strict build/ChordHarp_artefacts/Release/VST3/ChordHarp.vst3
-          codesign --verify --deep --strict build/ChordHarp_artefacts/Release/Standalone/ChordHarp.app
+          lipo build/Omnichord_artefacts/Release/VST3/Omnichord.vst3/Contents/MacOS/Omnichord -verify_arch arm64 x86_64
+          lipo build/Omnichord_artefacts/Release/Standalone/Omnichord.app/Contents/MacOS/Omnichord -verify_arch arm64 x86_64
+          codesign --force --deep --sign - build/Omnichord_artefacts/Release/VST3/Omnichord.vst3
+          codesign --force --deep --sign - build/Omnichord_artefacts/Release/Standalone/Omnichord.app
+          codesign --verify --deep --strict build/Omnichord_artefacts/Release/VST3/Omnichord.vst3
+          codesign --verify --deep --strict build/Omnichord_artefacts/Release/Standalone/Omnichord.app
       - name: Package for testing
         run: |
           mkdir -p package
-          cp -R build/ChordHarp_artefacts/Release/VST3/ChordHarp.vst3 package/
-          cp -R build/ChordHarp_artefacts/Release/Standalone/ChordHarp.app package/
+          cp -R build/Omnichord_artefacts/Release/VST3/Omnichord.vst3 package/
+          cp -R build/Omnichord_artefacts/Release/Standalone/Omnichord.app package/
           cp README.md package/
           cp THIRD_PARTY_NOTICES.md package/
           cp Assets/magic.xml package/
-          cp build/ChordHarp-preview.png package/
-          ditto -c -k --sequesterRsrc --keepParent package ChordHarp-macOS-universal.zip
+          cp build/Omnichord-preview.png package/
+          ditto -c -k --sequesterRsrc --keepParent package Omnichord-macOS-universal.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: ChordHarp-macOS-universal
+          name: Omnichord-macOS-universal
           path: |
-            ChordHarp-macOS-universal.zip
-            build/ChordHarp-preview.png
+            Omnichord-macOS-universal.zip
+            build/Omnichord-preview.png
           if-no-files-found: error
