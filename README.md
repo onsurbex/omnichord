@@ -56,6 +56,9 @@ Pulsa CARGAR LOGO para elegir tu PNG o JPEG original (hasta 8 MB y 4096 x 4096).
 Se respeta su transparencia y proporción, y sus datos se guardan dentro del estado
 del plugin con el proyecto de Ableton. El texto BLINBLIN es provisional hasta
 cargar el archivo: el logotipo del usuario no está incluido en el repositorio.
+Para incluir el logo de fábrica, guarda el PNG original en
+`Assets/BlinblinLogo.png` y vuelve a compilar. CMake lo incrusta en el VST3 y
+en la aplicación; aparecerá automáticamente sin cargarlo desde el ordenador.
 El workflow incluye una captura real del editor en el artefacto descargable.
 
 ## Verificar el motor sin JUCE

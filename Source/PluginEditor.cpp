@@ -1,9 +1,20 @@
 #include "PluginEditor.h"
+#if defined(CHORDHARP_HAS_EMBEDDED_LOGO)
+#include "BrandAssets.h"
+#endif
 
 namespace {
 const juce::Colour ink(0xff263e38), cream(0xffeee6cf), accent(0xffb66b44);
 constexpr int fifths[]{5,0,7,2,9,4,11,6,1,8,3,10};
 const char* noteNames[]{"C","C#","D","Eb","E","F","F#","G","Ab","A","Bb","B"};
+juce::Image embeddedLogo() {
+#if defined(CHORDHARP_HAS_EMBEDDED_LOGO)
+    return juce::ImageCache::getFromMemory(ChordHarpBrand::BlinblinLogo_png,
+                                          ChordHarpBrand::BlinblinLogo_pngSize);
+#else
+    return {};
+#endif
+}
 }
 
 void InstrumentLook::drawButtonBackground(juce::Graphics& g, juce::Button& button,
@@ -68,6 +79,8 @@ ChordHarpEditor::ChordHarpEditor(ChordHarpProcessor& p):AudioProcessorEditor(p),
     look.setColour(juce::ToggleButton::textColourId,ink);
     look.setColour(juce::ToggleButton::tickColourId,accent);
     setLookAndFeel(&look);
+    logo=embeddedLogo();
+    logoButton.setButtonText(logo.isValid()?"CAMBIAR LOGO":"CARGAR LOGO");
     for(int i=0;i<36;++i) {
         auto& button=chords[static_cast<size_t>(i)];
         button.setButtonText(juce::String(noteNames[i%12])+(i/12==1?"m":i/12==2?"7":""));
@@ -137,6 +150,8 @@ void ChordHarpEditor::timerCallback() {
     if(encoded!=logoData) {
         logoData=encoded; juce::MemoryBlock bytes;
         logo=bytes.fromBase64Encoding(encoded)?juce::ImageFileFormat::loadFrom(bytes.getData(),bytes.getSize()):juce::Image{};
+        if(!logo.isValid()) logo=embeddedLogo();
+        logoButton.setButtonText(logo.isValid()?"CAMBIAR LOGO":"CARGAR LOGO");
         changed=true;
     }
     if(changed) repaint();

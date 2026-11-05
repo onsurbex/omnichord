@@ -29,6 +29,16 @@ juce_add_plugin(ChordHarp
     COPY_PLUGIN_AFTER_BUILD FALSE)
 juce_generate_juce_header(ChordHarp)
 target_sources(ChordHarp PRIVATE Source/PluginProcessor.cpp Source/PluginEditor.cpp)
+# Bundle the original logo into both plugin formats, without a runtime file path.
+set(CHORDHARP_LOGO "${CMAKE_CURRENT_SOURCE_DIR}/Assets/BlinblinLogo.png")
+if(EXISTS "${CHORDHARP_LOGO}")
+    juce_add_binary_data(ChordHarpBrand
+        HEADER_NAME BrandAssets.h
+        NAMESPACE ChordHarpBrand
+        SOURCES "${CHORDHARP_LOGO}")
+    target_link_libraries(ChordHarp PRIVATE ChordHarpBrand)
+    target_compile_definitions(ChordHarp PRIVATE CHORDHARP_HAS_EMBEDDED_LOGO=1)
+endif()
 target_compile_definitions(ChordHarp PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0)
 target_link_libraries(ChordHarp PRIVATE juce::juce_audio_utils PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
 

@@ -53,7 +53,7 @@ int main() {
     require(editor && editor->getWidth() == 1060 && editor->getHeight() == 650,
             "Editor must instantiate at its intended dimensions");
     editor.reset();
-    // Capture the actual JUCE editor, with the honest default wordmark.
+    // Capture the JUCE editor with the bundled logo, or the provisional wordmark.
     restored.state.state.removeProperty("customLogo",nullptr);
     editor.reset(restored.createEditor());
     const auto preview=editor->createComponentSnapshot(editor->getLocalBounds());
