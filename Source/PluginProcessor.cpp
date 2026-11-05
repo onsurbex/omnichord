@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "BinaryData.h"
 
 juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::parameters() {
     juce::AudioProcessorValueTreeState::ParameterLayout p;
@@ -11,8 +12,24 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"pad",1},"Chord organ",false));
     return p;
 }
-ChordHarpProcessor::ChordHarpProcessor():AudioProcessor(BusesProperties().withOutput("Output",juce::AudioChannelSet::stereo(),true)),state(*this,nullptr,"ChordHarp",parameters()) {}
-void ChordHarpProcessor::prepareToPlay(double rate,int) { engine.prepare(rate); }
+ChordHarpProcessor::ChordHarpProcessor():AudioProcessor(BusesProperties().withOutput("Output",juce::AudioChannelSet::stereo(),true)),state(*this,nullptr,"ChordHarp",parameters()) {
+    magicState.updateParameterMap();
+    magicState.setGuiValueTree(BinaryData::magic_xml,BinaryData::magic_xmlSize);
+#if FOLEYS_SHOW_GUI_EDITOR_PALLETTE
+    // Gives Save XML a useful starting directory for a local development build.
+    const auto uiFile=juce::File(__FILE__).getParentDirectory().getSiblingFile("Assets").getChildFile("magic.xml");
+    magicState.setResourcesFolder(uiFile.getFullPathName());
+#endif
+    magicState.addTrigger("silence",[this] {
+        auto* parameter=state.getParameter("pad");
+        parameter->beginChangeGesture(); parameter->setValueNotifyingHost(0); parameter->endChangeGesture();
+        panic.store(true);
+    });
+}
+void ChordHarpProcessor::prepareToPlay(double rate,int blockSize) {
+    engine.prepare(rate);
+    magicState.prepareToPlay(rate,blockSize);
+}
 bool ChordHarpProcessor::isBusesLayoutSupported(const BusesLayout& b) const {
     return b.getMainInputChannelSet().isDisabled() && (b.getMainOutputChannelSet()==juce::AudioChannelSet::stereo() || b.getMainOutputChannelSet()==juce::AudioChannelSet::mono());
 }
@@ -25,6 +42,7 @@ void ChordHarpProcessor::strum(int index) {
 void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::MidiBuffer& midi) {
     juce::ScopedNoDenormals noDenormals;
     buffer.clear();
+    magicState.processMidiBuffer(midi,buffer.getNumSamples());
     engine.gain=state.getRawParameterValue("gain")->load();
     engine.tone=state.getRawParameterValue("tone")->load();
     engine.sustain=state.getRawParameterValue("sustain")->load();
@@ -53,10 +71,18 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
     midi.clear();
 }
 void ChordHarpProcessor::getStateInformation(juce::MemoryBlock& dest) {
-    if(auto xml=state.copyState().createXml()) copyXmlToBinary(*xml,dest);
+    auto snapshot=state.copyState();
+    snapshot.setProperty("guiLayout",magicState.getGuiTree().toXmlString(),nullptr);
+    if(auto xml=snapshot.createXml()) copyXmlToBinary(*xml,dest);
 }
 void ChordHarpProcessor::setStateInformation(const void* data,int size) {
-    if(auto xml=getXmlFromBinary(data,size)) if(xml->hasTagName(state.state.getType())) state.replaceState(juce::ValueTree::fromXml(*xml));
+    if(auto xml=getXmlFromBinary(data,size)) if(xml->hasTagName(state.state.getType())) {
+        auto restored=juce::ValueTree::fromXml(*xml);
+        const auto layout=juce::ValueTree::fromXml(restored.getProperty("guiLayout").toString());
+        if(layout.hasType("magic") && layout.getChildWithName("View").isValid())
+            magicState.setGuiValueTree(layout);
+        state.replaceState(restored);
+    }
 }
 juce::AudioProcessorEditor* ChordHarpProcessor::createEditor() { return new ChordHarpEditor(*this); }
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new ChordHarpProcessor; }

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<magic>
+  <Styles>
+    <Style name="BLINBLIN">
+      <Nodes />
+      <Classes>
+        <chord button-color="ffdad3bc" button-on-color="ffb66b44" button-off-text="ff263e38" button-on-text="fff6efdc" />
+        <knob slider-type="rotary-horizontal-vertical" slider-textbox="textbox-below" slider-thumb="ff263e38" slider-text="ff263e38" slider-text-outline="00000000" slider-text-background="00000000" rotary-fill="ffb66b44" />
+      </Classes>
+      <Types>
+        <View margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
+        <Label margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
+        <Slider margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
+        <TextButton margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
+        <ToggleButton margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
+        <OmniStrum margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
+        <BlinblinLogo margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
+        <LogoPicker margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
+        <ChordDisplay margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
+        <Speaker margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
+      </Types>
+      <Palettes>
+        <default />
+      </Palettes>
+    </Style>
+  </Styles>
+  <View id="root" width="1060" height="650" resizable="0" resize-corner="0" display="contents" background-color="ff172a25" margin="0" padding="0" border="0" lookAndFeel="BLINBLIN">
+    <View id="shell" pos-x="15" pos-y="15" pos-width="1030" pos-height="620" display="contents" background-color="ffeee6cf" radius="55">
+      <Label id="subtitle" pos-x="60" pos-y="38" pos-width="520" pos-height="22" text="CHORDHARP / INSTRUMENTO ELECTRONICO" font-size="13" />
+      <Label id="title" pos-x="59" pos-y="61" pos-width="520" pos-height="55" text="Acordes al tacto." font-size="40" />
+      <Label id="description" pos-x="62" pos-y="118" pos-width="500" pos-height="20" text="36 ACORDES / 12 CUERDAS / UN GESTO" font-size="12" />
+      <Speaker id="speaker" pos-x="62" pos-y="160" pos-width="150" pos-height="80" dot-color="66263e38" background-color="16263e38" radius="15" />
+      <ChordDisplay id="chord-display" pos-x="245" pos-y="160" pos-width="290" pos-height="80" display-background="ff263e38" display-text="ffeee6cf" display-caption="ACORDE EN MEMORIA" display-font-size="28" />
+      <View id="divider-275" pos-x="62" pos-y="260" pos-width="481" pos-height="1" background-color="24263e38" />
+      <View id="divider-439" pos-x="62" pos-y="424" pos-width="481" pos-height="1" background-color="24263e38" />
+      <Label id="quality-0" pos-x="28" pos-y="284" pos-width="35" pos-height="20" text="MAY" font-size="10" />
+      <TextButton id="chord-5" pos-x="67" pos-y="276" pos-width="35" pos-height="35" text="F" parameter="chord" button-radio-group="1001" button-radio-value="5" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-0" pos-x="106" pos-y="276" pos-width="35" pos-height="35" text="C" parameter="chord" button-radio-group="1001" button-radio-value="0" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-7" pos-x="145" pos-y="276" pos-width="35" pos-height="35" text="G" parameter="chord" button-radio-group="1001" button-radio-value="7" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-2" pos-x="184" pos-y="276" pos-width="35" pos-height="35" text="D" parameter="chord" button-radio-group="1001" button-radio-value="2" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-9" pos-x="223" pos-y="276" pos-width="35" pos-height="35" text="A" parameter="chord" button-radio-group="1001" button-radio-value="9" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-4" pos-x="262" pos-y="276" pos-width="35" pos-height="35" text="E" parameter="chord" button-radio-group="1001" button-radio-value="4" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-11" pos-x="301" pos-y="276" pos-width="35" pos-height="35" text="B" parameter="chord" button-radio-group="1001" button-radio-value="11" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-6" pos-x="340" pos-y="276" pos-width="35" pos-height="35" text="F#" parameter="chord" button-radio-group="1001" button-radio-value="6" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-1" pos-x="379" pos-y="276" pos-width="35" pos-height="35" text="C#" parameter="chord" button-radio-group="1001" button-radio-value="1" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-8" pos-x="418" pos-y="276" pos-width="35" pos-height="35" text="Ab" parameter="chord" button-radio-group="1001" button-radio-value="8" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-3" pos-x="457" pos-y="276" pos-width="35" pos-height="35" text="Eb" parameter="chord" button-radio-group="1001" button-radio-value="3" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-10" pos-x="496" pos-y="276" pos-width="35" pos-height="35" text="Bb" parameter="chord" button-radio-group="1001" button-radio-value="10" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <Label id="quality-1" pos-x="28" pos-y="328" pos-width="35" pos-height="20" text="MIN" font-size="10" />
+      <TextButton id="chord-17" pos-x="72" pos-y="320" pos-width="35" pos-height="35" text="Fm" parameter="chord" button-radio-group="1001" button-radio-value="17" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-12" pos-x="111" pos-y="320" pos-width="35" pos-height="35" text="Cm" parameter="chord" button-radio-group="1001" button-radio-value="12" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-19" pos-x="150" pos-y="320" pos-width="35" pos-height="35" text="Gm" parameter="chord" button-radio-group="1001" button-radio-value="19" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-14" pos-x="189" pos-y="320" pos-width="35" pos-height="35" text="Dm" parameter="chord" button-radio-group="1001" button-radio-value="14" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-21" pos-x="228" pos-y="320" pos-width="35" pos-height="35" text="Am" parameter="chord" button-radio-group="1001" button-radio-value="21" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-16" pos-x="267" pos-y="320" pos-width="35" pos-height="35" text="Em" parameter="chord" button-radio-group="1001" button-radio-value="16" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-23" pos-x="306" pos-y="320" pos-width="35" pos-height="35" text="Bm" parameter="chord" button-radio-group="1001" button-radio-value="23" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-18" pos-x="345" pos-y="320" pos-width="35" pos-height="35" text="F#m" parameter="chord" button-radio-group="1001" button-radio-value="18" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-13" pos-x="384" pos-y="320" pos-width="35" pos-height="35" text="C#m" parameter="chord" button-radio-group="1001" button-radio-value="13" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-20" pos-x="423" pos-y="320" pos-width="35" pos-height="35" text="Abm" parameter="chord" button-radio-group="1001" button-radio-value="20" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-15" pos-x="462" pos-y="320" pos-width="35" pos-height="35" text="Ebm" parameter="chord" button-radio-group="1001" button-radio-value="15" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-22" pos-x="501" pos-y="320" pos-width="35" pos-height="35" text="Bbm" parameter="chord" button-radio-group="1001" button-radio-value="22" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <Label id="quality-2" pos-x="28" pos-y="372" pos-width="35" pos-height="20" text="7" font-size="10" />
+      <TextButton id="chord-29" pos-x="77" pos-y="364" pos-width="35" pos-height="35" text="F7" parameter="chord" button-radio-group="1001" button-radio-value="29" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-24" pos-x="116" pos-y="364" pos-width="35" pos-height="35" text="C7" parameter="chord" button-radio-group="1001" button-radio-value="24" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-31" pos-x="155" pos-y="364" pos-width="35" pos-height="35" text="G7" parameter="chord" button-radio-group="1001" button-radio-value="31" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-26" pos-x="194" pos-y="364" pos-width="35" pos-height="35" text="D7" parameter="chord" button-radio-group="1001" button-radio-value="26" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-33" pos-x="233" pos-y="364" pos-width="35" pos-height="35" text="A7" parameter="chord" button-radio-group="1001" button-radio-value="33" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-28" pos-x="272" pos-y="364" pos-width="35" pos-height="35" text="E7" parameter="chord" button-radio-group="1001" button-radio-value="28" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-35" pos-x="311" pos-y="364" pos-width="35" pos-height="35" text="B7" parameter="chord" button-radio-group="1001" button-radio-value="35" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-30" pos-x="350" pos-y="364" pos-width="35" pos-height="35" text="F#7" parameter="chord" button-radio-group="1001" button-radio-value="30" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-25" pos-x="389" pos-y="364" pos-width="35" pos-height="35" text="C#7" parameter="chord" button-radio-group="1001" button-radio-value="25" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-32" pos-x="428" pos-y="364" pos-width="35" pos-height="35" text="Ab7" parameter="chord" button-radio-group="1001" button-radio-value="32" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-27" pos-x="467" pos-y="364" pos-width="35" pos-height="35" text="Eb7" parameter="chord" button-radio-group="1001" button-radio-value="27" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <TextButton id="chord-34" pos-x="506" pos-y="364" pos-width="35" pos-height="35" text="Bb7" parameter="chord" button-radio-group="1001" button-radio-value="34" tooltip="Selecciona el acorde y toca el panel de rasgueo" class="chord" />
+      <Slider id="gain" pos-x="60" pos-y="435" pos-width="100" pos-height="103" parameter="gain" class="knob" />
+      <Label id="gain-label" pos-x="60" pos-y="537" pos-width="100" pos-height="20" text="VOLUMEN" font-size="13" justification="centred" />
+      <Slider id="tone" pos-x="180" pos-y="435" pos-width="100" pos-height="103" parameter="tone" class="knob" />
+      <Label id="tone-label" pos-x="180" pos-y="537" pos-width="100" pos-height="20" text="TIMBRE" font-size="13" justification="centred" />
+      <Slider id="sustain" pos-x="300" pos-y="435" pos-width="100" pos-height="103" parameter="sustain" class="knob" />
+      <Label id="sustain-label" pos-x="300" pos-y="537" pos-width="100" pos-height="20" text="SUSTAIN" font-size="13" justification="centred" />
+      <Slider id="vibrato" pos-x="420" pos-y="435" pos-width="100" pos-height="103" parameter="vibrato" class="knob" />
+      <Label id="vibrato-label" pos-x="420" pos-y="537" pos-width="100" pos-height="20" text="VIBRATO" font-size="13" justification="centred" />
+      <ToggleButton id="pad" pos-x="63" pos-y="573" pos-width="230" pos-height="28" text="ORGANO DE ACORDES" parameter="pad" />
+      <TextButton id="silence" pos-x="390" pos-y="571" pos-width="140" pos-height="30" text="SILENCIO" onClick="silence" />
+      <View id="harp-frame" pos-x="605" pos-y="146" pos-width="370" pos-height="413" background-color="ffeee6cf" border="3" border-color="30263e38" radius="33" display="contents">
+        <Label id="harp-label" pos-x="30" pos-y="16" pos-width="300" pos-height="22" text="OMNI HARP" font-size="12" justification="centred" />
+        <OmniStrum id="strum" pos-x="26" pos-y="47" pos-width="318" pos-height="320" harp-background="ff193328" string-color="ffb9ae7a" active-color="ffffd993" string-width="1.4" tooltip="Mantén pulsado y desliza arriba o abajo" />
+        <Label id="strum-instructions" pos-x="30" pos-y="375" pos-width="300" pos-height="20" text="DESLIZA ARRIBA O ABAJO" font-size="11" justification="centred" />
+      </View>
+      <BlinblinLogo id="logo" pos-x="645" pos-y="34" pos-width="280" pos-height="86" />
+      <LogoPicker id="logo-picker" pos-x="719" pos-y="117" pos-width="140" pos-height="23" text="CAMBIAR LOGO" />
+      <Label id="footer" pos-x="705" pos-y="582" pos-width="260" pos-height="20" text="BLINBLIN / CHORDHARP 01" font-size="10" />
+    </View>
+  </View>
+</magic>

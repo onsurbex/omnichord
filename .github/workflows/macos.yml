@@ -15,6 +15,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Get JUCE 8.0.6
         run: git clone --branch 8.0.6 --depth 1 https://github.com/juce-framework/JUCE.git "$RUNNER_TEMP/JUCE"
       - name: Configure universal macOS build
@@ -24,6 +26,7 @@ jobs:
           -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
           -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
           -DCHORDHARP_PLUGIN_TESTS=ON
+          -DCHORDHARP_GUI_EDITOR=ON
       - name: Build instrument and tests
         run: cmake --build build --config Release --parallel 3 --target ChordHarp_VST3 ChordHarp_Standalone engine_tests processor_tests
       - name: Test engine and JUCE processor
@@ -42,6 +45,8 @@ jobs:
           cp -R build/ChordHarp_artefacts/Release/VST3/ChordHarp.vst3 package/
           cp -R build/ChordHarp_artefacts/Release/Standalone/ChordHarp.app package/
           cp README.md package/
+          cp THIRD_PARTY_NOTICES.md package/
+          cp Assets/magic.xml package/
           cp build/ChordHarp-preview.png package/
           ditto -c -k --sequesterRsrc --keepParent package ChordHarp-macOS-universal.zip
       - uses: actions/upload-artifact@v4
