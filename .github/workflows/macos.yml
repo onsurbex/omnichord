@@ -30,8 +30,8 @@ jobs:
         run: ctest --test-dir build -C Release --output-on-failure
       - name: Check universal binaries and local signatures
         run: |
-          lipo -verify_arch arm64 x86_64 build/ChordHarp_artefacts/Release/VST3/ChordHarp.vst3/Contents/MacOS/ChordHarp
-          lipo -verify_arch arm64 x86_64 build/ChordHarp_artefacts/Release/Standalone/ChordHarp.app/Contents/MacOS/ChordHarp
+          lipo build/ChordHarp_artefacts/Release/VST3/ChordHarp.vst3/Contents/MacOS/ChordHarp -verify_arch arm64 x86_64
+          lipo build/ChordHarp_artefacts/Release/Standalone/ChordHarp.app/Contents/MacOS/ChordHarp -verify_arch arm64 x86_64
           codesign --force --deep --sign - build/ChordHarp_artefacts/Release/VST3/ChordHarp.vst3
           codesign --force --deep --sign - build/ChordHarp_artefacts/Release/Standalone/ChordHarp.app
           codesign --verify --deep --strict build/ChordHarp_artefacts/Release/VST3/ChordHarp.vst3
@@ -42,9 +42,12 @@ jobs:
           cp -R build/ChordHarp_artefacts/Release/VST3/ChordHarp.vst3 package/
           cp -R build/ChordHarp_artefacts/Release/Standalone/ChordHarp.app package/
           cp README.md package/
+          cp build/ChordHarp-preview.png package/
           ditto -c -k --sequesterRsrc --keepParent package ChordHarp-macOS-universal.zip
       - uses: actions/upload-artifact@v4
         with:
           name: ChordHarp-macOS-universal
-          path: ChordHarp-macOS-universal.zip
+          path: |
+            ChordHarp-macOS-universal.zip
+            build/ChordHarp-preview.png
           if-no-files-found: error

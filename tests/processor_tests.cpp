@@ -32,15 +32,34 @@ int main() {
 
     auto* tone = processor.state.getParameter("tone");
     tone->setValueNotifyingHost(0.8f);
+    juce::Image logo(juce::Image::ARGB, 64, 24, true);
+    juce::Graphics logoGraphics(logo);
+    logoGraphics.setColour(juce::Colours::black);
+    logoGraphics.fillEllipse(2, 2, 20, 20);
+    juce::MemoryOutputStream logoBytes;
+    juce::PNGImageFormat png;
+    require(png.writeImageToStream(logo, logoBytes), "Test logo must encode");
+    const auto logoData=logoBytes.getMemoryBlock().toBase64Encoding();
+    processor.state.state.setProperty("customLogo",logoData,nullptr);
     juce::MemoryBlock saved;
     processor.getStateInformation(saved);
     ChordHarpProcessor restored;
     restored.setStateInformation(saved.getData(), static_cast<int>(saved.getSize()));
     require(std::abs(restored.state.getRawParameterValue("tone")->load() - 0.8f) < 0.001f,
             "DAW state must restore parameters");
+    require(restored.state.state.getProperty("customLogo").toString()==logoData,
+            "Custom logo must survive DAW state restoration");
     std::unique_ptr<juce::AudioProcessorEditor> editor(restored.createEditor());
-    require(editor && editor->getWidth() == 900 && editor->getHeight() == 530,
+    require(editor && editor->getWidth() == 1060 && editor->getHeight() == 650,
             "Editor must instantiate at its intended dimensions");
+    editor.reset();
+    // Capture the actual JUCE editor, with the honest default wordmark.
+    restored.state.state.removeProperty("customLogo",nullptr);
+    editor.reset(restored.createEditor());
+    const auto preview=editor->createComponentSnapshot(editor->getLocalBounds());
+    auto previewFile=juce::File::getCurrentWorkingDirectory().getChildFile("ChordHarp-preview.png");
+    auto previewStream=previewFile.createOutputStream();
+    require(previewStream && png.writeImageToStream(preview,*previewStream), "Editor preview must render");
     processor.releaseResources();
-    std::cout << "Processor checks passed: MIDI timing, audio, strum, silence, state and editor\n";
+    std::cout << "Processor checks passed: MIDI timing, audio, strum, silence, state, logo and editor\n";
 }

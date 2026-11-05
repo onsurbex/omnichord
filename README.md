@@ -39,12 +39,24 @@ respecto al instrumento real requieren una prueba manual en un Mac.
 ## Tocar
 
 - Selecciona un acorde y arrastra por la franja para rasguear hacia ambos lados.
-- Activa CHORD ORGAN para escuchar el acorde sostenido; SILENCE apaga el órgano
+- Activa ORGANO DE ACORDES para escuchar el acorde sostenido; SILENCIO apaga el órgano
   y corta las colas.
 - Las notas MIDI disparan directamente las voces de arpa con velocidad y decay.
   Note Off no corta la cola; el pedal de sustain no está implementado.
 - El acorde seleccionado queda memorizado y puede automatizarse en Live.
 - El rasgueo con ratón produce audio, pero no genera notas MIDI para grabar.
+
+## Diseño BLINBLIN
+
+Panel inspirado en la distribución de un Omnichord: carcasa crema redondeada,
+acordes circulares ordenados por quintas a la izquierda, cuatro potenciómetros
+y superficie de rasgueo vertical a la derecha. La rejilla de altavoz es decorativa.
+
+Pulsa CARGAR LOGO para elegir tu PNG o JPEG original (hasta 8 MB y 4096 x 4096).
+Se respeta su transparencia y proporción, y sus datos se guardan dentro del estado
+del plugin con el proyecto de Ableton. El texto BLINBLIN es provisional hasta
+cargar el archivo: el logotipo del usuario no está incluido en el repositorio.
+El workflow incluye una captura real del editor en el artefacto descargable.
 
 ## Verificar el motor sin JUCE
 
