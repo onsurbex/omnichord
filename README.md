@@ -166,7 +166,7 @@ El registro predeterminado del órgano está una octava por encima de la versió
 anterior. La pestaña Organo permite elegir Clasico, Reed, Suave o Brillante,
 ajustar timbre, volumen y transposición de octava (-1, 0, +1).
 
-Harp ofrece Clasico, Campana, Seno y Cuerdas, junto con ataque, sustain, timbre,
+Harp ofrece Clasico, Campana, Seno y Cuerdas, junto con ataque de 1 a 80 ms, sustain, timbre,
 vibrato, volumen propio y el modo de notas del acorde/cromático. GENERAL controla
 la salida de ambas fuentes después de los efectos.
 

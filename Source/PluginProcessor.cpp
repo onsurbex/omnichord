@@ -57,7 +57,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     addFloat("organTone","Organ Tone",0,1,0.4f);
     p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"organOctave",1},"Organ Octave",juce::StringArray{"-1","0","+1"},1));
     p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"harpSound",1},"Harp Sound",juce::StringArray{"Clasico","Campana","Seno","Cuerdas"},0));
-    addFloat("harpAttack","Harp Attack",0.001f,0.08f,0.002f);
+    addFloat("harpAttack","Harp Attack (ms)",1,80,2);
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"harpQuantize",1},"Harp Chord Notes",true));
     addFloat("delayTime","Delay Time (ms)",40,1200,350);
     addFloat("delayFeedback","Delay Feedback",0,0.85f,0.3f);
@@ -122,7 +122,7 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
     engine.harpGain=value(HarpGain); engine.organGain=value(OrganGain);
     engine.organSound=static_cast<int>(value(OrganSound)); engine.organTone=value(OrganTone);
     engine.organOctave=static_cast<int>(value(OrganOctave))-1;
-    engine.harpSound=static_cast<int>(value(HarpSound)); engine.attackSeconds=value(HarpAttack);
+    engine.harpSound=static_cast<int>(value(HarpSound)); engine.attackSeconds=value(HarpAttack)*0.001f;
     masterGain.setTargetValue(value(Gain));
     delay.milliseconds=value(DelayTime); delay.feedback=value(DelayFeedback); delay.mix=value(DelayMix);
     juce::Reverb::Parameters ambience;

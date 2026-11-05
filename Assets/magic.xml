@@ -92,7 +92,7 @@
           <Slider id="sustain" pos-x="205" pos-y="0" pos-width="88" pos-height="100" parameter="sustain" class="knob" />
           <Label id="sustain-label" pos-x="205" pos-y="100" pos-width="88" pos-height="18" text="SUSTAIN" font-size="11" justification="centred" />
           <Slider id="harpAttack" pos-x="305" pos-y="0" pos-width="88" pos-height="100" parameter="harpAttack" class="knob" />
-          <Label id="harpAttack-label" pos-x="305" pos-y="100" pos-width="88" pos-height="18" text="ATAQUE" font-size="11" justification="centred" />
+          <Label id="harpAttack-label" pos-x="305" pos-y="100" pos-width="88" pos-height="18" text="ATAQUE (ms)" font-size="11" justification="centred" />
           <Slider id="vibrato" pos-x="405" pos-y="0" pos-width="88" pos-height="100" parameter="vibrato" class="knob" />
           <Label id="vibrato-label" pos-x="405" pos-y="100" pos-width="88" pos-height="18" text="VIBRATO" font-size="11" justification="centred" />
           <ComboBox id="harpSound" pos-x="10" pos-y="123" pos-width="200" pos-height="24" parameter="harpSound" />
