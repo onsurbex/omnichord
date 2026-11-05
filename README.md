@@ -24,8 +24,8 @@ Cópialo a `~/Library/Audio/Plug-Ins/VST3/` (crea esa carpeta si hace falta).
 En Live, activa las carpetas de sistema VST3 en los ajustes de Plug-ins y vuelve
 a explorar. Arrastra ChordHarp a una pista MIDI.
 
-La compilación, firma y carga en macOS/Ableton están pendientes de verificar.
-Este repositorio contiene código fuente, no un plugin ya compilado.
+Los binarios de prueba se descargan desde GitHub Actions; no se almacenan
+en el repositorio. La prueba de carga dentro de Ableton requiere un Mac.
 
 ## Compilación automática
 
@@ -52,10 +52,11 @@ Panel inspirado en la distribución de un Omnichord: carcasa crema redondeada,
 acordes circulares ordenados por quintas a la izquierda, cuatro potenciómetros
 y superficie de rasgueo vertical a la derecha. La rejilla de altavoz es decorativa.
 
-Pulsa CARGAR LOGO para elegir tu PNG o JPEG original (hasta 8 MB y 4096 x 4096).
-Se respeta su transparencia y proporción, y sus datos se guardan dentro del estado
-del plugin con el proyecto de Ableton. El texto BLINBLIN es provisional hasta
-cargar el archivo: el logotipo del usuario no está incluido en el repositorio.
+El logo original de BLINBLIN, `Assets/BlinblinLogo.png`, viene incluido en el
+VST3 y en la aplicación. Aparece automáticamente al abrir el instrumento,
+conservando su transparencia y proporciones, sin necesitar un archivo externo.
+CAMBIAR LOGO permite elegir otro PNG o JPEG (hasta 8 MB y 4096 x 4096).
+Ese cambio se guarda dentro del estado del plugin con el proyecto de Ableton.
 El workflow incluye una captura real del editor en el artefacto descargable.
 
 ## Verificar el motor sin JUCE

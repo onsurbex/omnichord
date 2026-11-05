@@ -1,4 +1,5 @@
 #include "../Source/PluginProcessor.h"
+#include "BrandAssets.h"
 #include <cstdlib>
 #include <iostream>
 
@@ -8,6 +9,11 @@ static void require(bool condition, const char* message) {
 
 int main() {
     juce::ScopedJuceInitialiser_GUI gui;
+    const auto bundledLogo=juce::ImageFileFormat::loadFrom(ChordHarpBrand::BlinblinLogo_png,
+                                                         ChordHarpBrand::BlinblinLogo_pngSize);
+    require(bundledLogo.isValid() && bundledLogo.getWidth()==2172 && bundledLogo.getHeight()==724,
+            "Original BLINBLIN PNG must be bundled and readable");
+    require(bundledLogo.hasAlphaChannel(), "Original logo transparency must be preserved");
     ChordHarpProcessor processor;
     juce::AudioBuffer<float> audio(2, 512);
     juce::MidiBuffer midi;
@@ -53,10 +59,17 @@ int main() {
     require(editor && editor->getWidth() == 1060 && editor->getHeight() == 650,
             "Editor must instantiate at its intended dimensions");
     editor.reset();
-    // Capture the actual JUCE editor, with the honest default wordmark.
+    // A fresh instance must display the bundled logo without any project override.
     restored.state.state.removeProperty("customLogo",nullptr);
     editor.reset(restored.createEditor());
     const auto preview=editor->createComponentSnapshot(editor->getLocalBounds());
+    float darkest=1.0f, lightest=0.0f;
+    for(int y=49;y<135;++y) for(int x=660;x<940;++x) {
+        const auto brightness=preview.getPixelAt(x,y).getBrightness();
+        darkest=juce::jmin(darkest,brightness);
+        lightest=juce::jmax(lightest,brightness);
+    }
+    require(lightest-darkest>0.25f, "Bundled logo must be visible against the cream panel");
     auto previewFile=juce::File::getCurrentWorkingDirectory().getChildFile("ChordHarp-preview.png");
     auto previewStream=previewFile.createOutputStream();
     require(previewStream && png.writeImageToStream(preview,*previewStream), "Editor preview must render");
