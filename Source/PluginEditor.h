@@ -1,7 +1,7 @@
 #pragma once
 #include "PluginProcessor.h"
 
-class StrumStrip final : public juce::Component {
+class StrumStrip final : public juce::Component, public juce::SettableTooltipClient {
 public:
     explicit StrumStrip(ChordHarpProcessor& p):processor(p) { setMouseCursor(juce::MouseCursor::PointingHandCursor); }
     void paint(juce::Graphics&) override;
