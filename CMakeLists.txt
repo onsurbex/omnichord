@@ -45,14 +45,14 @@ target_compile_definitions(ChordHarp PUBLIC
     JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0
     FOLEYS_ENABLE_BINARY_DATA=1 FOLEYS_ENABLE_OPEN_GL_CONTEXT=0
     FOLEYS_SHOW_GUI_EDITOR_PALLETTE=$<BOOL:${CHORDHARP_GUI_EDITOR}>)
-target_link_libraries(ChordHarp PRIVATE juce::juce_audio_utils
-    PUBLIC foleys_gui_magic juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
+target_link_libraries(ChordHarp PRIVATE juce::juce_audio_utils foleys_gui_magic
+    PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
 
 option(CHORDHARP_PLUGIN_TESTS "Build JUCE processor integration checks" OFF)
 if(CHORDHARP_PLUGIN_TESTS)
     juce_add_console_app(processor_tests PRODUCT_NAME "ChordHarp processor tests")
     juce_generate_juce_header(processor_tests)
     target_sources(processor_tests PRIVATE tests/processor_tests.cpp)
-    target_link_libraries(processor_tests PRIVATE ChordHarp ChordHarpBrand juce::juce_audio_utils)
+    target_link_libraries(processor_tests PRIVATE ChordHarp ChordHarpBrand foleys_gui_magic juce::juce_audio_utils)
     add_test(NAME processor COMMAND processor_tests)
 endif()
