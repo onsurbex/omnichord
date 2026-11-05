@@ -1,5 +1,6 @@
 #pragma once
 #include "PluginProcessor.h"
+#include <map>
 
 class StrumStrip final : public juce::Component, public juce::SettableTooltipClient {
 public:
@@ -28,6 +29,13 @@ public:
 class ChordHarpEditor final : public foleys::MagicPluginEditor {
 public:
     explicit ChordHarpEditor(ChordHarpProcessor&);
+    ~ChordHarpEditor() override;
+    bool keyPressed(const juce::KeyPress&) override;
+    bool keyStateChanged(bool) override;
+    void focusLost(FocusChangeType) override;
 private:
+    void releaseComputerKeys();
+    ChordHarpProcessor& processor;
+    std::map<int,int> heldKeys;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChordHarpEditor)
 };
