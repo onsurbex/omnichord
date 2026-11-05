@@ -63,7 +63,7 @@ juce::ValueTree upgradeLayout(juce::ValueTree layout) {
     auto types=layout.getChildWithName("Styles").getChild(0).getChildWithName("Types");
     for(const auto* name:{"OmniChord","OmniToggle","ThemeSelector","ComboBox"})
         if(!types.getChildWithName(name).isValid()) types.appendChild(defaults.getChildWithName("Styles").getChild(0).getChildWithName("Types").getChildWithName(name).createCopy(),nullptr);
-    migrateButtonTypes(layout);
+    migrateButtonTypes(root);
     root.setProperty("layout-version",3,nullptr);
     omnichord::prepareThemes(layout);
     return layout;

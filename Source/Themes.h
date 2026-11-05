@@ -18,7 +18,7 @@ inline bool isColourProperty(const juce::Identifier& id) {
     const auto s=id.toString();
     return s.contains("color") || s.contains("colour") || (s.startsWith("slider-") && !s.contains("type") && !s.contains("textbox"))
         || s=="rotary-fill" || s=="rotary-outline" || s=="label-text" || (s.startsWith("button-") && !s.contains("radio"))
-        || s.startsWith("toggle-") || s.startsWith("combo-") || s=="display-text" || s=="display-background";
+        || s.startsWith("toggle-") || s.startsWith("combo-") || s=="display-text" || s=="display-background" || s=="harp-background";
 }
 inline void paletteReferences(juce::ValueTree node,juce::ValueTree palette) {
     if(node.hasType("Palettes")) return;
