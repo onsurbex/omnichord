@@ -1,8 +1,5 @@
 #include "PluginEditor.h"
 #include "BinaryData.h"
-#if FOLEYS_SHOW_GUI_EDITOR_PALLETTE
-#include <foleys_gui_magic/Editor/foleys_ToolBox.h>
-#endif
 
 namespace {
 const juce::Colour ink(0xff263e38), cream(0xffeee6cf), accent(0xffb66b44);
@@ -243,9 +240,4 @@ std::unique_ptr<foleys::MagicGUIBuilder> createBuilder(ChordHarpProcessor& proce
 }
 
 ChordHarpEditor::ChordHarpEditor(ChordHarpProcessor& processor)
-    :foleys::MagicPluginEditor(processor.magicState,createBuilder(processor)) {
-#if FOLEYS_SHOW_GUI_EDITOR_PALLETTE
-    const auto folder=processor.magicState.getResourcesFolder();
-    if(folder.isDirectory()) getGUIBuilder().getMagicToolBox().setLastLocation(folder.getChildFile("magic.xml"));
-#endif
-}
+    :foleys::MagicPluginEditor(processor.magicState,createBuilder(processor)) {}

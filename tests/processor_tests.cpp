@@ -66,6 +66,11 @@ int main() {
     // A fresh instance must display the bundled logo without any project override.
     restored.state.state.removeProperty("customLogo",nullptr);
     editor.reset(restored.createEditor());
+    // Foleys creates the toolbox using callAsync; exercise the real GUI message loop.
+    bool guiReady=false;
+    juce::MessageManager::callAsync([&guiReady] { guiReady=true; });
+    juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+    require(guiReady,"GUI callbacks must finish before inspecting the Foleys toolbox");
     const auto preview=editor->createComponentSnapshot(editor->getLocalBounds());
     float darkest=1.0f, lightest=0.0f;
     for(int y=49;y<135;++y) for(int x=660;x<940;++x) {
