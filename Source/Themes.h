@@ -21,7 +21,7 @@ inline bool isColourProperty(const juce::Identifier& id) {
         || s.startsWith("toggle-") || s.startsWith("combo-") || s=="display-text" || s=="display-background" || s=="harp-background";
 }
 inline void paletteReferences(juce::ValueTree node,juce::ValueTree palette) {
-    if(node.hasType("Palettes")) return;
+    if(node.hasType("Palettes") || node.hasType("CustomColours")) return;
     for(int i=0;i<node.getNumProperties();++i) {
         const auto key=node.getPropertyName(i); const auto value=node.getProperty(key).toString();
         if(isColourProperty(key) && value.length()==8 && value.containsOnly("0123456789abcdefABCDEF") && !value.startsWith("00")) {
@@ -38,6 +38,12 @@ inline void prepareThemes(juce::ValueTree layout) {
     auto palettes=style.getOrCreateChildWithName("Palettes",nullptr);
     if(!palettes.getNumChildren()) palettes.appendChild(juce::ValueTree("default"),nullptr);
     paletteReferences(layout,palettes.getChild(0));
+    auto custom=layout.getOrCreateChildWithName("CustomColours",nullptr);
+    auto palette=palettes.getChild(0);
+    for(int i=0;i<palette.getNumProperties();++i) {
+        const auto name=palette.getPropertyName(i);
+        if(name.toString().startsWith("color-") && !custom.hasProperty(name)) custom.setProperty(name,palette.getProperty(name),nullptr);
+    }
 }
 inline juce::Colour themedColour(juce::Colour original,int index) {
     index=juce::jlimit(0,static_cast<int>(themes.size())-1,index);
@@ -56,13 +62,23 @@ inline juce::Colour themedColour(juce::Colour original,int index) {
     }
     return juce::Colour(colour).withAlpha(original.getFloatAlpha());
 }
+inline void captureCustomTheme(juce::ValueTree layout) {
+    auto palette=layout.getChildWithName("Styles").getChild(0).getChildWithName("Palettes").getChild(0);
+    auto custom=layout.getOrCreateChildWithName("CustomColours",nullptr);
+    for(int i=0;i<palette.getNumProperties();++i) {
+        const auto name=palette.getPropertyName(i);
+        if(name.toString().startsWith("color-")) custom.setProperty(name,palette.getProperty(name),nullptr);
+    }
+}
 inline void applyTheme(juce::ValueTree layout,int index) {
     auto palette=layout.getChildWithName("Styles").getChild(0).getChildWithName("Palettes").getChild(0);
+    const auto custom=layout.getChildWithName("CustomColours");
     for(int i=0;i<palette.getNumProperties();++i) {
         const auto name=palette.getPropertyName(i);
         if(name.toString().startsWith("color-")) {
             const auto original=juce::Colour::fromString(name.toString().substring(6));
-            palette.setProperty(name,themedColour(original,index).toString(),nullptr);
+            const auto colour=index==0?custom.getProperty(name,original.toString()).toString():themedColour(original,index).toString();
+            palette.setProperty(name,colour,nullptr);
         }
     }
 }

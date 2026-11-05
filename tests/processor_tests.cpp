@@ -155,6 +155,8 @@ int main() {
     chordButton->onClick(); require(restored.selectedChord()==13,"Selecting a regular chord clears Maj7");
     auto* theme=dynamic_cast<juce::ComboBox*>(builder.findGuiItemWithId("theme")->getWrappedComponent());
     require(theme && theme->getNumItems()==6,"Theme selector must expose six palettes");
+    auto customPalette=restored.magicState.getGuiTree().getChildWithName("Styles").getChild(0).getChildWithName("Palettes").getChild(0);
+    customPalette.setProperty("color-ffeee6cf","fff0ddbb",nullptr);
     const auto panelBefore=shell.getProperty("background-color");
     const auto originalX=gainNode.getProperty("pos-x");
     theme->setSelectedId(3,juce::sendNotificationSync);
@@ -167,6 +169,11 @@ int main() {
     require(nightPreview.getPixelAt(35,180)!=preview.getPixelAt(35,180),"Changing themes must visibly recolour the rendered instrument");
     auto nightStream=juce::File::getCurrentWorkingDirectory().getChildFile("Omnichord-midnight-preview.png").createOutputStream();
     require(nightStream && png.writeImageToStream(nightPreview,*nightStream),"Midnight preview must render");
+    theme->setSelectedId(1,juce::sendNotificationSync);
+    juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+    require(palette.getProperty("color-ffeee6cf").toString()=="fff0ddbb","Personalizado must recover manual palette edits after switching themes");
+    theme->setSelectedId(3,juce::sendNotificationSync);
+    juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
     maj7->onClick();
     gainNode.setProperty("pos-x",123,&builder.getUndoManager());
 #if FOLEYS_SHOW_GUI_EDITOR_PALLETTE

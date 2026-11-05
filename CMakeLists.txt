@@ -36,6 +36,7 @@ juce_generate_juce_header(Omnichord)
 target_sources(Omnichord PRIVATE Source/PluginProcessor.cpp Source/PluginEditor.cpp)
 if(APPLE)
     enable_language(OBJCXX)
+    set_target_properties(Omnichord PROPERTIES OBJCXX_STANDARD 20 OBJCXX_STANDARD_REQUIRED ON)
     target_sources(Omnichord PRIVATE Source/MacKeyboard.mm)
 endif()
 # Bundle the original logo into both plugin formats, without a runtime file path.

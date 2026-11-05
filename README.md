@@ -8,8 +8,10 @@ timbre, sustain y vibrato. Guarda sus parámetros con el proyecto del DAW.
 El motor usa síntesis original: todavía no es una emulación calibrada de un
 modelo concreto de Omnichord. No incluye muestras del instrumento ni ritmos.
 
-La versión 3 incorpora selección de acordes por MIDI y teclado del Mac, timbres
-de órgano y arpa, volúmenes independientes y delay y reverb estéreo.
+La versión 3 añade Maj7, nuevas asignaciones MIDI y del teclado del Mac, un
+órgano con apertura y coro estéreo, seis temas de color y la corrección del botón
+de órgano en standalone. Conserva el XML personalizado de BLINBLIN, los timbres
+de órgano y arpa, los volúmenes independientes y delay y reverb estéreo.
 
 ## Compilar en macOS
 
@@ -190,8 +192,8 @@ guarda con el proyecto de Ableton y con el estado de la aplicación standalone.
 
 **Personalizado** recupera los colores definidos en tu XML. Para que los temas
 puedan cambiarse, el diseño usa referencias como `$color-ffeee6cf` y una paleta
-en `Styles/Style/Palettes/default`. Puedes editar esas referencias y la paleta
-con Foleys. Un color literal añadido manualmente queda fijo hasta volver a cargar
+en `Styles/Style/Palettes/default`. Selecciona Personalizado para editar esas referencias y la paleta
+con Foleys; sus colores se conservan al pasar a otro tema y volver. Un color literal añadido manualmente queda fijo hasta volver a cargar
 el diseño como diseño de fábrica recompilando. El selector es el componente
 `ThemeSelector`; los botones de acorde son `OmniChord` y los interruptores
 `OmniToggle`, que mantienen un único enlace con su parámetro.

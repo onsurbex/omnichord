@@ -313,6 +313,7 @@ ChordHarpEditor::~ChordHarpEditor() { stopTimer(); releaseComputerKeys(); }
 void ChordHarpEditor::timerCallback() {
     const int theme=static_cast<int>(processor.state.getRawParameterValue("theme")->load());
     auto layout=processor.magicState.getGuiTree();
+    if(currentTheme==0 && layout==themedLayout) omnichord::captureCustomTheme(layout);
     if(theme!=currentTheme || layout!=themedLayout) {
         currentTheme=theme; themedLayout=layout;
         omnichord::applyTheme(layout,theme);
