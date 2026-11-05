@@ -31,14 +31,11 @@ juce_generate_juce_header(ChordHarp)
 target_sources(ChordHarp PRIVATE Source/PluginProcessor.cpp Source/PluginEditor.cpp)
 # Bundle the original logo into both plugin formats, without a runtime file path.
 set(CHORDHARP_LOGO "${CMAKE_CURRENT_SOURCE_DIR}/Assets/BlinblinLogo.png")
-if(EXISTS "${CHORDHARP_LOGO}")
-    juce_add_binary_data(ChordHarpBrand
-        HEADER_NAME BrandAssets.h
-        NAMESPACE ChordHarpBrand
-        SOURCES "${CHORDHARP_LOGO}")
-    target_link_libraries(ChordHarp PRIVATE ChordHarpBrand)
-    target_compile_definitions(ChordHarp PRIVATE CHORDHARP_HAS_EMBEDDED_LOGO=1)
-endif()
+juce_add_binary_data(ChordHarpBrand
+    HEADER_NAME BrandAssets.h
+    NAMESPACE ChordHarpBrand
+    SOURCES "${CHORDHARP_LOGO}")
+target_link_libraries(ChordHarp PRIVATE ChordHarpBrand)
 target_compile_definitions(ChordHarp PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0)
 target_link_libraries(ChordHarp PRIVATE juce::juce_audio_utils PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
 
@@ -47,6 +44,6 @@ if(CHORDHARP_PLUGIN_TESTS)
     juce_add_console_app(processor_tests PRODUCT_NAME "ChordHarp processor tests")
     juce_generate_juce_header(processor_tests)
     target_sources(processor_tests PRIVATE tests/processor_tests.cpp)
-    target_link_libraries(processor_tests PRIVATE ChordHarp juce::juce_audio_utils)
+    target_link_libraries(processor_tests PRIVATE ChordHarp ChordHarpBrand juce::juce_audio_utils)
     add_test(NAME processor COMMAND processor_tests)
 endif()
