@@ -111,9 +111,9 @@
           <Label id="organOctave-label" pos-x="245" pos-y="76" pos-width="230" pos-height="18" text="OCTAVA" font-size="11" />
           <ComboBox id="organOctave" pos-x="245" pos-y="96" pos-width="230" pos-height="25" parameter="organOctave" />
           <Label id="organSpread-label" pos-x="10" pos-y="124" pos-width="73" pos-height="23" text="APERTURA" font-size="10" />
-          <Slider id="organSpread" parameter="organSpread" pos-x="85" pos-y="124" pos-width="170" pos-height="23" slider-type="linear-horizontal" slider-textbox="textbox-right" class="knob" />
+          <Slider id="organSpread" parameter="organSpread" pos-x="85" pos-y="124" pos-width="170" pos-height="23" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" class="knob" />
           <Label id="organChorus-label" pos-x="280" pos-y="124" pos-width="73" pos-height="23" text="CORO" font-size="10" />
-          <Slider id="organChorus" parameter="organChorus" pos-x="355" pos-y="124" pos-width="170" pos-height="23" slider-type="linear-horizontal" slider-textbox="textbox-right" class="knob" />
+          <Slider id="organChorus" parameter="organChorus" pos-x="355" pos-y="124" pos-width="170" pos-height="23" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" class="knob" />
         </View>
         <View id="delay-controls" tab-caption="Delay" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
           <Slider id="delayMix" pos-x="30" pos-y="0" pos-width="90" pos-height="100" parameter="delayMix" class="knob" />

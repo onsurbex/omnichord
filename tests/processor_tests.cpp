@@ -136,7 +136,7 @@ int main() {
     require(magicEditor->keyPressed(juce::KeyPress(static_cast<int>(U'Ñ'),juce::ModifierKeys(juce::ModifierKeys::shiftModifier),0)),"Shift+enye selects F#Maj7");
     require(restored.selectedChord()==42,"Mac keyboard follows the F#Maj7 column mapping");
     magicEditor->keyStateChanged(false);
-    require(magicEditor->keyPressed(juce::KeyPress('1')),"Mac number keys play the harp");
+    require(magicEditor->keyPressed(juce::KeyPress('1',juce::ModifierKeys(mods),0)),"Mac numbers must play harp while Ctrl+Shift is held for Maj7");
     restored.processBlock(audio,midi); restored.processBlock(audio,midi);
     require(audio.getMagnitude(0,512)>0.001f,"Mac keyboard must produce harp audio");
     magicEditor->keyStateChanged(false);

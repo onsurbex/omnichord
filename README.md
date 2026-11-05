@@ -155,7 +155,7 @@ En la pestaña **Teclado**, activa el control del Mac y da foco a la ventana:
 El arpa se toca con **1 2 3 4 5 6 7 8 9 0**, más las dos teclas a la derecha
 del 0 para las cuerdas 11 y 12 (apóstrofo e ¡ en un teclado español).
 En Mac se usan las posiciones físicas del teclado español QWERTY, también al
-mantener Mayús para seleccionar Maj7. El teclado numérico permite las primeras
+mantener Ctrl o Mayús para seleccionar Db/Ab o Maj7. El teclado numérico permite las primeras
 diez cuerdas. Los acordes quedan memorizados al soltar las teclas.
 
 El teclado del Mac se pausa al editar texto o valores y mientras está activo

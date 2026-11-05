@@ -350,7 +350,7 @@ bool ChordHarpEditor::keyPressed(const juce::KeyPress& key) {
     const auto character=physical?native.character:static_cast<char32_t>(key.getKeyCode());
     const int chord=chordharp::chordFromComputerKey(character,key.getModifiers().isCtrlDown(),key.getModifiers().isShiftDown());
     const int harp=physical?native.harp:chordharp::harpFromComputerKey(character);
-    if(chord<0 && (harp<0 || key.getModifiers().isCtrlDown())) return false;
+    if(chord<0 && harp<0) return false;
     const int token=physical?0x10000+native.physical:key.getKeyCode();
     if(heldKeys.find(token)==heldKeys.end()) {
         if(chord>=0) { processor.selectChord(chord); heldKeys.emplace(token,-1); }
