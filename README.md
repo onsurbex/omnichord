@@ -43,8 +43,24 @@ El workflow `macOS VST3 build and tests` compila para Apple Silicon e Intel,
 ejecuta las pruebas del motor y del procesador JUCE y comprueba las firmas
 locales de los bundles. En una ejecución correcta, el apartado Artifacts de
 GitHub Actions ofrece `Omnichord-macOS-universal`, con el VST3 y la app standalone.
+Estos paquetes se compilan con `CHORDHARP_GUI_EDITOR=OFF`, sin las herramientas
+de edición de Foleys. Conservan el diseño de `Assets/magic.xml` y los temas.
 La firma es ad hoc, sin notarización de Apple; la carga en Ableton y la fidelidad
 respecto al instrumento real requieren una prueba manual en un Mac.
+
+Descomprime el paquete y abre **Instalar Omnichord.command**, situado junto a
+`Omnichord.vst3`. Comprueba la firma y copia el plugin a
+`~/Library/Audio/Plug-Ins/VST3/Omnichord.vst3`, reemplazando una instalación
+anterior. No necesita permisos de administrador. Después vuelve a explorar
+los plugins en Ableton Live. La compilación automática prueba la instalación
+y la sustitución en una carpeta temporal de macOS.
+
+Para instalar una compilación local desde la carpeta del repositorio:
+
+```sh
+bash "scripts/Instalar Omnichord.command" \
+  "build-release/Omnichord_artefacts/Release/VST3/Omnichord.vst3"
+```
 
 ## Tocar
 
