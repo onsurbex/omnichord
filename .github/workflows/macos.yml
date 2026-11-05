@@ -26,7 +26,7 @@ jobs:
           -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
           -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
           -DCHORDHARP_PLUGIN_TESTS=ON
-          -DCHORDHARP_GUI_EDITOR=ON
+          -DCHORDHARP_GUI_EDITOR=OFF
       - name: Build instrument and tests
         run: cmake --build build --config Release --parallel 3 --target Omnichord_VST3 Omnichord_Standalone engine_tests processor_tests
       - name: Test engine and JUCE processor
@@ -39,6 +39,17 @@ jobs:
           codesign --force --deep --sign - build/Omnichord_artefacts/Release/Standalone/Omnichord.app
           codesign --verify --deep --strict build/Omnichord_artefacts/Release/VST3/Omnichord.vst3
           codesign --verify --deep --strict build/Omnichord_artefacts/Release/Standalone/Omnichord.app
+      - name: Create macOS PKG installer
+        run: bash scripts/build-macos-pkg.sh build .
+      - name: Verify PKG installation and replacement
+        run: |
+          sudo installer -pkg Omnichord-*.pkg -target /
+          sudo installer -pkg Omnichord-*.pkg -target /
+          codesign --verify --deep --strict --verbose=2 /Library/Audio/Plug-Ins/VST3/Omnichord.vst3
+          codesign --verify --deep --strict --verbose=2 /Applications/Omnichord.app
+          lipo /Library/Audio/Plug-Ins/VST3/Omnichord.vst3/Contents/MacOS/Omnichord -verify_arch arm64 x86_64
+          lipo /Applications/Omnichord.app/Contents/MacOS/Omnichord -verify_arch arm64 x86_64
+          pkgutil --pkg-info audio.chordharp.instrument.pkg
       - name: Package for testing
         run: |
           mkdir -p package
@@ -54,6 +65,7 @@ jobs:
         with:
           name: Omnichord-macOS-universal
           path: |
+            Omnichord-*.pkg
             Omnichord-macOS-universal.zip
             build/Omnichord-preview.png
             build/Omnichord-midnight-preview.png

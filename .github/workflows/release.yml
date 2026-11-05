@@ -1,0 +1,72 @@
+name: Publish GitHub release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Select an identical verified macOS build
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/macos.yml/runs?status=success&per_page=100" \
+            --jq '.workflow_runs[] | [.id, .head_sha] | @tsv' > /tmp/omnichord-builds.tsv
+          build_run=""
+          while IFS=$'\t' read -r run_id build_sha; do
+            if git cat-file -e "$build_sha^{commit}" 2>/dev/null \
+              && git merge-base --is-ancestor "$build_sha" "$GITHUB_SHA" \
+              && git diff --quiet "$build_sha" "$GITHUB_SHA" -- . ':!.github/workflows/release.yml'; then
+              build_run="$run_id"
+              echo "BUILD_RUN=$run_id" >> "$GITHUB_ENV"
+              echo "BUILD_SHA=$build_sha" >> "$GITHUB_ENV"
+              break
+            fi
+          done < /tmp/omnichord-builds.tsv
+          if [[ -z "$build_run" ]]; then
+            echo "No verified macOS build matches the tagged source." >&2
+            exit 1
+          fi
+      - name: Download the tested installer
+        run: |
+          gh run download "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" \
+            --name Omnichord-macOS-universal --dir release
+          test -f "release/Omnichord-${GITHUB_REF_NAME#v}.pkg"
+      - name: Add checksums and build provenance
+        shell: bash
+        run: |
+          (cd release && sha256sum Omnichord-*.pkg Omnichord-macOS-universal.zip > SHA256SUMS.txt)
+          printf 'Build commit: %s\nVerified workflow: https://github.com/%s/actions/runs/%s\n' \
+            "$BUILD_SHA" "$GITHUB_REPOSITORY" "$BUILD_RUN" > release/BUILD.txt
+      - name: Publish installer and portable bundles
+        shell: bash
+        run: |
+          cat > /tmp/omnichord-release-notes.md <<'NOTES'
+          Instalador de Omnichord para macOS 11 o posterior, compatible con Apple Silicon e Intel.
+
+          Descarga **Omnichord-0.3.0.pkg** y ábrelo con el instalador de macOS. Instala el VST3 en `/Library/Audio/Plug-Ins/VST3/` y la aplicación en `/Applications/`. El asistente solicita permisos de administrador. Después vuelve a explorar los plugins en Ableton Live.
+
+          Incluye 48 acordes (mayores, menores, 7 y Maj7), selección MIDI C0–C3, arpa desde C4, teclado del Mac, órgano con Apertura y Coro, delay, reverb y seis temas de color. Compilado sin las herramientas de edición de Foleys.
+
+          VST3 y standalone con firma local ad hoc verificada. El PKG no tiene certificado Developer ID Installer ni notarización de Apple. Se han probado la instalación y reinstalación en macOS; la carga dentro de Ableton requiere una prueba manual.
+
+          También se adjuntan los bundles en ZIP, sus sumas SHA-256 y la referencia de la compilación verificada.
+          NOTES
+          gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" --verify-tag \
+            --title "Omnichord $GITHUB_REF_NAME" \
+            --notes-file /tmp/omnichord-release-notes.md \
+            release/Omnichord-*.pkg release/Omnichord-macOS-universal.zip \
+            release/SHA256SUMS.txt release/BUILD.txt

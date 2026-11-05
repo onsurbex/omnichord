@@ -43,8 +43,30 @@ El workflow `macOS VST3 build and tests` compila para Apple Silicon e Intel,
 ejecuta las pruebas del motor y del procesador JUCE y comprueba las firmas
 locales de los bundles. En una ejecución correcta, el apartado Artifacts de
 GitHub Actions ofrece `Omnichord-macOS-universal`, con el VST3 y la app standalone.
+Estos paquetes se compilan con `CHORDHARP_GUI_EDITOR=OFF`, sin las herramientas
+de edición de Foleys. Conservan el diseño de `Assets/magic.xml` y los temas.
 La firma es ad hoc, sin notarización de Apple; la carga en Ableton y la fidelidad
 respecto al instrumento real requieren una prueba manual en un Mac.
+
+El artefacto incluye **Omnichord-0.3.0.pkg**. Ábrelo con el instalador de macOS:
+instala el VST3 en `/Library/Audio/Plug-Ins/VST3/Omnichord.vst3` y la aplicación
+en `/Applications/Omnichord.app`. El asistente solicita permisos de administrador.
+Después vuelve a explorar los plugins en Ableton Live. La compilación automática
+comprueba el contenido del PKG, sus firmas y la instalación y reinstalación reales
+en un servidor de macOS. El VST3 y la app tienen firma ad hoc; el PKG no tiene
+certificado Developer ID Installer ni notarización de Apple.
+
+Para generar el PKG de una compilación local, firma primero ambos bundles:
+
+```sh
+codesign --force --deep --sign - \
+  "build-release/Omnichord_artefacts/Release/VST3/Omnichord.vst3"
+codesign --force --deep --sign - \
+  "build-release/Omnichord_artefacts/Release/Standalone/Omnichord.app"
+bash scripts/build-macos-pkg.sh build-release .
+```
+
+El empaquetado utiliza `pkgbuild`, `pkgutil` y Python 3.
 
 ## Tocar
 
