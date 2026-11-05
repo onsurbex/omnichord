@@ -1,0 +1,50 @@
+name: macOS VST3 build and tests
+
+on:
+  push:
+    branches: [main, work]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get JUCE 8.0.6
+        run: git clone --branch 8.0.6 --depth 1 https://github.com/juce-framework/JUCE.git "$RUNNER_TEMP/JUCE"
+      - name: Configure universal macOS build
+        run: >-
+          cmake -S . -B build -G Xcode
+          -DJUCE_PATH="$RUNNER_TEMP/JUCE"
+          -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+          -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
+          -DCHORDHARP_PLUGIN_TESTS=ON
+      - name: Build instrument and tests
+        run: cmake --build build --config Release --parallel 3 --target ChordHarp_VST3 ChordHarp_Standalone engine_tests processor_tests
+      - name: Test engine and JUCE processor
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Check universal binaries and local signatures
+        run: |
+          lipo -verify_arch arm64 x86_64 build/ChordHarp_artefacts/Release/VST3/ChordHarp.vst3/Contents/MacOS/ChordHarp
+          lipo -verify_arch arm64 x86_64 build/ChordHarp_artefacts/Release/Standalone/ChordHarp.app/Contents/MacOS/ChordHarp
+          codesign --force --deep --sign - build/ChordHarp_artefacts/Release/VST3/ChordHarp.vst3
+          codesign --force --deep --sign - build/ChordHarp_artefacts/Release/Standalone/ChordHarp.app
+          codesign --verify --deep --strict build/ChordHarp_artefacts/Release/VST3/ChordHarp.vst3
+          codesign --verify --deep --strict build/ChordHarp_artefacts/Release/Standalone/ChordHarp.app
+      - name: Package for testing
+        run: |
+          mkdir -p package
+          cp -R build/ChordHarp_artefacts/Release/VST3/ChordHarp.vst3 package/
+          cp -R build/ChordHarp_artefacts/Release/Standalone/ChordHarp.app package/
+          cp README.md package/
+          ditto -c -k --sequesterRsrc --keepParent package ChordHarp-macOS-universal.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ChordHarp-macOS-universal
+          path: ChordHarp-macOS-universal.zip
+          if-no-files-found: error
