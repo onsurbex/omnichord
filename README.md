@@ -1,14 +1,14 @@
-# Omnichord — BLINBLIN · versión 2
+# Omnichord — BLINBLIN · versión 3
 
 Prototipo de instrumento inspirado en el Omnichord para Ableton Live en macOS.
-Incluye 36 acordes (mayores, menores y séptimas), una franja de rasgueo de
+Incluye 48 acordes (mayores, menores, séptimas y séptimas mayores), una franja de rasgueo de
 12 notas, órgano de acordes opcional y controles automatizables de volumen,
 timbre, sustain y vibrato. Guarda sus parámetros con el proyecto del DAW.
 
 El motor usa síntesis original: todavía no es una emulación calibrada de un
 modelo concreto de Omnichord. No incluye muestras del instrumento ni ritmos.
 
-La versión 2 incorpora selección de acordes por MIDI y teclado del Mac, timbres
+La versión 3 incorpora selección de acordes por MIDI y teclado del Mac, timbres
 de órgano y arpa, volúmenes independientes y delay y reverb estéreo.
 
 ## Compilar en macOS
@@ -49,7 +49,7 @@ respecto al instrumento real requieren una prueba manual en un Mac.
 - Selecciona un acorde y arrastra por la franja para rasguear hacia ambos lados.
 - Activa ORGANO DE ACORDES para escuchar el acorde sostenido; SILENCIO apaga el órgano
   y corta las colas.
-- Las notas MIDI C1–B3 seleccionan acordes por posición. C4 en adelante toca
+- Las notas MIDI C0–B3 seleccionan acordes por posición. C4 en adelante toca
   las notas del acorde como la franja; desactiva NOTAS DEL ACORDE para tocar
   alturas cromáticas libres. La velocidad MIDI controla la intensidad del arpa.
   Note Off deja decaer las voces; el pedal de sustain no está implementado.
@@ -59,7 +59,7 @@ respecto al instrumento real requieren una prueba manual en un Mac.
 ## Diseño BLINBLIN
 
 Panel inspirado en la distribución de un Omnichord: carcasa crema redondeada,
-acordes circulares ordenados por quintas a la izquierda, cuatro potenciómetros
+acordes circulares ordenados por quintas a la izquierda, controles de sonido
 y superficie de rasgueo vertical a la derecha. La rejilla de altavoz es decorativa.
 
 El logo original de BLINBLIN, `Assets/BlinblinLogo.png`, viene incluido en el
@@ -121,25 +121,18 @@ Se usa el orden físico **Db, Ab, Eb, Bb, F, C, G, D, A, E, B, F#**.
 Las notas se asignan por posición, no por el nombre de la tecla pulsada.
 Se emplea la numeración de Ableton Live: C3 = MIDI 60.
 
-| Posición | Tecla en la primera fila | Acorde mayor |
+| Fila | Notas MIDI en Ableton | Números MIDI |
 |---|---|---|
-| 1 | C1 (36) | Db |
-| 2 | C#1 (37) | Ab |
-| 3 | D1 (38) | Eb |
-| 4 | Eb1 (39) | Bb |
-| 5 | E1 (40) | F |
-| 6 | F1 (41) | C |
-| 7 | F#1 (42) | G |
-| 8 | G1 (43) | D |
-| 9 | Ab1 (44) | A |
-| 10 | A1 (45) | E |
-| 11 | Bb1 (46) | B |
-| 12 | B1 (47) | F# |
+| Mayores | C0–B0 | 24–35 |
+| Menores | C1–B1 | 36–47 |
+| Séptima dominante | C2–B2 | 48–59 |
+| Séptima mayor (Maj7) | C3–B3 | 60–71 |
 
-C2–B2 (MIDI 48–59) repite las posiciones con acordes menores.
-C3–B3 (MIDI 60–71) las repite con acordes de séptima dominante.
-Estas tres filas seleccionan el acorde y no disparan el arpa.
-Activa ORGANO DE ACORDES para oír el acompañamiento sostenido.
+Las doce teclas consecutivas de cada octava corresponden, de izquierda a derecha,
+a **Db, Ab, Eb, Bb, F, C, G, D, A, E, B, F#**. Por ejemplo, C0 selecciona Db mayor,
+C#0 selecciona Ab mayor y B3 selecciona F#Maj7. Estas cuatro filas seleccionan
+el acorde; activa ORGANO DE ACORDES para escuchar el acompañamiento sostenido.
+Maj7 usa los intervalos 0, 4, 7, 11; la séptima dominante usa 0, 4, 7, 10.
 
 C4–B4 (MIDI 72–83) recorre las 12 notas de la franja del arpa en el acorde
 seleccionado. Cada bloque de 12 teclas superior transpone esa franja una octava.
@@ -150,21 +143,32 @@ este mapa MIDI, fijado al orden del instrumento original.
 
 En la pestaña **Teclado**, activa el control del Mac y da foco a la ventana:
 
-- **Z / X / C**: elige mayor / menor / séptima para la posición seleccionada.
-- **1 2 3 4 5 6 7 8 9 0 Q P**: elige las 12 posiciones, de Db a F#.
-- **A W S E D F T G Y H U J**: toca las 12 notas del arpa.
+| Fila | Db / Ab | Eb, Bb, F, C, G, D, A, E, B, F# |
+|---|---|---|
+| Mayores | Ctrl+Q / Ctrl+W | Q W E R T Y U I O P |
+| Menores | Ctrl+A / Ctrl+S | A S D F G H J K L Ñ |
+| Séptimas | Ctrl+Z / Ctrl+X | Z X C V B N M , . - |
+| Maj7 | Ctrl+Mayús+A / Ctrl+Mayús+S | Mayús + A S D F G H J K L Ñ |
+
+El arpa se toca con **1 2 3 4 5 6 7 8 9 0**, más las dos teclas a la derecha
+del 0 para las cuerdas 11 y 12 (apóstrofo e ¡ en un teclado español).
+En Mac se usan las posiciones físicas del teclado español QWERTY, también al
+mantener Mayús para seleccionar Maj7. El teclado numérico permite las primeras
+diez cuerdas. Los acordes quedan memorizados al soltar las teclas.
 
 El teclado del Mac se pausa al editar texto o valores y mientras está activo
 el modo Edit de Foleys. En Ableton el host debe entregar el foco al plugin;
 si usas este control, desactiva el teclado MIDI del ordenador de Live (M) para
 que no se dupliquen los eventos. También puedes usar el teclado MIDI de Live
-para enviar las notas de las tres filas. Standalone recibe las teclas directamente.
+para enviar las notas de las cuatro filas. Standalone recibe las teclas directamente.
 
 ## Sonido y efectos
 
 El registro predeterminado del órgano está una octava por encima de la versión
 anterior. La pestaña Organo permite elegir Clasico, Reed, Suave o Brillante,
-ajustar timbre, volumen y transposición de octava (-1, 0, +1).
+ajustar timbre, volumen y transposición de octava (-1, 0, +1). Apertura añade
+un registro agudo al acorde y Coro mezcla voces ligeramente desafinadas en
+estéreo. Coro a cero deja el órgano en mono.
 
 Harp ofrece Clasico, Campana, Seno y Cuerdas, junto con ataque de 1 a 80 ms, sustain, timbre,
 vibrato, volumen propio y el modo de notas del acorde/cromático. GENERAL controla
@@ -175,6 +179,22 @@ mezcla, tamaño y amortiguación. Ambos efectos son estéreo, están después de
 mezcla de órgano y arpa y comienzan con mezcla cero. Sus colas siguen sonando al
 bajar el volumen de una fuente; SILENCIO limpia también esas colas.
 Todos los ajustes se automatizan y se guardan con la sesión del DAW.
+
+## Temas de color
+
+En la parte superior del panel, abre el desplegable con los cuadrados de color.
+Cada opción incluye cuatro muestras: **Personalizado, Crema, Medianoche, Bosque,
+Coral y Lavanda**. Cambiar de tema recolorea el panel, los controles y el arpa;
+conserva las posiciones de tu XML y la imagen original del logo. La elección se
+guarda con el proyecto de Ableton y con el estado de la aplicación standalone.
+
+**Personalizado** recupera los colores definidos en tu XML. Para que los temas
+puedan cambiarse, el diseño usa referencias como `$color-ffeee6cf` y una paleta
+en `Styles/Style/Palettes/default`. Puedes editar esas referencias y la paleta
+con Foleys. Un color literal añadido manualmente queda fijo hasta volver a cargar
+el diseño como diseño de fábrica recompilando. El selector es el componente
+`ThemeSelector`; los botones de acorde son `OmniChord` y los interruptores
+`OmniToggle`, que mantienen un único enlace con su parámetro.
 
 ## Verificar el motor sin JUCE
 
@@ -192,5 +212,6 @@ c++ -std=c++17 -Wall -Wextra -Wpedantic -O2 -ISource tests/engine_tests.cpp -o w
 ./work/engine_tests
 ```
 
-Las pruebas comprueban acordes, decaimiento, silencio y estabilidad de voces a
+Las pruebas comprueban las cuatro familias de acordes, el mapa MIDI y del Mac,
+el decaimiento, el estéreo, el silencio y la estabilidad de voces a
 44.1, 48 y 96 kHz; no miden fidelidad respecto a hardware real.
