@@ -135,6 +135,8 @@ int main() {
     magicEditor->keyStateChanged(false);
     require(magicEditor->keyPressed(juce::KeyPress('A')),"Mac A plays the first harp string");
     restored.processBlock(audio,midi);
+    // Indirect GUI MIDI can be timestamped at the end of the first block.
+    restored.processBlock(audio,midi);
     require(audio.getMagnitude(0,512)>0.001f,"Mac keyboard must produce harp audio");
     magicEditor->keyStateChanged(false);
     gainNode.setProperty("pos-x",123,&builder.getUndoManager());
@@ -162,6 +164,23 @@ int main() {
     require(std::abs(sessionRestored.state.getRawParameterValue("delayMix")->load()-0.35f)<0.001f
         && std::abs(sessionRestored.state.getRawParameterValue("reverbMix")->load()-0.25f)<0.001f,
         "Effects must survive DAW state restoration");
+    ChordHarpProcessor legacySession;
+    auto legacyLayout=legacySession.magicState.getGuiTree().createCopy();
+    auto legacyRoot=legacyLayout.getChildWithName("View");
+    legacyRoot.removeProperty("layout-version",nullptr);
+    auto legacyShell=legacyRoot.getChildWithProperty("id","shell");
+    legacyShell.removeChild(legacyShell.getChildWithProperty("id","sound-controls"),nullptr);
+    legacyShell.appendChild(juce::ValueTree("LogoPicker",{{"id","logo-picker"}}),nullptr);
+    legacySession.magicState.setGuiValueTree(legacyLayout);
+    legacySession.state.getParameter("gain")->setValueNotifyingHost(0.23f);
+    juce::MemoryBlock oldSession;
+    legacySession.getStateInformation(oldSession);
+    ChordHarpProcessor upgraded;
+    upgraded.setStateInformation(oldSession.getData(),static_cast<int>(oldSession.getSize()));
+    auto upgradedShell=upgraded.magicState.getGuiTree().getChildWithName("View").getChildWithProperty("id","shell");
+    require(upgradedShell.getChildWithProperty("id","sound-controls").isValid()
+        && !upgradedShell.getChildWithProperty("id","logo-picker").isValid(),"Legacy layouts must gain v2 controls and lose logo replacement");
+    require(std::abs(upgraded.state.getRawParameterValue("gain")->load()-0.23f)<0.001f,"Layout migration must preserve sound parameters");
     // Compare a muted source with and without effects: only the effects may keep sounding.
     const auto tailEnergy=[](bool effects) {
         ChordHarpProcessor synth;
