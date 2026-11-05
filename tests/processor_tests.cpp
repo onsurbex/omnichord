@@ -1,5 +1,9 @@
 #include "../Source/PluginProcessor.h"
-#include "BrandAssets.h"
+#include "../Source/PluginEditor.h"
+#include "BinaryData.h"
+#if FOLEYS_SHOW_GUI_EDITOR_PALLETTE
+#include <foleys_gui_magic/Editor/foleys_ToolBox.h>
+#endif
 #include <cstdlib>
 #include <iostream>
 
@@ -9,8 +13,8 @@ static void require(bool condition, const char* message) {
 
 int main() {
     juce::ScopedJuceInitialiser_GUI gui;
-    const auto bundledLogo=juce::ImageFileFormat::loadFrom(ChordHarpBrand::BlinblinLogo_png,
-                                                         ChordHarpBrand::BlinblinLogo_pngSize);
+    const auto bundledLogo=juce::ImageFileFormat::loadFrom(BinaryData::BlinblinLogo_png,
+                                                         BinaryData::BlinblinLogo_pngSize);
     require(bundledLogo.isValid() && bundledLogo.getWidth()==2172 && bundledLogo.getHeight()==724,
             "Original BLINBLIN PNG must be bundled and readable");
     require(bundledLogo.hasAlphaChannel(), "Original logo transparency must be preserved");
@@ -73,6 +77,55 @@ int main() {
     auto previewFile=juce::File::getCurrentWorkingDirectory().getChildFile("ChordHarp-preview.png");
     auto previewStream=previewFile.createOutputStream();
     require(previewStream && png.writeImageToStream(preview,*previewStream), "Editor preview must render");
+
+    auto* magicEditor=dynamic_cast<ChordHarpEditor*>(editor.get());
+    require(magicEditor!=nullptr,"Foleys editor must be created");
+    auto& builder=magicEditor->getGUIBuilder();
+    auto* gainItem=builder.findGuiItemWithId("gain");
+    auto* strumItem=builder.findGuiItemWithId("strum");
+    auto* chordItem=builder.findGuiItemWithId("chord-13");
+    require(gainItem && strumItem && chordItem,"XML must create the instrument controls");
+    require(dynamic_cast<StrumStrip*>(strumItem->getWrappedComponent())!=nullptr,
+            "Custom strum component must be registered in Foleys");
+    auto* gainSlider=dynamic_cast<juce::Slider*>(gainItem->getWrappedComponent());
+    require(gainSlider!=nullptr,"Foleys must create the volume slider");
+    gainSlider->setValue(0.4,juce::sendNotificationSync);
+    require(std::abs(restored.state.getRawParameterValue("gain")->load()-0.4f)<0.001f,
+            "Visual slider must control the audio parameter");
+    auto* chordButton=dynamic_cast<juce::TextButton*>(chordItem->getWrappedComponent());
+    require(chordButton!=nullptr,"Foleys must create chord buttons");
+    chordButton->setToggleState(true,juce::sendNotificationSync);
+    require(restored.state.getRawParameterValue("chord")->load()==13.0f,
+            "Chord button must set the chord parameter");
+    auto* silenceItem=builder.findGuiItemWithId("silence");
+    auto* silence=silenceItem?dynamic_cast<juce::TextButton*>(silenceItem->getWrappedComponent()):nullptr;
+    require(silence && silence->onClick,"Silence trigger must be connected");
+    silence->onClick();
+    require(restored.panic.load(),"Silence trigger must reach the audio processor");
+
+    auto shell=restored.magicState.getGuiTree().getChildWithName("View").getChildWithProperty("id","shell");
+    auto gainNode=shell.getChildWithProperty("id","gain");
+    require(gainNode.isValid(),"XML must expose the gain layout node");
+    gainNode.setProperty("pos-x",123,&builder.getUndoManager());
+#if FOLEYS_SHOW_GUI_EDITOR_PALLETTE
+    builder.setEditMode(true);
+    require(builder.isEditModeOn(),"Visual edit mode must be available");
+    builder.setEditMode(false);
+    auto layoutFile=juce::File::getCurrentWorkingDirectory().getChildFile("ChordHarp-layout-test.xml");
+    require(builder.getMagicToolBox().saveGUI(layoutFile),"Foleys Save XML must export the layout");
+    gainNode.setProperty("pos-x",300,nullptr);
+    builder.getMagicToolBox().loadGUI(layoutFile);
+    auto reloadedShell=restored.magicState.getGuiTree().getChildWithName("View").getChildWithProperty("id","shell");
+    require(static_cast<int>(reloadedShell.getChildWithProperty("id","gain").getProperty("pos-x"))==123,
+            "Foleys Load XML must recover the exported position");
+#endif
+    juce::MemoryBlock layoutState;
+    restored.getStateInformation(layoutState);
+    ChordHarpProcessor sessionRestored;
+    sessionRestored.setStateInformation(layoutState.getData(),static_cast<int>(layoutState.getSize()));
+    auto restoredShell=sessionRestored.magicState.getGuiTree().getChildWithName("View").getChildWithProperty("id","shell");
+    require(static_cast<int>(restoredShell.getChildWithProperty("id","gain").getProperty("pos-x"))==123,
+            "DAW sessions must preserve visual layout edits");
     processor.releaseResources();
-    std::cout << "Processor checks passed: MIDI timing, audio, strum, silence, state, logo and editor\n";
+    std::cout << "Processor checks passed: MIDI, audio, logo, visual controls, XML export/import and layout state\n";
 }

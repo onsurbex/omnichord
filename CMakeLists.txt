@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 project(ChordHarp VERSION 0.1.0 LANGUAGES C CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(CHORDHARP_DSP_ONLY "Build the engine tests without JUCE" OFF)
 enable_testing()
@@ -15,6 +15,11 @@ if(NOT EXISTS "${JUCE_PATH}/CMakeLists.txt")
     message(FATAL_ERROR "Set -DJUCE_PATH=/path/to/JUCE (JUCE 8.0.6)")
 endif()
 add_subdirectory("${JUCE_PATH}" "${CMAKE_BINARY_DIR}/JUCE")
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/modules/foleys_gui_magic/modules/foleys_gui_magic/foleys_gui_magic.h")
+    message(FATAL_ERROR "Initialise Foleys: git submodule update --init --recursive")
+endif()
+juce_add_module(modules/foleys_gui_magic/modules/foleys_gui_magic)
+option(CHORDHARP_GUI_EDITOR "Include the Foleys visual design toolbox" ON)
 juce_add_plugin(ChordHarp
     COMPANY_NAME "ChordHarp"
     BUNDLE_ID "audio.chordharp.instrument"
@@ -32,12 +37,16 @@ target_sources(ChordHarp PRIVATE Source/PluginProcessor.cpp Source/PluginEditor.
 # Bundle the original logo into both plugin formats, without a runtime file path.
 set(CHORDHARP_LOGO "${CMAKE_CURRENT_SOURCE_DIR}/Assets/BlinblinLogo.png")
 juce_add_binary_data(ChordHarpBrand
-    HEADER_NAME BrandAssets.h
-    NAMESPACE ChordHarpBrand
-    SOURCES "${CHORDHARP_LOGO}")
+    HEADER_NAME BinaryData.h
+    NAMESPACE BinaryData
+    SOURCES "${CHORDHARP_LOGO}" Assets/magic.xml)
 target_link_libraries(ChordHarp PRIVATE ChordHarpBrand)
-target_compile_definitions(ChordHarp PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0)
-target_link_libraries(ChordHarp PRIVATE juce::juce_audio_utils PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
+target_compile_definitions(ChordHarp PUBLIC
+    JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0
+    FOLEYS_ENABLE_BINARY_DATA=1 FOLEYS_ENABLE_OPEN_GL_CONTEXT=0
+    FOLEYS_SHOW_GUI_EDITOR_PALLETTE=$<BOOL:${CHORDHARP_GUI_EDITOR}>)
+target_link_libraries(ChordHarp PRIVATE juce::juce_audio_utils
+    PUBLIC foleys_gui_magic juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
 
 option(CHORDHARP_PLUGIN_TESTS "Build JUCE processor integration checks" OFF)
 if(CHORDHARP_PLUGIN_TESTS)

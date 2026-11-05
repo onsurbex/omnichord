@@ -1,5 +1,6 @@
 #pragma once
 #include <JuceHeader.h>
+#include <foleys_gui_magic/foleys_gui_magic.h>
 #include "Engine.h"
 #include <atomic>
 
@@ -26,6 +27,7 @@ public:
     void setStateInformation(const void*, int) override;
     void strum(int index);
     juce::AudioProcessorValueTreeState state;
+    foleys::MagicProcessorState magicState{*this};
     std::atomic<bool> panic{false};
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout parameters();
