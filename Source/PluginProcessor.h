@@ -30,15 +30,18 @@ public:
     void selectChord(int value);
     int selectedChord() const;
     bool computerKeyboardEnabled() const;
+    void setChordFromMidi(int value);
     juce::AudioProcessorValueTreeState state;
     foleys::MagicProcessorState magicState{*this};
     std::atomic<bool> panic{false};
 private:
     enum Param { Gain,Tone,Sustain,Vibrato,Chord,Pad,HarpGain,OrganGain,OrganSound,
         OrganTone,OrganOctave,HarpSound,HarpAttack,HarpQuantize,DelayTime,DelayFeedback,
-        DelayMix,ReverbSize,ReverbDamping,ReverbMix,ComputerKeys,NumParams };
+        DelayMix,ReverbSize,ReverbDamping,ReverbMix,ComputerKeys,Major7,OrganSpread,OrganChorus,Theme,NumParams };
     std::array<std::atomic<float>*,NumParams> raw{};
     juce::RangedAudioParameter* chordParameter=nullptr;
+    juce::RangedAudioParameter* major7Parameter=nullptr;
+    std::atomic<bool> chordRetrigger{false};
     chordharp::StereoDelay delay;
     juce::Reverb reverb;
     juce::SmoothedValue<float> masterGain;

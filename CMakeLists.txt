@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(Omnichord VERSION 0.2.0 LANGUAGES C CXX)
+project(Omnichord VERSION 0.3.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(CHORDHARP_DSP_ONLY "Build the engine tests without JUCE" OFF)
@@ -34,6 +34,11 @@ juce_add_plugin(Omnichord
     COPY_PLUGIN_AFTER_BUILD FALSE)
 juce_generate_juce_header(Omnichord)
 target_sources(Omnichord PRIVATE Source/PluginProcessor.cpp Source/PluginEditor.cpp)
+if(APPLE)
+    enable_language(OBJCXX)
+    set_target_properties(Omnichord PROPERTIES OBJCXX_STANDARD 20 OBJCXX_STANDARD_REQUIRED ON)
+    target_sources(Omnichord PRIVATE Source/MacKeyboard.mm)
+endif()
 # Bundle the original logo into both plugin formats, without a runtime file path.
 set(CHORDHARP_LOGO "${CMAKE_CURRENT_SOURCE_DIR}/Assets/BlinblinLogo.png")
 juce_add_binary_data(OmnichordBrand

@@ -26,7 +26,7 @@ public:
     void drawRotarySlider(juce::Graphics&,int,int,int,int,float,float,float,juce::Slider&) override;
 };
 
-class ChordHarpEditor final : public foleys::MagicPluginEditor {
+class ChordHarpEditor final : public foleys::MagicPluginEditor,private juce::Timer {
 public:
     explicit ChordHarpEditor(ChordHarpProcessor&);
     ~ChordHarpEditor() override;
@@ -35,6 +35,9 @@ public:
     void focusLost(FocusChangeType) override;
 private:
     void releaseComputerKeys();
+    void timerCallback() override;
+    int currentTheme=-1;
+    juce::ValueTree themedLayout;
     ChordHarpProcessor& processor;
     std::map<int,int> heldKeys;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChordHarpEditor)

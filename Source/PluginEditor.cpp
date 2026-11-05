@@ -1,6 +1,8 @@
 #include "PluginEditor.h"
 #include "BinaryData.h"
 #include "KeyboardMapping.h"
+#include "MacKeyboard.h"
+#include "Themes.h"
 
 namespace {
 const juce::Colour ink(0xff263e38), cream(0xffeee6cf), accent(0xffb66b44);
@@ -87,8 +89,11 @@ void StrumStrip::play(int y) {
 namespace {
 class LogoView final : public juce::Component {
 public:
-    explicit LogoView(ChordHarpProcessor&):logo(embeddedLogo()) {}
+    explicit LogoView(ChordHarpProcessor& p):processor(p),logo(embeddedLogo()) {}
     void paint(juce::Graphics& g) override {
+        if(processor.state.getRawParameterValue("theme")->load()>0.5f) {
+            g.setColour(cream); g.fillRoundedRectangle(getLocalBounds().toFloat(),12);
+        }
         g.setColour(juce::Colours::white);
         g.drawImageWithin(logo,0,0,getWidth(),getHeight(),juce::RectanglePlacement::centred);
     }
@@ -96,6 +101,7 @@ public:
     static std::vector<std::pair<juce::String,int>> colours() { return {}; }
     static std::vector<foleys::SettableProperty> properties(const juce::ValueTree&) { return {}; }
 private:
+    ChordHarpProcessor& processor;
     juce::Image logo;
 };
 
@@ -119,16 +125,16 @@ public:
     }
     void paint(juce::Graphics& g) override {
         g.setColour(findColour(background)); g.fillRoundedRectangle(getLocalBounds().toFloat(),13);
-        const int chord=juce::jlimit(0,35,static_cast<int>(processor.state.getRawParameterValue("chord")->load()));
+        const int chord=processor.selectedChord();
         g.setColour(findColour(text).withAlpha(0.6f)); g.setFont(juce::FontOptions(10.0f));
         g.drawText(caption,20,9,getWidth()-40,20,juce::Justification::centredLeft);
         g.setColour(findColour(text)); g.setFont(juce::FontOptions(fontSize));
-        g.drawText(juce::String(noteNames[chord%12])+(chord/12==1?"m":chord/12==2?"7":""),20,30,getWidth()-40,getHeight()-34,juce::Justification::centredLeft);
+        g.drawText(juce::String(noteNames[chord%12])+(chord/12==1?"m":chord/12==2?"7":chord/12==3?"Maj7":""),20,30,getWidth()-40,getHeight()-34,juce::Justification::centredLeft);
         g.setColour(accent); g.fillEllipse(static_cast<float>(getWidth()-35),static_cast<float>(getHeight()/2-4),8,8);
     }
 private:
     void timerCallback() override {
-        const int current=static_cast<int>(processor.state.getRawParameterValue("chord")->load());
+        const int current=processor.selectedChord();
         if(current!=selected) { selected=current; repaint(); }
     }
     ChordHarpProcessor& processor;
@@ -173,6 +179,108 @@ private:
     Widget widget;
 };
 
+// One parameter attachment per boolean button. Foleys' radio handler must not
+// write the same parameter a second time with an empty radio value.
+class ToggleItem final : public foleys::GuiItem {
+public:
+    ToggleItem(foleys::MagicGUIBuilder& b,const juce::ValueTree& n):GuiItem(b,n) {
+        setColourTranslation({{"toggle-text",juce::ToggleButton::textColourId},{"toggle-tick",juce::ToggleButton::tickColourId},
+                              {"toggle-tick-disabled",juce::ToggleButton::tickDisabledColourId}});
+        addAndMakeVisible(button);
+    }
+    static std::unique_ptr<foleys::GuiItem> factory(foleys::MagicGUIBuilder& b,const juce::ValueTree& n) { return std::make_unique<ToggleItem>(b,n); }
+    void update() override {
+        attachment.reset(); button.setButtonText(getProperty("text").toString());
+        const auto id=getProperty("parameter").toString();
+        if(id.isNotEmpty()) attachment=getMagicState().createAttachment(id,button);
+    }
+    juce::Component* getWrappedComponent() override { return &button; }
+    std::vector<foleys::SettableProperty> getSettableProperties() const override {
+        return {{configNode,"text",foleys::SettableProperty::Text,{},{}},
+                {configNode,"parameter",foleys::SettableProperty::Choice,{},magicBuilder.createParameterMenuLambda()}};
+    }
+private:
+    juce::ToggleButton button;
+    std::unique_ptr<juce::ButtonParameterAttachment> attachment;
+};
+
+// Virtual chord values 36..47 use the separate Maj7 parameter, preserving the
+// original 0..35 chord automation range for existing Ableton projects.
+class ChordItem final : public foleys::GuiItem,private juce::Timer {
+public:
+    ChordItem(foleys::MagicGUIBuilder& b,const juce::ValueTree& n):GuiItem(b,n),processor(processorFor(b)) {
+        setColourTranslation({{"button-color",juce::TextButton::buttonColourId},{"button-on-color",juce::TextButton::buttonOnColourId},
+                              {"button-off-text",juce::TextButton::textColourOffId},{"button-on-text",juce::TextButton::textColourOnId}});
+        addAndMakeVisible(button); startTimerHz(30);
+    }
+    static std::unique_ptr<foleys::GuiItem> factory(foleys::MagicGUIBuilder& b,const juce::ValueTree& n) { return std::make_unique<ChordItem>(b,n); }
+    void update() override {
+        value=juce::jlimit(0,47,static_cast<int>(getProperty("button-radio-value")));
+        button.setButtonText(getProperty("text").toString());
+        button.setRadioGroupId(1001); button.setClickingTogglesState(true);
+        button.onClick=[this] { processor.selectChord(value); };
+        timerCallback();
+    }
+    juce::Component* getWrappedComponent() override { return &button; }
+    std::vector<foleys::SettableProperty> getSettableProperties() const override {
+        return {{configNode,"text",foleys::SettableProperty::Text,{},{}},
+                {configNode,"button-radio-value",foleys::SettableProperty::Number,0,{}}};
+    }
+private:
+    void timerCallback() override { button.setToggleState(processor.selectedChord()==value,juce::dontSendNotification); }
+    ChordHarpProcessor& processor;
+    juce::TextButton button;
+    int value=0;
+};
+
+class ThemeLook final : public juce::LookAndFeel_V4 {
+    static void swatches(juce::Graphics& g,int theme,int x,int y) {
+        const auto& t=omnichord::themes[static_cast<size_t>(juce::jlimit(0,5,theme))];
+        const juce::uint32 colours[]{t.panel,t.ink,t.accent,t.harp};
+        for(int i=0;i<4;++i) {
+            auto box=juce::Rectangle<float>(static_cast<float>(x+i*14),static_cast<float>(y),11,11);
+            g.setColour(juce::Colour(colours[i])); g.fillRoundedRectangle(box,2);
+            g.setColour(juce::Colours::grey.withAlpha(0.5f)); g.drawRoundedRectangle(box,2,0.5f);
+        }
+    }
+public:
+    void drawPopupMenuItem(juce::Graphics& g,const juce::Rectangle<int>& area,bool separator,bool active,bool highlighted,
+                          bool ticked,bool submenu,const juce::String& text,const juce::String& shortcut,
+                          const juce::Drawable* icon,const juce::Colour* colour) override {
+        LookAndFeel_V4::drawPopupMenuItem(g,area,separator,active,highlighted,ticked,submenu,text,shortcut,icon,colour);
+        const int index=omnichord::themeNames().indexOf(text);
+        if(index>=0) swatches(g,index,area.getRight()-68,area.getCentreY()-5);
+    }
+    void getIdealPopupMenuItemSize(const juce::String& text,bool separator,int height,int& width,int& outHeight) override {
+        LookAndFeel_V4::getIdealPopupMenuItemSize(text,separator,height,width,outHeight); width+=74; outHeight=juce::jmax(28,outHeight);
+    }
+    void drawComboBox(juce::Graphics& g,int w,int h,bool down,int bx,int by,int bw,int bh,juce::ComboBox& combo) override {
+        LookAndFeel_V4::drawComboBox(g,w,h,down,bx,by,bw,bh,combo);
+        swatches(g,combo.getSelectedId()-1,8,h/2-5);
+    }
+    void positionComboBoxText(juce::ComboBox& combo,juce::Label& label) override {
+        LookAndFeel_V4::positionComboBoxText(combo,label);
+        label.setBounds(68,1,juce::jmax(1,combo.getWidth()-96),combo.getHeight()-2);
+    }
+};
+class ThemeSelector final : public juce::ComboBox {
+public:
+    explicit ThemeSelector(ChordHarpProcessor& p) {
+        setLookAndFeel(&look); addItemList(omnichord::themeNames(),1);
+        attachment=std::make_unique<juce::ComboBoxParameterAttachment>(*p.state.getParameter("theme"),*this);
+    }
+    ~ThemeSelector() override { setLookAndFeel(nullptr); }
+    void configure(foleys::GuiItem&) {}
+    static std::vector<std::pair<juce::String,int>> colours() {
+        return {{"combo-background",juce::ComboBox::backgroundColourId},{"combo-text",juce::ComboBox::textColourId},
+                {"combo-outline",juce::ComboBox::outlineColourId},{"combo-text",juce::ComboBox::arrowColourId}};
+    }
+    static std::vector<foleys::SettableProperty> properties(const juce::ValueTree&) { return {}; }
+private:
+    ThemeLook look;
+    std::unique_ptr<juce::ComboBoxParameterAttachment> attachment;
+};
+
 std::unique_ptr<foleys::MagicGUIBuilder> createBuilder(ChordHarpProcessor& processor) {
     auto builder=std::make_unique<foleys::MagicGUIBuilder>(processor.magicState);
     builder->registerJUCEFactories();
@@ -189,6 +297,9 @@ std::unique_ptr<foleys::MagicGUIBuilder> createBuilder(ChordHarpProcessor& proce
     builder->registerFactory("BlinblinLogo",&InstrumentItem<LogoView>::factory);
     builder->registerFactory("ChordDisplay",&InstrumentItem<ChordDisplay>::factory);
     builder->registerFactory("Speaker",&InstrumentItem<Speaker>::factory);
+    builder->registerFactory("OmniToggle",&ToggleItem::factory);
+    builder->registerFactory("OmniChord",&ChordItem::factory);
+    builder->registerFactory("ThemeSelector",&InstrumentItem<ThemeSelector>::factory);
     return builder;
 }
 }
@@ -196,18 +307,33 @@ std::unique_ptr<foleys::MagicGUIBuilder> createBuilder(ChordHarpProcessor& proce
 ChordHarpEditor::ChordHarpEditor(ChordHarpProcessor& processor)
     :foleys::MagicPluginEditor(processor.magicState,createBuilder(processor)),processor(processor) {
     setWantsKeyboardFocus(true);
+    timerCallback(); startTimerHz(20);
 }
-ChordHarpEditor::~ChordHarpEditor() { releaseComputerKeys(); }
+ChordHarpEditor::~ChordHarpEditor() { stopTimer(); releaseComputerKeys(); }
+void ChordHarpEditor::timerCallback() {
+    const int theme=static_cast<int>(processor.state.getRawParameterValue("theme")->load());
+    auto layout=processor.magicState.getGuiTree();
+    if(currentTheme==0 && layout==themedLayout) omnichord::captureCustomTheme(layout);
+    if(theme!=currentTheme || layout!=themedLayout) {
+        currentTheme=theme; themedLayout=layout;
+        omnichord::applyTheme(layout,theme);
+        getGUIBuilder().updateColours(); repaint();
+    }
+    if(!processor.computerKeyboardEnabled() && !heldKeys.empty()) releaseComputerKeys();
+}
 void ChordHarpEditor::releaseComputerKeys() {
-    for(const auto& held:heldKeys) processor.magicState.getKeyboardState().noteOff(1,held.second,0);
+    for(const auto& held:heldKeys) if(held.second>=0) processor.magicState.getKeyboardState().noteOff(1,held.second,0);
     heldKeys.clear();
 }
 void ChordHarpEditor::focusLost(FocusChangeType) { releaseComputerKeys(); }
 bool ChordHarpEditor::keyStateChanged(bool) {
+    const auto native=chordharp::currentMacKeyboardEvent();
     bool handled=false;
     for(auto it=heldKeys.begin();it!=heldKeys.end();) {
-        if(!juce::KeyPress::isKeyCurrentlyDown(it->first)) {
-            processor.magicState.getKeyboardState().noteOff(1,it->second,0);
+        const bool released=it->first>=0x10000?(native.isUp && native.physical==it->first-0x10000)
+            :!juce::KeyPress::isKeyCurrentlyDown(it->first);
+        if(released) {
+            if(it->second>=0) processor.magicState.getKeyboardState().noteOff(1,it->second,0);
             it=heldKeys.erase(it); handled=true;
         } else ++it;
     }
@@ -215,25 +341,20 @@ bool ChordHarpEditor::keyStateChanged(bool) {
 }
 bool ChordHarpEditor::keyPressed(const juce::KeyPress& key) {
     if(!processor.computerKeyboardEnabled() || getGUIBuilder().isEditModeOn()) return false;
-    if(key.getModifiers().isCommandDown() || key.getModifiers().isCtrlDown() || key.getModifiers().isAltDown()) return false;
+    if(key.getModifiers().isCommandDown() || key.getModifiers().isAltDown()) return false;
     const auto* focus=juce::Component::getCurrentlyFocusedComponent();
     if(focus && (dynamic_cast<const juce::TextEditor*>(focus) || focus->findParentComponentOfClass<juce::TextEditor>()
         || dynamic_cast<const juce::ComboBox*>(focus) || focus->findParentComponentOfClass<juce::ComboBox>())) return false;
-    const int code=key.getKeyCode();
-    if(code<0 || code>127) return false;
-    const int upper=juce::CharacterFunctions::toUpperCase(static_cast<juce::juce_wchar>(code));
-    const juce::String qualities("ZXC");
-    const int quality=qualities.indexOfChar(static_cast<juce::juce_wchar>(upper));
-    if(quality>=0) { processor.selectChord(quality*12+processor.selectedChord()%12); return true; }
-    const int column=juce::String("1234567890QP").indexOfChar(static_cast<juce::juce_wchar>(upper));
-    const int harp=juce::String("AWSEDFTGYHUJ").indexOfChar(static_cast<juce::juce_wchar>(upper));
-    int note=-1;
-    if(column>=0) note=36+(processor.selectedChord()/12)*12+column;
-    else if(harp>=0) note=72+harp;
-    if(note<0) return false;
-    if(heldKeys.find(upper)==heldKeys.end()) {
-        heldKeys.emplace(upper,note);
-        processor.magicState.getKeyboardState().noteOn(1,note,0.8f);
+    const auto native=chordharp::currentMacKeyboardEvent();
+    const bool physical=native.physical>=0 && !native.isUp;
+    const auto character=physical?native.character:static_cast<char32_t>(key.getKeyCode());
+    const int chord=chordharp::chordFromComputerKey(character,key.getModifiers().isCtrlDown(),key.getModifiers().isShiftDown());
+    const int harp=physical?native.harp:chordharp::harpFromComputerKey(character);
+    if(chord<0 && harp<0) return false;
+    const int token=physical?0x10000+native.physical:key.getKeyCode();
+    if(heldKeys.find(token)==heldKeys.end()) {
+        if(chord>=0) { processor.selectChord(chord); heldKeys.emplace(token,-1); }
+        else { heldKeys.emplace(token,72+harp); processor.magicState.getKeyboardState().noteOn(1,72+harp,0.8f); }
     }
     return true;
 }
