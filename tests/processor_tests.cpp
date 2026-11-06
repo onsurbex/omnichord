@@ -125,14 +125,19 @@ static void checkPresetLibrary() {
     ChordHarpProcessor source(root);
     std::vector<float> expected;
     for(auto* parameter:source.getParameters()) {
-        parameter->setValueNotifyingHost(.73f);expected.push_back(parameter->getValue());
+        // JUCE bools retain fractional host values internally, but their legal
+        // states (and the preset's engineering values) are OFF=0 and ON=1.
+        parameter->setValueNotifyingHost(parameter->isBoolean()?1.0f:.73f);expected.push_back(parameter->getValue());
     }
     juce::String error; const auto file=source.getPresetDirectory().getChildFile("Mi preset completo.omnipreset");
     require(source.savePreset(file,error),"Saving a full preset must succeed");
     for(auto* parameter:source.getParameters()) parameter->setValueNotifyingHost(0);
     require(source.loadPreset(file,error),"Saved presets must reload");
-    for(int i=0;i<source.getParameters().size();++i)
+    for(int i=0;i<source.getParameters().size();++i) {
+        if(std::abs(source.getParameters()[i]->getValue()-expected[static_cast<size_t>(i)])>=.001f)
+            std::cerr << "Preset mismatch: " << source.getParameters()[i]->getName(100) << " expected " << expected[static_cast<size_t>(i)] << " actual " << source.getParameters()[i]->getValue() << '\n';
         require(std::abs(source.getParameters()[i]->getValue()-expected[static_cast<size_t>(i)])<.001f,"Every plugin parameter must round-trip through a preset");
+    }
     const auto collision=source.getPresetDirectory().getChildFile("Inicio.omnipreset");
     require(source.savePreset(collision,error) && source.loadFactoryPreset(0,error),"Factory and user presets may share a name");
     require(source.getPresetSource()=="factory:0","The factory preset keeps its identity despite a matching user filename");
