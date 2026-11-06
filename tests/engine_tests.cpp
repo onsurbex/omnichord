@@ -3,6 +3,7 @@
 #include "Delay.h"
 #include "Tape.h"
 #include "ChordGate.h"
+#include "Tempo.h"
 #include <cstdlib>
 #include <iostream>
 void require(bool condition,const char* message) { if(!condition) { std::cerr<<message<<'\n'; std::exit(1); } }
@@ -136,6 +137,29 @@ int main() {
         require(speedVariation(true)>0.002,"Flutter changes pitch rapidly");
         Tape extreme; extreme.enabled=true; extreme.noiseLevel=extreme.wowAmount=extreme.flutterAmount=extreme.driveAmount=1; extreme.prepare(rate);
         for(int i=0;i<rate;++i) { float l=16*static_cast<float>(std::sin(i*0.23)),r=-l; extreme.process(l,r); require(std::isfinite(l) && std::isfinite(r) && std::abs(l)<2 && std::abs(r)<2,"Tape remains stable at maximum settings"); }
+    }
+    require(std::abs(syncedDelayMs(120,4)-500)<.001,"Quarter-note delay at 120 BPM");
+    require(std::abs(syncedDelayMs(120,8)-166.6666667)<.001,"Eighth-note triplet timing");
+    require(std::abs(syncedDelayMs(90,9)-500)<.001,"Dotted eighth timing");
+    require(syncedDelayMs(20,0)==12000,"Whole note at the lowest tempo fits the delay buffer");
+    for(double rate:{44100.0,48000.0,96000.0}) {
+        for(int model=0;model<=10;++model) {
+            Engine organ; organ.organModel=model; organ.prepare(rate); organ.chord(9,3,true); double energy=0;
+            for(int i=0;i<rate/2;++i) { const float sample=organ.next(); require(std::isfinite(sample) && std::abs(sample)<=1,"All organ models remain finite and bounded"); energy+=sample*sample; }
+            require(energy>.1,"Every organ registration must be audible");
+            organ.chord(9,3,false);for(int i=0;i<rate*2;++i) organ.next();require(std::abs(organ.next())<.00001,"All organ models release after note off");
+        }
+        const auto subEnergy=[&](int model) {
+            Engine organ;organ.organModel=model;organ.vibrato=0;organ.organChorus=organ.organRotary=0;organ.prepare(rate);organ.chord(9,0,true);
+            double sine=0,cosine=0;
+            for(int i=0;i<rate*2;++i) { const double y=organ.next();if(i>=rate){sine+=y*std::sin(2*pi*110*i/rate);cosine+=y*std::cos(2*pi*110*i/rate);} }
+            return sine*sine+cosine*cosine;
+        };
+        require(subEnergy(8)>subEnergy(4)*10,"Tonewheel drawbars add a genuine 16-foot sub-octave rank");
+        StereoDelay clock;clock.synced=true;clock.milliseconds=static_cast<float>(syncedDelayMs(120,4));clock.feedback=0;clock.mix=1;clock.prepare(rate);
+        float peak=0;int peakAt=0;
+        for(int i=0;i<rate*.7;++i){float l=i==0?1.0f:0,r=l;clock.process(l,r);if(i>1){require(l==r,"Synced stereo echoes share the exact beat duration");if(l>peak){peak=l;peakAt=i;}}}
+        require(std::abs(peakAt-rate*.5)<2 && peak>.9,"The synced echo occurs at the expected beat");
     }
     std::cout<<"Engine checks passed at 44.1, 48 and 96 kHz\n";
 }

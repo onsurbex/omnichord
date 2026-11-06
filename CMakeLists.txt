@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(Omnichord VERSION 0.4.1 LANGUAGES C CXX)
+project(Omnichord VERSION 0.5.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(CHORDHARP_DSP_ONLY "Build the engine tests without JUCE" OFF)
@@ -32,8 +32,10 @@ juce_add_plugin(Omnichord
     NEEDS_MIDI_OUTPUT FALSE
     IS_MIDI_EFFECT FALSE
     COPY_PLUGIN_AFTER_BUILD FALSE)
+target_sources(Omnichord_Standalone PRIVATE Source/StandaloneApp.cpp)
+target_compile_definitions(Omnichord_Standalone PRIVATE JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP=1)
 juce_generate_juce_header(Omnichord)
-target_sources(Omnichord PRIVATE Source/PluginProcessor.cpp Source/PluginEditor.cpp)
+target_sources(Omnichord PRIVATE Source/PluginProcessor.cpp Source/PluginEditor.cpp Source/Presets.cpp)
 if(APPLE)
     enable_language(OBJCXX)
     set_target_properties(Omnichord PROPERTIES OBJCXX_STANDARD 20 OBJCXX_STANDARD_REQUIRED ON)

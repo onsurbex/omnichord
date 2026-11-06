@@ -19,6 +19,12 @@ static juce::TabbedButtonBar* findTabBar(juce::Component& parent) {
     return nullptr;
 }
 
+static juce::Component* findComponent(juce::Component& parent,const juce::String& id) {
+    if(parent.getComponentID()==id) return &parent;
+    for(int i=0;i<parent.getNumChildComponents();++i) if(auto* item=findComponent(*parent.getChildComponent(i),id)) return item;
+    return nullptr;
+}
+
 static void checkLogoThemes(ChordHarpProcessor& processor,ChordHarpEditor& editor) {
     auto* logo=editor.getGUIBuilder().findGuiItemWithId("logo")->getWrappedComponent();
     const auto assertLogo=[&](bool white) {
@@ -37,6 +43,8 @@ static void checkLogoThemes(ChordHarpProcessor& processor,ChordHarpEditor& edito
         parameter->setValueNotifyingHost(parameter->convertTo0to1(static_cast<float>(theme)));
         juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
         assertLogo(theme==2);
+        const auto full=editor.createComponentSnapshot(editor.getLocalBounds());
+        require(full.getPixelAt(0,0)==juce::Colour(0xff292a2d) && full.getPixelAt(full.getWidth()-1,full.getHeight()-1)==juce::Colour(0xff292a2d),"Every host and theme must render the same opaque neutral outer background");
         for(const auto* id:{"pad","harpQuantize","chordSustain","tapeEnabled"})
             require(editor.getGUIBuilder().findGuiItemWithId(id)!=nullptr,"All physical switches must survive theme changes");
         if(theme==1) {
@@ -106,6 +114,67 @@ static void checkChordReleaseAndTape() {
     require(audio.getMagnitude(0,512)==0,"Master volume must also mute tape noise");
 }
 
+static void checkPresetLibrary() {
+    const auto root=juce::File::getSpecialLocation(juce::File::tempDirectory).getNonexistentChildFile("Omnichord preset checks","",true);
+    struct Cleanup { juce::File file; ~Cleanup() { file.deleteRecursively(); } } cleanup{root};
+    ChordHarpProcessor source(root);
+    std::vector<float> expected;
+    for(auto* parameter:source.getParameters()) {
+        parameter->setValueNotifyingHost(.73f);expected.push_back(parameter->getValue());
+    }
+    juce::String error; const auto file=source.getPresetDirectory().getChildFile("Mi preset completo.omnipreset");
+    require(source.savePreset(file,error),"Saving a full preset must succeed");
+    for(auto* parameter:source.getParameters()) parameter->setValueNotifyingHost(0);
+    require(source.loadPreset(file,error),"Saved presets must reload");
+    for(int i=0;i<source.getParameters().size();++i)
+        require(std::abs(source.getParameters()[i]->getValue()-expected[static_cast<size_t>(i)])<.001f,"Every plugin parameter must round-trip through a preset");
+    const auto layout=source.magicState.getGuiTree().toXmlString();
+    require(source.setStartupPreset(error),"A complete snapshot can be chosen as startup preset");
+    ChordHarpProcessor next(root);
+    for(int i=0;i<next.getParameters().size();++i)
+        require(std::abs(next.getParameters()[i]->getValue()-expected[static_cast<size_t>(i)])<.001f,"A new instance must start from all chosen default parameters");
+    const auto bad=root.getChildFile("corrupt.omnipreset");bad.replaceWithText("<OmnichordPreset formatVersion=\"1\"><PARAM id=\"gain\" value=\"0.1\"/><PARAM id=\"tone\" value=\"nan\"/></OmnichordPreset>");
+    require(!next.loadPreset(bad,error),"Invalid preset values must be rejected");
+    require(std::abs(next.getParameters()[0]->getValue()-expected[0])<.001f,"A corrupt preset must not partially change the sound");
+    for(auto* parameter:source.getParameters()) parameter->setValueNotifyingHost(0);
+    require(source.savePreset(root.getChildFile("minimum.omnipreset"),error) && source.loadPreset(root.getChildFile("minimum.omnipreset"),error),"Parameter minima must survive preset encoding");
+    juce::MemoryBlock project;source.getStateInformation(project);next.setStateInformation(project.getData(),static_cast<int>(project.getSize()));
+    require(next.state.getRawParameterValue("gain")->load()==0,"DAW project state must override the startup preset");
+    for(int i=0;i<ChordHarpProcessor::factoryPresetNames().size();++i) require(next.loadFactoryPreset(i,error),"Every factory preset must load");
+    require(source.magicState.getGuiTree().toXmlString()==layout,"Loading sound presets must preserve the edited panel layout");
+    require(source.clearStartupPreset(error),"The default can be returned to factory settings");
+    ChordHarpProcessor factory(root);require(factory.state.getRawParameterValue("organModel")->load()==4 && factory.state.getRawParameterValue("pad")->load()==0,"Factory startup must be deterministic and silent");
+}
+class TestPlayhead final : public juce::AudioPlayHead {
+public:
+    juce::Optional<PositionInfo> getPosition() const override { PositionInfo position;position.setBpm(90);return position; }
+};
+static void checkTempoAndAmbience() {
+    ChordHarpProcessor synth; synth.state.getParameter("delayTempo")->setValueNotifyingHost(synth.state.getParameter("delayTempo")->convertTo0to1(150));
+    synth.prepareToPlay(48000,512);juce::AudioBuffer<float> audio(2,512);juce::MidiBuffer midi;synth.processBlock(audio,midi);
+    require(std::abs(synth.getCurrentTempo()-150)<.01 && !synth.tempoComesFromHost(),"Standalone must use the editable BPM");
+    TestPlayhead playhead;synth.setPlayHead(&playhead);synth.processBlock(audio,midi);
+    require(synth.getCurrentTempo()==90 && synth.tempoComesFromHost(),"Host BPM must override standalone tempo");
+    synth.setPlayHead(nullptr);
+    const auto impulse=[&](float predelay,float early) {
+        chordharp::Ambience room;room.mix=1;room.predelayMs=predelay;room.early=early;room.prepare(48000);room.configure();
+        int first=-1;double energy=0;
+        for(int i=0;i<24000;++i) {float l=i==0?1.f:0.f,r=l;room.process(l,r);if(std::abs(l)+std::abs(r)>1e-6 && first<0)first=i;energy+=l*l+r*r;require(std::isfinite(l) && std::isfinite(r),"Reverb output must remain finite");}
+        return std::pair<int,double>{first,energy};
+    };
+    const auto dry=impulse(0,0),pre=impulse(100,0),reflections=impulse(0,1);
+    require(pre.first-dry.first>=4798 && pre.first-dry.first<=4802,"Predelay must postpone the wet signal by 100 ms");
+    require(reflections.first<dry.first && reflections.second>dry.second,"Early reflections must add a separate early response");
+    const auto response=[](int band,float gain,double frequency) {
+        chordharp::Ambience room;room.mix=1;room.early=1;room.gainDb[static_cast<size_t>(band)]=gain;room.prepare(48000);room.configure();double energy=0;
+        for(int i=0;i<48000;++i){float l=.1f*static_cast<float>(std::sin(6.283185307179586*frequency*i/48000)),r=l;room.process(l,r);if(i>24000)energy+=l*l+r*r;}
+        return energy;
+    };
+    require(response(0,12,100)>response(0,-12,100)*5,"Low EQ must shape the reverb bass");
+    require(response(1,12,1000)>response(1,-12,1000)*5,"Mid EQ must shape the reverb mids");
+    require(response(2,12,8000)>response(2,-12,8000)*5,"High EQ must shape the reverb treble");
+}
+
 int main() {
     juce::ScopedJuceInitialiser_GUI gui;
     const auto bundledLogo=juce::ImageFileFormat::loadFrom(BinaryData::BlinblinLogo_png,
@@ -168,7 +237,7 @@ int main() {
     require(!restored.state.state.hasProperty("customLogo"),
             "Legacy custom logo overrides must be removed; branding is fixed");
     std::unique_ptr<juce::AudioProcessorEditor> editor(restored.createEditor());
-    require(editor && editor->getWidth() == 1060 && editor->getHeight() == 695,
+    require(editor && editor->getWidth() == 1060 && editor->getHeight() == 805,
             "Editor must instantiate at its intended dimensions");
     editor.reset();
     // A fresh instance must display the bundled logo without any project override.
@@ -181,7 +250,9 @@ int main() {
     require(guiReady,"GUI callbacks must finish before inspecting the Foleys toolbox");
     const auto preview=editor->createComponentSnapshot(editor->getLocalBounds());
     float darkest=1.0f, lightest=0.0f;
-    for(int y=49;y<135;++y) for(int x=660;x<940;++x) {
+    auto* logoWidget=dynamic_cast<ChordHarpEditor*>(editor.get())->getGUIBuilder().findGuiItemWithId("logo")->getWrappedComponent();
+    const auto logoBounds=editor->getLocalArea(logoWidget,logoWidget->getLocalBounds());
+    for(int y=logoBounds.getY();y<logoBounds.getBottom();++y) for(int x=logoBounds.getX();x<logoBounds.getRight();++x) {
         const auto brightness=preview.getPixelAt(x,y).getBrightness();
         darkest=juce::jmin(darkest,brightness);
         lightest=juce::jmax(lightest,brightness);
@@ -283,6 +354,20 @@ int main() {
     require(nightStream && png.writeImageToStream(nightPreview,*nightStream),"Midnight preview must render");
     auto* tabs=findTabBar(*builder.findGuiItemWithId("sound-controls"));
     require(tabs && tabs->getNumTabs()==6,"The interface must expose the Tape tab");
+    require(builder.findGuiItemWithId("preset-bar") && builder.findGuiItemWithId("instrument-body"),"The preset library and physical case must be present");
+    tabs->setCurrentTabIndex(2);
+    auto* syncButton=dynamic_cast<juce::TextButton*>(builder.findGuiItemWithId("delaySync")->getWrappedComponent());
+    auto* timing=builder.findGuiItemWithId("delayTime")->getWrappedComponent();
+    require(syncButton && timing,"Delay sync and time controls must exist");
+    syncButton->setToggleState(true,juce::sendNotificationSync);
+    juce::MessageManager::getInstance()->runDispatchLoopUntil(150);
+    require(findComponent(*timing,"delay-note")->isVisible() && !findComponent(*timing,"delay-ms")->isVisible(),"Sync must replace milliseconds with a note selector");
+    auto* division=dynamic_cast<juce::ComboBox*>(findComponent(*timing,"delay-note"));
+    division->setSelectedId(9,juce::sendNotificationSync);
+    require(restored.state.getRawParameterValue("delayDivision")->load()==8,"Triplet selection must reach the delay engine");
+    syncButton->setToggleState(false,juce::sendNotificationSync);
+    juce::MessageManager::getInstance()->runDispatchLoopUntil(150);
+    require(findComponent(*timing,"delay-ms")->isVisible() && !findComponent(*timing,"delay-note")->isVisible(),"Free delay must show milliseconds");
     tabs->setCurrentTabIndex(4);
     juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
     const auto tapePreview=editor->createComponentSnapshot(editor->getLocalBounds());
@@ -380,6 +465,8 @@ int main() {
     };
     const double dryTail=tailEnergy(false),wetTail=tailEnergy(true);
     require(wetTail>0.0001 && wetTail>dryTail*10,"Delay and reverb must produce audible tails after source mute");
+    checkPresetLibrary();
+    checkTempoAndAmbience();
     checkChordReleaseAndTape();
     processor.releaseResources();
     std::cout << "Processor checks passed: MIDI, audio, logo, visual controls, XML export/import and layout state\n";
