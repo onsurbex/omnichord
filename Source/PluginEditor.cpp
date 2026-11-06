@@ -421,7 +421,11 @@ void ChordHarpEditor::timerCallback() {
     if(theme!=currentTheme || layout!=themedLayout) {
         currentTheme=theme; themedLayout=layout;
         omnichord::applyTheme(layout,theme);
-        getGUIBuilder().updateColours(); repaint();
+        getGUIBuilder().updateColours();
+        // Foleys RootItem updates its children but skips its own decorator.
+        // Set that layer explicitly so it cannot cover the editor with darkgrey.
+        if(auto* root=getGUIBuilder().findGuiItemWithId("root")) root->foleys::GuiItem::updateColours();
+        repaint();
     }
     if(!processor.computerKeyboardEnabled() && !heldKeys.empty()) releaseComputerKeys();
 }

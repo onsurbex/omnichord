@@ -44,6 +44,8 @@ static void checkLogoThemes(ChordHarpProcessor& processor,ChordHarpEditor& edito
         juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
         assertLogo(theme==2);
         const auto full=editor.createComponentSnapshot(editor.getLocalBounds());
+        if(full.getPixelAt(0,0)!=juce::Colour(0xff292a2d) || full.getPixelAt(full.getWidth()-1,full.getHeight()-1)!=juce::Colour(0xff292a2d))
+            std::cerr << "Theme " << theme << " outer corners: " << full.getPixelAt(0,0).toString() << ", " << full.getPixelAt(full.getWidth()-1,full.getHeight()-1).toString() << '\n';
         require(full.getPixelAt(0,0)==juce::Colour(0xff292a2d) && full.getPixelAt(full.getWidth()-1,full.getHeight()-1)==juce::Colour(0xff292a2d),"Every host and theme must render the same opaque neutral outer background");
         for(const auto* id:{"pad","harpQuantize","chordSustain","tapeEnabled"})
             require(editor.getGUIBuilder().findGuiItemWithId(id)!=nullptr,"All physical switches must survive theme changes");
