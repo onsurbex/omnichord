@@ -12,6 +12,65 @@ static void require(bool condition, const char* message) {
     if (!condition) { std::cerr << message << '\n'; std::exit(1); }
 }
 
+static juce::TabbedButtonBar* findTabBar(juce::Component& parent) {
+    if(auto* tabs=dynamic_cast<juce::TabbedButtonBar*>(&parent)) return tabs;
+    for(int i=0;i<parent.getNumChildComponents();++i)
+        if(auto* tabs=findTabBar(*parent.getChildComponent(i))) return tabs;
+    return nullptr;
+}
+
+static void checkChordReleaseAndTape() {
+    ChordHarpProcessor piano,reference;
+    for(auto* synth:{&piano,&reference}) {
+        synth->state.getParameter("pad")->setValueNotifyingHost(1);
+        synth->state.getParameter("chordSustain")->setValueNotifyingHost(0);
+        synth->prepareToPlay(48000,512);
+    }
+    juce::AudioBuffer<float> audio(2,512),control(2,512); juce::MidiBuffer midi,other;
+    midi.addEvent(juce::MidiMessage::noteOn(1,24,0.8f),0);
+    other.addEvent(juce::MidiMessage::noteOn(1,24,0.8f),0);
+    for(int b=0;b<20;++b) { piano.processBlock(audio,midi); reference.processBlock(control,other); }
+    require(audio.getMagnitude(0,512)>0.001f,"Unlatched chord must sound while MIDI is held");
+    midi.addEvent(juce::MidiMessage::noteOff(1,24),128);
+    piano.processBlock(audio,midi); reference.processBlock(control,other);
+    for(int i=0;i<128;++i) require(audio.getSample(0,i)==control.getSample(0,i),"Note Off must respect its exact MIDI sample offset");
+    require(audio.getMagnitude(0,128,384)>0.0001f,"Note Off must produce a release envelope rather than a hard cut");
+    for(int b=0;b<120;++b) piano.processBlock(audio,midi);
+    require(audio.getMagnitude(0,512)<0.00001f,"Unlatched chord must finish its release after the final Note Off");
+    midi.addEvent(juce::MidiMessage::noteOn(1,24,0.8f),0);
+    midi.addEvent(juce::MidiMessage::noteOn(2,25,0.8f),256);
+    piano.processBlock(audio,midi); require(piano.selectedChord()==8,"Newest chord has priority across MIDI channels");
+    midi.addEvent(juce::MidiMessage::noteOff(2,25),0); piano.processBlock(audio,midi);
+    require(piano.selectedChord()==1,"Releasing the newest MIDI chord returns to the older held chord");
+    for(int b=0;b<20;++b) piano.processBlock(audio,midi);
+    require(audio.getMagnitude(0,512)>0.001f,"The older held chord must remain audible");
+    piano.state.getParameter("chordSustain")->setValueNotifyingHost(1);
+    midi.addEvent(juce::MidiMessage::noteOff(1,24),0);
+    for(int b=0;b<120;++b) piano.processBlock(audio,midi);
+    require(audio.getMagnitude(0,512)>0.001f,"Sustain ON keeps the chord after Note Off");
+    piano.state.getParameter("chordSustain")->setValueNotifyingHost(0);
+    for(int b=0;b<120;++b) piano.processBlock(audio,midi);
+    require(audio.getMagnitude(0,512)<0.00001f,"Turning sustain OFF with no held keys releases the chord");
+    piano.pressChord(37,true);
+    for(int b=0;b<20;++b) piano.processBlock(audio,midi);
+    require(piano.selectedChord()==37 && audio.getMagnitude(0,512)>0.001f,"Mac Maj7 key-down must open the chord gate");
+    piano.releaseChord(37,true);
+    for(int b=0;b<120;++b) piano.processBlock(audio,midi);
+    require(audio.getMagnitude(0,512)<0.00001f,"Mac key-up must release the chord gate");
+    piano.state.getParameter("tapeEnabled")->setValueNotifyingHost(1);
+    piano.state.getParameter("tapeNoise")->setValueNotifyingHost(1);
+    for(int b=0;b<40;++b) piano.processBlock(audio,midi);
+    require(audio.getMagnitude(0,512)>0.0001f,"Tape noise must reach the processor output");
+    midi.addEvent(juce::MidiMessage::allSoundOff(1),0); piano.processBlock(audio,midi);
+    require(audio.getMagnitude(0,512)==0,"Panic must clear tape history and mute hiss");
+    midi.addEvent(juce::MidiMessage::noteOn(1,72,0.8f),0);
+    for(int b=0;b<4;++b) piano.processBlock(audio,midi);
+    require(audio.getMagnitude(0,512)>0.0001f,"A new performance resumes tape after panic");
+    piano.state.getParameter("gain")->setValueNotifyingHost(0);
+    for(int b=0;b<10;++b) piano.processBlock(audio,midi);
+    require(audio.getMagnitude(0,512)==0,"Master volume must also mute tape noise");
+}
+
 int main() {
     juce::ScopedJuceInitialiser_GUI gui;
     const auto bundledLogo=juce::ImageFileFormat::loadFrom(BinaryData::BlinblinLogo_png,
@@ -113,7 +172,7 @@ int main() {
             "Visual slider must control the audio parameter");
     auto* chordButton=dynamic_cast<juce::TextButton*>(chordItem->getWrappedComponent());
     require(chordButton!=nullptr,"Foleys must create chord buttons");
-    chordButton->onClick();
+    chordButton->setState(juce::Button::buttonDown); chordButton->setState(juce::Button::buttonNormal);
     require(restored.state.getRawParameterValue("chord")->load()==13.0f,
             "Chord button must set the chord parameter");
     auto* silenceItem=builder.findGuiItemWithId("silence");
@@ -140,7 +199,7 @@ int main() {
     restored.processBlock(audio,midi); restored.processBlock(audio,midi);
     require(audio.getMagnitude(0,512)>0.001f,"Mac keyboard must produce harp audio");
     magicEditor->keyStateChanged(false);
-    auto* pad=dynamic_cast<juce::ToggleButton*>(builder.findGuiItemWithId("pad")->getWrappedComponent());
+    auto* pad=dynamic_cast<juce::TextButton*>(builder.findGuiItemWithId("pad")->getWrappedComponent());
     require(pad!=nullptr,"Standalone organ toggle must exist");
     restored.panic.store(true); restored.processBlock(audio,midi);
     pad->setToggleState(true,juce::sendNotificationSync);
@@ -149,11 +208,24 @@ int main() {
     require(audio.getMagnitude(0,512)>0.001f,"Enabling the organ from the GUI must produce audio without host automation");
     pad->setToggleState(false,juce::sendNotificationSync);
     require(restored.state.getRawParameterValue("pad")->load()<0.5f,"Clicking the organ toggle must switch OFF");
+    auto* sustainSwitch=dynamic_cast<juce::TextButton*>(builder.findGuiItemWithId("chordSustain")->getWrappedComponent());
+    sustainSwitch->setToggleState(false,juce::sendNotificationSync); pad->setToggleState(true,juce::sendNotificationSync);
+    chordButton->setState(juce::Button::buttonDown);
+    for(int b=0;b<20;++b) restored.processBlock(audio,midi);
+    require(audio.getMagnitude(0,512)>0.001f,"Holding a chord button must sound with Sustain OFF");
+    chordButton->setState(juce::Button::buttonNormal);
+    for(int b=0;b<120;++b) restored.processBlock(audio,midi);
+    require(audio.getMagnitude(0,512)<0.00001f,"Releasing a chord button must release the organ with Sustain OFF");
+    sustainSwitch->setToggleState(true,juce::sendNotificationSync); pad->setToggleState(false,juce::sendNotificationSync);
     auto* maj7=dynamic_cast<juce::TextButton*>(builder.findGuiItemWithId("chord-37")->getWrappedComponent());
-    maj7->onClick();
+    maj7->setState(juce::Button::buttonDown); maj7->setState(juce::Button::buttonNormal);
     require(restored.selectedChord()==37 && restored.state.getParameter("chord")->getNormalisableRange().end==35,"Maj7 buttons preserve legacy chord automation range");
-    chordButton->onClick(); require(restored.selectedChord()==13,"Selecting a regular chord clears Maj7");
+    chordButton->setState(juce::Button::buttonDown); chordButton->setState(juce::Button::buttonNormal); require(restored.selectedChord()==13,"Selecting a regular chord clears Maj7");
     auto* theme=dynamic_cast<juce::ComboBox*>(builder.findGuiItemWithId("theme")->getWrappedComponent());
+    require(builder.findGuiItemWithId("tape-controls") && builder.findGuiItemWithId("chordSustain"),"Tape tab and chord sustain switch must exist");
+    require(pad->getButtonText()=="ORGAN" && static_cast<bool>(pad->getProperties()["physical-switch"]),"Organ must use a physical push button");
+    auto* follow=dynamic_cast<juce::TextButton*>(builder.findGuiItemWithId("harpQuantize")->getWrappedComponent());
+    require(follow && follow->getButtonText()=="FOLLOW CHORDS","Harp quantize must be a physical FOLLOW CHORDS button");
     require(theme && theme->getNumItems()==6,"Theme selector must expose six palettes");
     auto customPalette=restored.magicState.getGuiTree().getChildWithName("Styles").getChild(0).getChildWithName("Palettes").getChild(0);
     customPalette.setProperty("color-ffeee6cf","fff0ddbb",nullptr);
@@ -165,16 +237,27 @@ int main() {
     require(restored.state.getRawParameterValue("theme")->load()==2,"Theme dropdown must set the selected theme");
     require(palette.getProperty("color-ffeee6cf").toString()=="ff242c40","Midnight must recolour the actual panel palette");
     require(shell.getProperty("background-color")==panelBefore && gainNode.getProperty("pos-x")==originalX,"Themes preserve layout positions and palette references");
+    require(pad->findColour(juce::TextButton::buttonOnColourId)==juce::Colour(0xfff0ca59) && follow->findColour(juce::TextButton::buttonOnColourId)==juce::Colour(0xfff0ca59),"Organ and Follow Chords stay yellow in every theme");
+    require(sustainSwitch->findColour(juce::TextButton::buttonOnColourId)==juce::Colour(0xff96a9ef),"Sustain button must use the active theme colour");
     auto nightPreview=editor->createComponentSnapshot(editor->getLocalBounds());
     require(nightPreview.getPixelAt(35,180)!=preview.getPixelAt(35,180),"Changing themes must visibly recolour the rendered instrument");
     auto nightStream=juce::File::getCurrentWorkingDirectory().getChildFile("Omnichord-midnight-preview.png").createOutputStream();
     require(nightStream && png.writeImageToStream(nightPreview,*nightStream),"Midnight preview must render");
+    auto* tabs=findTabBar(*builder.findGuiItemWithId("sound-controls"));
+    require(tabs && tabs->getNumTabs()==6,"The interface must expose the Tape tab");
+    tabs->setCurrentTabIndex(4);
+    juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+    const auto tapePreview=editor->createComponentSnapshot(editor->getLocalBounds());
+    auto tapeStream=juce::File::getCurrentWorkingDirectory().getChildFile("Omnichord-tape-preview.png").createOutputStream();
+    require(tapeStream && png.writeImageToStream(tapePreview,*tapeStream),"Tape panel preview must render");
+    tabs->setCurrentTabIndex(0);
+    juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
     theme->setSelectedId(1,juce::sendNotificationSync);
     juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
     require(palette.getProperty("color-ffeee6cf").toString()=="fff0ddbb","Personalizado must recover manual palette edits after switching themes");
     theme->setSelectedId(3,juce::sendNotificationSync);
     juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
-    maj7->onClick();
+    maj7->setState(juce::Button::buttonDown); maj7->setState(juce::Button::buttonNormal);
     gainNode.setProperty("pos-x",123,&builder.getUndoManager());
 #if FOLEYS_SHOW_GUI_EDITOR_PALLETTE
     builder.setEditMode(true);
@@ -190,11 +273,21 @@ int main() {
 #endif
     restored.state.getParameter("delayMix")->setValueNotifyingHost(0.35f);
     restored.state.getParameter("reverbMix")->setValueNotifyingHost(0.25f);
+    restored.state.getParameter("tapeEnabled")->setValueNotifyingHost(1);
+    restored.state.getParameter("tapeNoise")->setValueNotifyingHost(0.4f);
+    restored.state.getParameter("tapeWow")->setValueNotifyingHost(0.6f);
+    restored.state.getParameter("tapeFlutter")->setValueNotifyingHost(0.2f);
+    restored.state.getParameter("tapeDrive")->setValueNotifyingHost(0.7f);
     juce::MemoryBlock layoutState;
     restored.getStateInformation(layoutState);
     ChordHarpProcessor sessionRestored;
     sessionRestored.setStateInformation(layoutState.getData(),static_cast<int>(layoutState.getSize()));
     require(sessionRestored.selectedChord()==37 && sessionRestored.state.getRawParameterValue("theme")->load()==2,"Sessions must restore Maj7 and colour theme");
+    require(sessionRestored.state.getRawParameterValue("tapeEnabled")->load()==1
+        && std::abs(sessionRestored.state.getRawParameterValue("tapeNoise")->load()-0.4f)<0.001f
+        && std::abs(sessionRestored.state.getRawParameterValue("tapeWow")->load()-0.6f)<0.001f
+        && std::abs(sessionRestored.state.getRawParameterValue("tapeFlutter")->load()-0.2f)<0.001f
+        && std::abs(sessionRestored.state.getRawParameterValue("tapeDrive")->load()-0.7f)<0.001f,"All tape controls must survive session restore");
     auto restoredShell=sessionRestored.magicState.getGuiTree().getChildWithName("View").getChildWithProperty("id","shell");
     require(static_cast<int>(restoredShell.getChildWithProperty("id","gain").getProperty("pos-x"))==123,
             "DAW sessions must preserve visual layout edits");
@@ -208,6 +301,9 @@ int main() {
     auto legacyShell=legacyRoot.getChildWithProperty("id","shell");
     for(int chord=36;chord<48;++chord) legacyShell.removeChild(legacyShell.getChildWithProperty("id","chord-"+juce::String(chord)),nullptr);
     legacyShell.removeChild(legacyShell.getChildWithProperty("id","quality-3"),nullptr);
+    legacyShell.removeChild(legacyShell.getChildWithProperty("id","chordSustain"),nullptr);
+    auto legacyTabs=legacyShell.getChildWithProperty("id","sound-controls");
+    legacyTabs.removeChild(legacyTabs.getChildWithProperty("id","tape-controls"),nullptr);
     legacyShell.getChildWithProperty("id","gain").setProperty("pos-x",321,nullptr);
     legacyShell.appendChild(juce::ValueTree("LogoPicker",{{"id","logo-picker"}}),nullptr);
     legacySession.magicState.setGuiValueTree(legacyLayout);
@@ -220,6 +316,9 @@ int main() {
     require(upgradedShell.getChildWithProperty("id","sound-controls").isValid()
         && !upgradedShell.getChildWithProperty("id","logo-picker").isValid(),"Legacy layouts must gain v2 controls and lose logo replacement");
     require(upgradedShell.getChildWithProperty("id","chord-47").isValid() && static_cast<int>(upgradedShell.getChildWithProperty("id","gain").getProperty("pos-x"))==321,"V2 migration adds Maj7 while preserving the user layout");
+    require(upgradedShell.getChildWithProperty("id","chordSustain").hasType("OmniSwitch")
+        && upgradedShell.getChildWithProperty("id","pad").getProperty("text").toString()=="ORGAN"
+        && upgradedShell.getChildWithProperty("id","sound-controls").getChildWithProperty("id","tape-controls").isValid(),"Old layouts must gain Tape and physical sustain controls");
     require(std::abs(upgraded.state.getRawParameterValue("gain")->load()-0.23f)<0.001f,"Layout migration must preserve sound parameters");
     // Compare a muted source with and without effects: only the effects may keep sounding.
     const auto tailEnergy=[](bool effects) {
@@ -243,6 +342,7 @@ int main() {
     };
     const double dryTail=tailEnergy(false),wetTail=tailEnergy(true);
     require(wetTail>0.0001 && wetTail>dryTail*10,"Delay and reverb must produce audible tails after source mute");
+    checkChordReleaseAndTape();
     processor.releaseResources();
     std::cout << "Processor checks passed: MIDI, audio, logo, visual controls, XML export/import and layout state\n";
 }

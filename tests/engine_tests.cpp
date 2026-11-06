@@ -1,6 +1,8 @@
 #include "Engine.h"
 #include "KeyboardMapping.h"
 #include "Delay.h"
+#include "Tape.h"
+#include "ChordGate.h"
 #include <cstdlib>
 #include <iostream>
 void require(bool condition,const char* message) { if(!condition) { std::cerr<<message<<'\n'; std::exit(1); } }
@@ -79,6 +81,61 @@ int main() {
         // Fractional interpolation can split a unit impulse across two half-height samples.
         require(maximumLeft>0.45f && maximumRight>0.45f,"Stereo delay returns its input after the selected time");
         delay.reset(); float l=0,r=0; delay.process(l,r); require(l==0 && r==0,"Delay reset silence");
+    }
+    require(chordNote(0,3,3)==59,"Maj7 keeps its major seventh");
+    ChordGate gate; require(gate.latest()==-1,"Chord gate starts empty");
+    gate.press(0,1); gate.press(48,8); require(gate.latest()==8,"Newest held chord wins");
+    gate.release(48); require(gate.latest()==1,"Releasing the newest chord returns to the held chord");
+    gate.press(863,1); gate.release(0); require(gate.latest()==1,"GUI and MIDI sources are independent");
+    gate.release(863); require(gate.latest()==-1,"The final release closes the chord gate");
+    gate.press(864,7); require(gate.latest()==-1,"Invalid sources are ignored");
+    gate.press(767,42); gate.clear(); require(gate.latest()==-1,"Panic clears every source");
+    for(int chord=0;chord<48;++chord) require(chordFromMidi(midiFromChord(chord))==chord,"GUI and MIDI chord maps agree");
+    for(double rate:{44100.0,48000.0,96000.0}) {
+        Tape bypass; bypass.noiseLevel=1; bypass.wowAmount=1; bypass.flutterAmount=1; bypass.driveAmount=1; bypass.prepare(rate);
+        for(int i=0;i<10000;++i) {
+            float l=static_cast<float>(std::sin(i*0.1)),r=l*0.25f; const auto a=l,b=r;
+            bypass.process(l,r); require(l==a && r==b,"Disabled tape is an exact stereo bypass");
+        }
+        Tape silent; silent.enabled=true; silent.noiseLevel=0; silent.prepare(rate);
+        for(int i=0;i<10000;++i) { float l=0,r=0; silent.process(l,r); require(l==0 && r==0,"Zero tape noise preserves silence"); }
+        const auto noiseEnergy=[&](float level) {
+            Tape t; t.enabled=true; t.noiseLevel=level; t.prepare(rate); double sum=0;
+            for(int i=0;i<rate/2;++i) { float l=0,r=0; t.process(l,r); sum+=l*l+r*r; }
+            t.reset(); float l=0,r=0; t.process(l,r,false); require(l==0 && r==0,"Tape reset and panic suppress hiss");
+            return sum;
+        };
+        const auto quiet=noiseEnergy(0.1f),loud=noiseEnergy(1);
+        require(quiet>0.00001 && loud>quiet*90 && loud<quiet*110,"Noise knob controls the level of stereo hiss");
+        const auto harmonic=[&](float drive) {
+            Tape t; t.enabled=true; t.driveAmount=drive; t.wowAmount=t.flutterAmount=0; t.prepare(rate);
+            double sine=0,cosine=0;
+            for(int i=0;i<rate;++i) {
+                float l=0.25f*static_cast<float>(std::sin(2*pi*500*i/rate)),r=l; t.process(l,r);
+                require(l==r,"Common tape speed preserves a mono source without noise");
+                if(i>=rate/2) { sine+=l*std::sin(2*pi*1500*i/rate); cosine+=l*std::cos(2*pi*1500*i/rate); }
+            }
+            return sine*sine+cosine*cosine;
+        };
+        require(harmonic(1)>harmonic(0)*100+1,"Drive adds measurable saturation harmonics");
+        const auto speedVariation=[&](bool flutter) {
+            Tape t; t.enabled=true; t.driveAmount=0; t.wowAmount=flutter?0.0f:1.0f; t.flutterAmount=flutter?1.0f:0.0f; t.prepare(rate);
+            float previous=0; double crossing=-1,minimum=1e9,maximum=0;
+            for(int i=0;i<rate*2;++i) {
+                float l=static_cast<float>(std::sin(2*pi*1000*i/rate)),r=l; t.process(l,r);
+                if(i>rate/2 && previous<=0 && l>0) {
+                    const double current=i-static_cast<double>(l)/(l-previous);
+                    if(crossing>=0) { minimum=std::min(minimum,current-crossing); maximum=std::max(maximum,current-crossing); }
+                    crossing=current;
+                }
+                previous=l;
+            }
+            return (maximum-minimum)/(rate/1000);
+        };
+        require(speedVariation(false)>0.002,"Wow changes pitch slowly");
+        require(speedVariation(true)>0.002,"Flutter changes pitch rapidly");
+        Tape extreme; extreme.enabled=true; extreme.noiseLevel=extreme.wowAmount=extreme.flutterAmount=extreme.driveAmount=1; extreme.prepare(rate);
+        for(int i=0;i<rate;++i) { float l=16*static_cast<float>(std::sin(i*0.23)),r=-l; extreme.process(l,r); require(std::isfinite(l) && std::isfinite(r) && std::abs(l)<2 && std::abs(r)<2,"Tape remains stable at maximum settings"); }
     }
     std::cout<<"Engine checks passed at 44.1, 48 and 96 kHz\n";
 }

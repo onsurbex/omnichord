@@ -53,17 +53,9 @@ jobs:
       - name: Publish installer and portable bundles
         shell: bash
         run: |
-          cat > /tmp/omnichord-release-notes.md <<'NOTES'
-          Instalador de Omnichord para macOS 11 o posterior, compatible con Apple Silicon e Intel.
-
-          Descarga **Omnichord-0.3.0.pkg** y ábrelo con el instalador de macOS. Instala el VST3 en `/Library/Audio/Plug-Ins/VST3/` y la aplicación en `/Applications/`. El asistente solicita permisos de administrador. Después vuelve a explorar los plugins en Ableton Live.
-
-          Incluye 48 acordes (mayores, menores, 7 y Maj7), selección MIDI C0–C3, arpa desde C4, teclado del Mac, órgano con Apertura y Coro, delay, reverb y seis temas de color. Compilado sin las herramientas de edición de Foleys.
-
-          VST3 y standalone con firma local ad hoc verificada. El PKG no tiene certificado Developer ID Installer ni notarización de Apple. Se han probado la instalación y reinstalación en macOS; la carga dentro de Ableton requiere una prueba manual.
-
-          También se adjuntan los bundles en ZIP, sus sumas SHA-256 y la referencia de la compilación verificada.
-          NOTES
+          cp docs/RELEASE_NOTES.md /tmp/omnichord-release-notes.md
+          printf '\nDescarga el instalador **Omnichord-%s.pkg**. También se adjuntan los bundles en ZIP, las sumas SHA-256 y la referencia de la compilación verificada.\n' \
+            "${GITHUB_REF_NAME#v}" >> /tmp/omnichord-release-notes.md
           gh release create "$GITHUB_REF_NAME" \
             --repo "$GITHUB_REPOSITORY" --verify-tag \
             --title "Omnichord $GITHUB_REF_NAME" \

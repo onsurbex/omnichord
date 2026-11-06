@@ -10,6 +10,12 @@ inline int chordFromMidi(int note) {
     if(note<24 || note>=72) return -1;
     return ((note-24)/12)*12+omnichordRoots[static_cast<size_t>((note-24)%12)];
 }
+inline int midiFromChord(int chord) {
+    chord=std::clamp(chord,0,47);
+    for(size_t i=0;i<omnichordRoots.size();++i)
+        if(omnichordRoots[i]==chord%12) return 24+(chord/12)*12+static_cast<int>(i);
+    return 24;
+}
 inline int harpFromMidi(int note,int chord,bool quantized) {
     if(!quantized) return note;
     const int position=std::clamp(note-72,0,55);

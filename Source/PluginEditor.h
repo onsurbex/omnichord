@@ -23,6 +23,7 @@ private:
 class InstrumentLook final : public juce::LookAndFeel_V4 {
 public:
     void drawButtonBackground(juce::Graphics&,juce::Button&,const juce::Colour&,bool,bool) override;
+    void drawButtonText(juce::Graphics&,juce::TextButton&,bool,bool) override;
     void drawRotarySlider(juce::Graphics&,int,int,int,int,float,float,float,juce::Slider&) override;
 };
 

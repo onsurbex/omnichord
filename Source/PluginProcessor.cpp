@@ -61,10 +61,26 @@ juce::ValueTree upgradeLayout(juce::ValueTree layout) {
         if(!findNode(shell,id).isValid()) findNode(shell,"organ-controls").appendChild(findNode(defaults,id).createCopy(),nullptr);
     if(!findNode(shell,"theme").isValid()) shell.appendChild(findNode(defaults,"theme").createCopy(),nullptr);
     auto types=layout.getChildWithName("Styles").getChild(0).getChildWithName("Types");
-    for(const auto* name:{"OmniChord","OmniToggle","ThemeSelector","ComboBox"})
+    for(const auto* name:{"OmniChord","OmniToggle","OmniSwitch","ThemeSelector","ComboBox"})
         if(!types.getChildWithName(name).isValid()) types.appendChild(defaults.getChildWithName("Styles").getChild(0).getChildWithName("Types").getChildWithName(name).createCopy(),nullptr);
+    if(static_cast<int>(root.getProperty("layout-version",0))<4) {
+        const auto switchNode=[&](const char* id,const char* text) {
+            auto node=findNode(root,id); const auto model=findNode(defaults,id);
+            if(!node.isValid()) { node=model.createCopy(); shell.appendChild(node,nullptr); return; }
+            juce::ValueTree replacement("OmniSwitch"); replacement.copyPropertiesAndChildrenFrom(node,nullptr);
+            for(const auto* property:{"pos-x","pos-y","pos-width","pos-height","switch-fixed-color","button-color","button-on-color","button-off-text","button-on-text"})
+                if(model.hasProperty(property)) replacement.setProperty(property,model.getProperty(property),nullptr);
+            replacement.setProperty("text",text,nullptr);
+            node.getParent().removeChild(node,nullptr); shell.appendChild(replacement,nullptr);
+        };
+        switchNode("pad","ORGAN"); switchNode("harpQuantize","FOLLOW CHORDS"); switchNode("chordSustain","SUSTAIN");
+        auto display=findNode(root,"chord-display");
+        display.setProperty("pos-height",60,nullptr); display.setProperty("display-font-size",24,nullptr);
+    }
+    auto tabs=findNode(root,"sound-controls");
+    if(!findNode(root,"tape-controls").isValid()) tabs.addChild(findNode(defaults,"tape-controls").createCopy(),juce::jmin(4,tabs.getNumChildren()),nullptr);
     migrateButtonTypes(root);
-    root.setProperty("layout-version",3,nullptr);
+    root.setProperty("layout-version",4,nullptr);
     omnichord::prepareThemes(layout);
     return layout;
 }
@@ -100,12 +116,22 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     addFloat("organSpread","Organ Spread",0,1,0.55f);
     addFloat("organChorus","Organ Chorus",0,1,0.35f);
     p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"theme",1},"Colour Theme",omnichord::themeNames(),0));
+    p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"chordSustain",1},"Chord Sustain",true));
+    p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"tapeEnabled",1},"Tape",false));
+    const auto addTape=[&](const char* id,const char* name,float initial) {
+        auto attributes=juce::AudioParameterFloatAttributes().withLabel("%")
+            .withStringFromValueFunction([](float x,int) { return juce::String(juce::roundToInt(x*100)); })
+            .withValueFromStringFunction([](const juce::String& text) { return text.getFloatValue()*0.01f; });
+        p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{id,1},name,juce::NormalisableRange<float>(0,1),initial,attributes));
+    };
+    addTape("tapeNoise","Tape Noise",0); addTape("tapeWow","Tape Wow",0.15f);
+    addTape("tapeFlutter","Tape Flutter",0.1f); addTape("tapeDrive","Tape Drive",0.25f);
     return p;
 }
 ChordHarpProcessor::ChordHarpProcessor():AudioProcessor(BusesProperties().withOutput("Output",juce::AudioChannelSet::stereo(),true)),state(*this,nullptr,"ChordHarp",parameters()) {
     const char* ids[]{"gain","tone","sustain","vibrato","chord","pad","harpGain","organGain",
         "organSound","organTone","organOctave","harpSound","harpAttack","harpQuantize",
-        "delayTime","delayFeedback","delayMix","reverbSize","reverbDamping","reverbMix","computerKeys","major7","organSpread","organChorus","theme"};
+        "delayTime","delayFeedback","delayMix","reverbSize","reverbDamping","reverbMix","computerKeys","major7","organSpread","organChorus","theme","chordSustain","tapeEnabled","tapeNoise","tapeWow","tapeFlutter","tapeDrive"};
     for(size_t i=0;i<raw.size();++i) raw[i]=state.getRawParameterValue(ids[i]);
     chordParameter=state.getParameter("chord");
     major7Parameter=state.getParameter("major7");
@@ -129,6 +155,11 @@ void ChordHarpProcessor::prepareToPlay(double rate,int blockSize) {
     reverb.setSampleRate(rate); reverb.reset();
     masterGain.reset(rate,0.02); masterGain.setCurrentAndTargetValue(raw[Gain]->load());
     organSilenced=false; lastChord=selectedChord(); lastPad=raw[Pad]->load()>0.5f;
+    tape.enabled=raw[TapeEnabled]->load()>0.5f; tape.noiseLevel=raw[TapeNoise]->load();
+    tape.wowAmount=raw[TapeWow]->load(); tape.flutterAmount=raw[TapeFlutter]->load(); tape.driveAmount=raw[TapeDrive]->load();
+    tape.prepare(rate); tapeMuted=false;
+    heldChords.clear(); guiChordKeys.reset(); guiChordMidi.clear(); guiChordMidi.ensureSize(16384);
+    lastChordSustain=raw[ChordSustain]->load()>0.5f;
     magicState.prepareToPlay(rate,blockSize);
 }
 bool ChordHarpProcessor::isBusesLayoutSupported(const BusesLayout& b) const {
@@ -151,6 +182,13 @@ void ChordHarpProcessor::selectChord(int value) {
     major7Parameter->endChangeGesture(); chordParameter->endChangeGesture();
     chordRetrigger.store(true);
 }
+void ChordHarpProcessor::pressChord(int value,bool computer) {
+    selectChord(value);
+    guiChordKeys.noteOn(computer?2:1,chordharp::midiFromChord(value),0.8f);
+}
+void ChordHarpProcessor::releaseChord(int value,bool computer) {
+    guiChordKeys.noteOff(computer?2:1,chordharp::midiFromChord(value),0);
+}
 int ChordHarpProcessor::selectedChord() const {
     const int chord=static_cast<int>(raw[Chord]->load());
     return raw[Major7]->load()>0.5f?36+chord%12:chord;
@@ -160,6 +198,8 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
     juce::ScopedNoDenormals noDenormals;
     buffer.clear();
     magicState.processMidiBuffer(midi,buffer.getNumSamples());
+    guiChordMidi.clear();
+    guiChordKeys.processNextMidiBuffer(guiChordMidi,0,buffer.getNumSamples(),true);
     const auto value=[this](Param p) { return raw[p]->load(); };
     engine.gain=1;
     engine.tone=value(Tone); engine.sustain=value(Sustain); engine.vibrato=value(Vibrato);
@@ -174,52 +214,75 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
     ambience.roomSize=value(ReverbSize); ambience.damping=value(ReverbDamping);
     ambience.wetLevel=value(ReverbMix); ambience.dryLevel=1-value(ReverbMix); ambience.width=1;
     reverb.setParameters(ambience);
-    const auto silence=[this] { engine.reset(); delay.reset(); reverb.reset(); organSilenced=true; };
-    int activeChord=selectedChord();
-    const bool pad=value(Pad)>0.5f;
-    if(chordRetrigger.exchange(false) || activeChord!=lastChord || pad!=lastPad) organSilenced=false;
+    tape.enabled=value(TapeEnabled)>0.5f; tape.noiseLevel=value(TapeNoise);
+    tape.wowAmount=value(TapeWow); tape.flutterAmount=value(TapeFlutter); tape.driveAmount=value(TapeDrive);
+    int activeChord=selectedChord(),held=heldChords.latest();
+    const bool pad=value(Pad)>0.5f,sustain=value(ChordSustain)>0.5f;
+    if(chordRetrigger.exchange(false) || activeChord!=lastChord || pad!=lastPad || sustain!=lastChordSustain) organSilenced=false;
+    if(!sustain && held>=0) { activeChord=held; setChordFromMidi(held); }
+    const auto refreshOrgan=[&] { engine.chord(activeChord%12,activeChord/12,pad && !organSilenced && (sustain || held>=0)); };
+    const auto silence=[&] {
+        engine.reset(); delay.reset(); reverb.reset(); tape.reset(); heldChords.clear(); held=-1;
+        organSilenced=true; tapeMuted=true;
+    };
     const bool stop=panic.exchange(false);
-    if(stop) silence();
-    engine.chord(activeChord%12,activeChord/12,pad && !organSilenced);
+    if(stop) { silence(); guiChordMidi.clear(); }
+    refreshOrgan();
     int a,n,b,m; fifo.prepareToRead(fifo.getNumReady(),a,n,b,m);
     if(!stop) {
+        if(n+m>0) tapeMuted=false;
         for(int i=0;i<n;++i) engine.pluck(notes[static_cast<size_t>(a+i)]);
         for(int i=0;i<m;++i) engine.pluck(notes[static_cast<size_t>(b+i)]);
     }
     fifo.finishedRead(n+m);
-    auto event=midi.cbegin();
+    const auto selector=[&](const juce::MidiMessage& message,bool gui) {
+        const int chord=chordharp::chordFromMidi(message.getNoteNumber());
+        if(chord<0) return;
+        const int source=(gui?768:0)+(message.getChannel()-1)*48+message.getNoteNumber()-24;
+        if(message.isNoteOn()) {
+            heldChords.press(source,chord); held=chord; activeChord=chord;
+            organSilenced=false; tapeMuted=false; setChordFromMidi(chord);
+        } else if(message.isNoteOff()) {
+            heldChords.release(source); held=heldChords.latest();
+            if(!sustain && held>=0) { activeChord=held; setChordFromMidi(held); }
+        }
+    };
+    auto event=midi.cbegin(),guiEvent=guiChordMidi.cbegin();
     for(int sample=0;sample<buffer.getNumSamples();++sample) {
+        auto guiEnd=guiEvent;
+        while(guiEnd!=guiChordMidi.cend() && (*guiEnd).samplePosition<=sample) ++guiEnd;
+        for(auto it=guiEvent;it!=guiEnd;++it) selector((*it).getMessage(),true);
+        guiEvent=guiEnd;
         auto groupEnd=event;
         while(groupEnd!=midi.cend() && (*groupEnd).samplePosition<=sample) ++groupEnd;
-        // Chord selection precedes harp notes sharing a MIDI timestamp.
+        auto arpBegin=event;
+        // Selectors precede harp notes at the same timestamp. Preserve selector
+        // on/off order, and discard harp notes that precede a panic in the group.
         for(auto it=event;it!=groupEnd;++it) {
             const auto message=(*it).getMessage();
-            if(message.isNoteOn()) {
-                const int chord=chordharp::chordFromMidi(message.getNoteNumber());
-                if(chord>=0) {
-                    activeChord=chord; organSilenced=false;
-                    setChordFromMidi(chord);
-                    engine.chord(chord%12,chord/12,pad);
-                }
-            }
+            if(message.isNoteOn() || message.isNoteOff()) selector(message,false);
+            if(message.isAllSoundOff() || message.isAllNotesOff()) { silence(); arpBegin=it; ++arpBegin; }
         }
-        for(auto it=event;it!=groupEnd;++it) {
+        refreshOrgan();
+        for(auto it=arpBegin;it!=groupEnd;++it) {
             const auto message=(*it).getMessage();
-            if(message.isNoteOn() && message.getNoteNumber()>=72)
+            if(message.isNoteOn() && message.getNoteNumber()>=72) {
+                tapeMuted=false;
                 engine.pluck(chordharp::harpFromMidi(message.getNoteNumber(),activeChord,value(HarpQuantize)>0.5f),message.getFloatVelocity());
-            if(message.isAllSoundOff() || message.isAllNotesOff()) silence();
+            }
         }
         event=groupEnd;
         engine.next();
         float left=engine.leftOutput,right=engine.rightOutput;
         delay.process(left,right);
         reverb.processStereo(&left,&right,1);
+        tape.process(left,right,!tapeMuted);
         const float master=masterGain.getNextValue();
         left=std::tanh(left*master); right=std::tanh(right*master);
         if(buffer.getNumChannels()==1) buffer.setSample(0,sample,(left+right)*0.5f);
         else { buffer.setSample(0,sample,left); buffer.setSample(1,sample,right); }
     }
-    lastChord=activeChord; lastPad=pad;
+    lastChord=activeChord; lastPad=pad; lastChordSustain=sustain;
     midi.clear();
 }
 void ChordHarpProcessor::getStateInformation(juce::MemoryBlock& dest) {
@@ -235,7 +298,7 @@ void ChordHarpProcessor::setStateInformation(const void* data,int size) {
         const auto layout=juce::ValueTree::fromXml(restored.getProperty("guiLayout").toString());
         if(layout.hasType("magic") && layout.getChildWithName("View").isValid())
             magicState.setGuiValueTree(upgradeLayout(layout));
-        for(const auto* id:{"major7","organSpread","organChorus","theme"}) {
+        for(const auto* id:{"major7","organSpread","organChorus","theme","chordSustain","tapeEnabled","tapeNoise","tapeWow","tapeFlutter","tapeDrive"}) {
             auto* parameter=state.getParameter(id);
             parameter->setValueNotifyingHost(parameter->getDefaultValue());
         }
