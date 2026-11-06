@@ -21,13 +21,14 @@
         <OmniChord margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
         <OmniToggle margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
         <ThemeSelector margin="0" padding="0" border="0" background-color="00000000" combo-background="ffddd3b8" combo-text="ff263e38" combo-outline="ffb66b44" lookAndFeel="BLINBLIN" />
+        <OmniSwitch margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
       </Types>
       <Palettes>
         <default />
       </Palettes>
     </Style>
   </Styles>
-  <View id="root" width="1060" height="695" resizable="0" resize-corner="0" display="contents" background-color="ff172a25" margin="0" padding="0" border="0" lookAndFeel="BLINBLIN" layout-version="3">
+  <View id="root" width="1060" height="695" resizable="0" resize-corner="0" display="contents" background-color="ff172a25" margin="0" padding="0" border="0" lookAndFeel="BLINBLIN" layout-version="4">
     <View id="shell" pos-x="15" pos-y="15" pos-width="1030" pos-height="665" display="contents" background-color="ffeee6cf" radius="55">
       <OmniChord id="chord-35" pos-x="535" pos-y="365" pos-width="42" pos-height="42" text="B7" parameter="chord" button-radio-group="1001" button-radio-value="35" tooltip="B7 | MIDI 58 (octava C2)" class="chord" />
       <OmniChord id="chord-32" pos-x="130" pos-y="365" pos-width="42" pos-height="42" text="Ab7" parameter="chord" button-radio-group="1001" button-radio-value="32" tooltip="Ab7 | MIDI 49 (octava C2)" class="chord" />
@@ -35,7 +36,7 @@
       <Label id="title" pos-x="59" pos-y="61" pos-width="400" pos-height="55" text="Omnichord" font-size="45" />
       <Label id="description" pos-x="62" pos-y="118" pos-width="500" pos-height="20" text="48 ACORDES / 12 CUERDAS" font-size="12" />
       <Speaker id="speaker" pos-x="62" pos-y="160" pos-width="150" pos-height="60" dot-color="66263e38" background-color="16263e38" radius="15" />
-      <ChordDisplay id="chord-display" pos-x="245" pos-y="160" pos-width="345" pos-height="80" display-background="ff263e38" display-text="ffeee6cf" display-caption="ACORDE EN MEMORIA" display-font-size="28" />
+      <ChordDisplay id="chord-display" pos-x="245" pos-y="160" pos-width="345" pos-height="60" display-background="ff263e38" display-text="ffeee6cf" display-caption="ACORDE EN MEMORIA" display-font-size="24" />
       <View id="divider-275" pos-x="62" pos-y="260" pos-width="481" pos-height="1" background-color="24263e38" />
       <View id="divider-439" pos-x="62" pos-y="469" pos-width="481" pos-height="1" background-color="24263e38" />
       <Label id="quality-0" pos-x="28" pos-y="284" pos-width="35" pos-height="20" text="MAY" font-size="14" />
@@ -77,7 +78,7 @@
       <OmniChord id="chord-34" pos-x="220" pos-y="365" pos-width="42" pos-height="42" text="Bb7" parameter="chord" button-radio-group="1001" button-radio-value="34" tooltip="Bb7 | MIDI 51 (octava C2)" class="chord" />
       <Slider id="gain" pos-x="490" pos-y="51" pos-width="92" pos-height="100" parameter="gain" class="knob" />
       <Label id="gain-label" pos-x="490" pos-y="30" pos-width="92" pos-height="20" text="GENERAL" font-size="13" justification="centred" />
-      <OmniToggle id="pad" pos-x="60" pos-y="227" pos-width="180" pos-height="28" text="ORGANO DE ACORDES" parameter="pad" />
+      <OmniSwitch id="pad" pos-x="60" pos-y="227" pos-width="145" pos-height="28" text="ORGAN" parameter="pad" switch-fixed-color="1" button-color="ffcfad4a" button-on-color="fff0ca59" button-off-text="ff302c1d" button-on-text="ff302c1d" />
       <TextButton id="silence" pos-x="650" pos-y="618" pos-width="115" pos-height="30" text="SILENCIO" onClick="silence" />
       <View id="harp-frame" pos-x="635" pos-y="146" pos-width="350" pos-height="458" background-color="ffeee6cf" border="3" border-color="30263e38" radius="33" display="contents">
         <Label id="harp-label" pos-x="25" pos-y="16" pos-width="300" pos-height="22" text="OMNI HARP" font-size="12" justification="centred" />
@@ -85,7 +86,7 @@
         <Label id="strum-instructions" pos-x="25" pos-y="420" pos-width="300" pos-height="20" text="DESLIZA ARRIBA O ABAJO" font-size="11" justification="centred" />
       </View>
       <BlinblinLogo id="logo" pos-x="670" pos-y="34" pos-width="280" pos-height="86" />
-      <Label id="footer" pos-x="795" pos-y="627" pos-width="190" pos-height="20" text="BLINBLIN / OMNICHORD 03" font-size="10" />
+      <Label id="footer" pos-x="795" pos-y="627" pos-width="190" pos-height="20" text="BLINBLIN / OMNICHORD 04" font-size="10" />
       <View id="sound-controls" pos-x="50" pos-y="475" pos-width="555" pos-height="175" display="tabbed" tab-height="24" tab-selected="0" background-color="ffeee6cf">
         <View id="harp-controls" tab-caption="Harp" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
           <Slider id="harpGain" pos-x="5" pos-y="0" pos-width="88" pos-height="100" parameter="harpGain" class="knob" />
@@ -99,7 +100,6 @@
           <Slider id="vibrato" pos-x="405" pos-y="0" pos-width="88" pos-height="100" parameter="vibrato" class="knob" />
           <Label id="vibrato-label" pos-x="405" pos-y="100" pos-width="88" pos-height="18" text="VIBRATO" font-size="11" justification="centred" />
           <ComboBox id="harpSound" pos-x="10" pos-y="123" pos-width="200" pos-height="24" parameter="harpSound" />
-          <OmniToggle id="harpQuantize" pos-x="235" pos-y="123" pos-width="260" pos-height="24" text="NOTAS DEL ACORDE" parameter="harpQuantize" />
         </View>
         <View id="organ-controls" tab-caption="Organo" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
           <Slider id="organGain" pos-x="15" pos-y="0" pos-width="90" pos-height="100" parameter="organGain" class="knob" />
@@ -133,6 +133,18 @@
           <Label id="reverbDamping-label" pos-x="350" pos-y="100" pos-width="90" pos-height="18" text="AMORTIGUACION" font-size="11" justification="centred" />
           <Label id="reverb-help" pos-x="10" pos-y="125" pos-width="490" pos-height="20" text="Reverb estereo aplicada al organo y al harp." font-size="12" />
         </View>
+        <View id="tape-controls" tab-caption="Tape" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
+          <Slider id="tapeNoise" parameter="tapeNoise" pos-x="30" pos-y="0" pos-width="90" pos-height="100" class="knob" suffix=" %" />
+          <Label id="tapeNoise-label" text="NOISE" pos-x="30" pos-y="100" pos-width="90" pos-height="18" font-size="11" justification="centred" />
+          <Slider id="tapeWow" parameter="tapeWow" pos-x="155" pos-y="0" pos-width="90" pos-height="100" class="knob" suffix=" %" />
+          <Label id="tapeWow-label" text="WOW" pos-x="155" pos-y="100" pos-width="90" pos-height="18" font-size="11" justification="centred" />
+          <Slider id="tapeFlutter" parameter="tapeFlutter" pos-x="280" pos-y="0" pos-width="90" pos-height="100" class="knob" suffix=" %" />
+          <Label id="tapeFlutter-label" text="FLUTTER" pos-x="280" pos-y="100" pos-width="90" pos-height="18" font-size="11" justification="centred" />
+          <Slider id="tapeDrive" parameter="tapeDrive" pos-x="405" pos-y="0" pos-width="90" pos-height="100" class="knob" suffix=" %" />
+          <Label id="tapeDrive-label" text="DRIVE" pos-x="405" pos-y="100" pos-width="90" pos-height="18" font-size="11" justification="centred" />
+          <OmniSwitch id="tapeEnabled" parameter="tapeEnabled" text="TAPE" pos-x="10" pos-y="121" pos-width="140" pos-height="28" button-color="ffdad3bc" button-on-color="ffb66b44" button-off-text="ff263e38" button-on-text="fff6efdc" />
+          <Label id="tape-help" text="Saturacion de cinta, hiss y variacion de velocidad." pos-x="165" pos-y="124" pos-width="370" pos-height="22" font-size="10" />
+        </View>
         <View id="keyboard-controls" tab-caption="Teclado" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
           <OmniToggle id="computerKeys" pos-x="10" pos-y="0" pos-width="400" pos-height="24" text="ACTIVAR TECLADO DEL MAC" parameter="computerKeys" />
           <Label id="midi-help" pos-x="10" pos-y="25" pos-width="535" pos-height="22" text="MIDI: C0 mayor / C1 menor / C2 septima / C3 Maj7 / C4+ arpa" font-size="10" />
@@ -156,6 +168,8 @@
       <OmniChord id="chord-42" pos-x="580" pos-y="410" pos-width="42" pos-height="42" text="F#M7" parameter="chord" button-radio-group="1001" button-radio-value="42" tooltip="F#Maj7 | MIDI 71 (octava C3)" class="chord" />
       <Label id="quality-3" pos-x="28" pos-y="417" pos-width="35" pos-height="20" text="Maj7" font-size="10" />
       <ThemeSelector id="theme" pos-x="350" pos-y="18" pos-width="230" pos-height="27" parameter="theme" tooltip="Tema de color. Personalizado conserva los colores de tu XML." />
+      <OmniSwitch id="harpQuantize" pos-x="220" pos-y="227" pos-width="165" pos-height="28" text="FOLLOW CHORDS" parameter="harpQuantize" switch-fixed-color="1" button-color="ffcfad4a" button-on-color="fff0ca59" button-off-text="ff302c1d" button-on-text="ff302c1d" />
+      <OmniSwitch id="chordSustain" parameter="chordSustain" text="SUSTAIN" pos-x="400" pos-y="227" pos-width="175" pos-height="28" button-color="ffdad3bc" button-on-color="ffb66b44" button-off-text="ff263e38" button-on-text="fff6efdc" tooltip="Activado: mantiene el acorde. Apagado: el organo se libera al soltar las teclas o botones." />
     </View>
   </View>
 </magic>

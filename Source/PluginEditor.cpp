@@ -15,7 +15,17 @@ juce::Image embeddedLogo() {
 void InstrumentLook::drawButtonBackground(juce::Graphics& g,juce::Button& button,
                                          const juce::Colour& colour,bool hover,bool down) {
     auto area=button.getLocalBounds().toFloat().reduced(1.5f);
-    if(button.getRadioGroupId()==1001) {
+    if(static_cast<bool>(button.getProperties().getWithDefault("physical-switch",false))) {
+        const bool on=button.getToggleState();
+        auto cap=area.withTrimmedBottom(3).translated(0,on || down?2.0f:0.0f);
+        const auto fill=on?button.findColour(juce::TextButton::buttonOnColourId):colour;
+        g.setColour(juce::Colours::black.withAlpha(0.4f)); g.fillRoundedRectangle(area.translated(0,2),5);
+        g.setGradientFill(juce::ColourGradient(fill.brighter(hover?0.22f:0.12f),cap.getTopLeft(),fill.darker(0.2f),cap.getBottomLeft(),false));
+        g.fillRoundedRectangle(cap,5);
+        g.setColour(juce::Colours::white.withAlpha(0.35f)); g.drawRoundedRectangle(cap.reduced(1),4,0.7f);
+        g.setColour(on?juce::Colour(0xfffff1b0):juce::Colours::black.withAlpha(0.4f));
+        g.fillEllipse(cap.getX()+8,cap.getCentreY()-2.5f,5,5);
+    } else if(button.getRadioGroupId()==1001) {
         const auto fill=button.getToggleState()?button.findColour(juce::TextButton::buttonOnColourId):colour;
         g.setColour(ink.withAlpha(0.25f)); g.fillEllipse(area.translated(0,2));
         g.setGradientFill(juce::ColourGradient(fill.brighter(down?0.0f:0.2f),area.getX(),area.getY(),
@@ -26,6 +36,15 @@ void InstrumentLook::drawButtonBackground(juce::Graphics& g,juce::Button& button
         g.setColour(hover?colour.brighter(0.08f):colour); g.fillRoundedRectangle(area,7);
         g.setColour(ink.withAlpha(0.22f)); g.drawRoundedRectangle(area,7,1);
     }
+}
+void InstrumentLook::drawButtonText(juce::Graphics& g,juce::TextButton& button,bool hover,bool down) {
+    if(!static_cast<bool>(button.getProperties().getWithDefault("physical-switch",false))) {
+        LookAndFeel_V4::drawButtonText(g,button,hover,down); return;
+    }
+    g.setColour(button.findColour(button.getToggleState()?juce::TextButton::textColourOnId:juce::TextButton::textColourOffId));
+    g.setFont(juce::FontOptions(12.0f,juce::Font::bold));
+    auto text=button.getLocalBounds().reduced(5,2).withTrimmedLeft(13).translated(0,button.getToggleState() || down?1:0);
+    g.drawFittedText(button.getButtonText(),text,juce::Justification::centred,1);
 }
 void InstrumentLook::drawRotarySlider(juce::Graphics& g,int x,int y,int width,int height,
                                      float position,float start,float end,juce::Slider& slider) {
@@ -204,6 +223,30 @@ private:
     std::unique_ptr<juce::ButtonParameterAttachment> attachment;
 };
 
+class SwitchItem final : public foleys::GuiItem {
+public:
+    SwitchItem(foleys::MagicGUIBuilder& b,const juce::ValueTree& n):GuiItem(b,n) {
+        setColourTranslation({{"button-color",juce::TextButton::buttonColourId},{"button-on-color",juce::TextButton::buttonOnColourId},
+                              {"button-off-text",juce::TextButton::textColourOffId},{"button-on-text",juce::TextButton::textColourOnId}});
+        button.getProperties().set("physical-switch",true);
+        button.setClickingTogglesState(true); addAndMakeVisible(button);
+    }
+    static std::unique_ptr<foleys::GuiItem> factory(foleys::MagicGUIBuilder& b,const juce::ValueTree& n) { return std::make_unique<SwitchItem>(b,n); }
+    void update() override {
+        attachment.reset(); button.setButtonText(getProperty("text").toString());
+        const auto id=getProperty("parameter").toString();
+        if(id.isNotEmpty()) attachment=getMagicState().createAttachment(id,button);
+    }
+    juce::Component* getWrappedComponent() override { return &button; }
+    std::vector<foleys::SettableProperty> getSettableProperties() const override {
+        return {{configNode,"text",foleys::SettableProperty::Text,{},{}},
+                {configNode,"parameter",foleys::SettableProperty::Choice,{},magicBuilder.createParameterMenuLambda()}};
+    }
+private:
+    juce::TextButton button;
+    std::unique_ptr<juce::ButtonParameterAttachment> attachment;
+};
+
 // Virtual chord values 36..47 use the separate Maj7 parameter, preserving the
 // original 0..35 chord automation range for existing Ableton projects.
 class ChordItem final : public foleys::GuiItem,private juce::Timer {
@@ -214,11 +257,18 @@ public:
         addAndMakeVisible(button); startTimerHz(30);
     }
     static std::unique_ptr<foleys::GuiItem> factory(foleys::MagicGUIBuilder& b,const juce::ValueTree& n) { return std::make_unique<ChordItem>(b,n); }
+    ~ChordItem() override { if(pressed) processor.releaseChord(value); }
     void update() override {
+        if(pressed) { processor.releaseChord(value); pressed=false; }
         value=juce::jlimit(0,47,static_cast<int>(getProperty("button-radio-value")));
         button.setButtonText(getProperty("text").toString());
         button.setRadioGroupId(1001); button.setClickingTogglesState(true);
-        button.onClick=[this] { processor.selectChord(value); };
+        button.onStateChange=[this] {
+            const bool down=button.isDown();
+            if(down==pressed) return;
+            pressed=down;
+            if(down) processor.pressChord(value); else processor.releaseChord(value);
+        };
         timerCallback();
     }
     juce::Component* getWrappedComponent() override { return &button; }
@@ -231,6 +281,7 @@ private:
     ChordHarpProcessor& processor;
     juce::TextButton button;
     int value=0;
+    bool pressed=false;
 };
 
 class ThemeLook final : public juce::LookAndFeel_V4 {
@@ -298,6 +349,7 @@ std::unique_ptr<foleys::MagicGUIBuilder> createBuilder(ChordHarpProcessor& proce
     builder->registerFactory("ChordDisplay",&InstrumentItem<ChordDisplay>::factory);
     builder->registerFactory("Speaker",&InstrumentItem<Speaker>::factory);
     builder->registerFactory("OmniToggle",&ToggleItem::factory);
+    builder->registerFactory("OmniSwitch",&SwitchItem::factory);
     builder->registerFactory("OmniChord",&ChordItem::factory);
     builder->registerFactory("ThemeSelector",&InstrumentItem<ThemeSelector>::factory);
     return builder;
@@ -322,7 +374,10 @@ void ChordHarpEditor::timerCallback() {
     if(!processor.computerKeyboardEnabled() && !heldKeys.empty()) releaseComputerKeys();
 }
 void ChordHarpEditor::releaseComputerKeys() {
-    for(const auto& held:heldKeys) if(held.second>=0) processor.magicState.getKeyboardState().noteOff(1,held.second,0);
+    for(const auto& held:heldKeys) {
+        if(held.second>=0) processor.magicState.getKeyboardState().noteOff(1,held.second,0);
+        else processor.releaseChord(-held.second-2,true);
+    }
     heldKeys.clear();
 }
 void ChordHarpEditor::focusLost(FocusChangeType) { releaseComputerKeys(); }
@@ -334,6 +389,7 @@ bool ChordHarpEditor::keyStateChanged(bool) {
             :!juce::KeyPress::isKeyCurrentlyDown(it->first);
         if(released) {
             if(it->second>=0) processor.magicState.getKeyboardState().noteOff(1,it->second,0);
+            else processor.releaseChord(-it->second-2,true);
             it=heldKeys.erase(it); handled=true;
         } else ++it;
     }
@@ -353,7 +409,7 @@ bool ChordHarpEditor::keyPressed(const juce::KeyPress& key) {
     if(chord<0 && harp<0) return false;
     const int token=physical?0x10000+native.physical:key.getKeyCode();
     if(heldKeys.find(token)==heldKeys.end()) {
-        if(chord>=0) { processor.selectChord(chord); heldKeys.emplace(token,-1); }
+        if(chord>=0) { processor.pressChord(chord,true); heldKeys.emplace(token,-chord-2); }
         else { heldKeys.emplace(token,72+harp); processor.magicState.getKeyboardState().noteOn(1,72+harp,0.8f); }
     }
     return true;

@@ -3,6 +3,8 @@
 #include <foleys_gui_magic/foleys_gui_magic.h>
 #include "Engine.h"
 #include "Delay.h"
+#include "Tape.h"
+#include "ChordGate.h"
 #include <atomic>
 
 class ChordHarpProcessor final : public juce::AudioProcessor {
@@ -29,6 +31,8 @@ public:
     void strum(int index);
     void selectChord(int value);
     int selectedChord() const;
+    void pressChord(int value,bool computer=false);
+    void releaseChord(int value,bool computer=false);
     bool computerKeyboardEnabled() const;
     void setChordFromMidi(int value);
     juce::AudioProcessorValueTreeState state;
@@ -37,12 +41,17 @@ public:
 private:
     enum Param { Gain,Tone,Sustain,Vibrato,Chord,Pad,HarpGain,OrganGain,OrganSound,
         OrganTone,OrganOctave,HarpSound,HarpAttack,HarpQuantize,DelayTime,DelayFeedback,
-        DelayMix,ReverbSize,ReverbDamping,ReverbMix,ComputerKeys,Major7,OrganSpread,OrganChorus,Theme,NumParams };
+        DelayMix,ReverbSize,ReverbDamping,ReverbMix,ComputerKeys,Major7,OrganSpread,OrganChorus,Theme,ChordSustain,TapeEnabled,TapeNoise,TapeWow,TapeFlutter,TapeDrive,NumParams };
     std::array<std::atomic<float>*,NumParams> raw{};
     juce::RangedAudioParameter* chordParameter=nullptr;
     juce::RangedAudioParameter* major7Parameter=nullptr;
     std::atomic<bool> chordRetrigger{false};
     chordharp::StereoDelay delay;
+    chordharp::Tape tape;
+    chordharp::ChordGate heldChords;
+    juce::MidiKeyboardState guiChordKeys;
+    juce::MidiBuffer guiChordMidi;
+    bool tapeMuted=false,lastChordSustain=true;
     juce::Reverb reverb;
     juce::SmoothedValue<float> masterGain;
     bool organSilenced=false,lastPad=false;

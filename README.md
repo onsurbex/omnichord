@@ -1,4 +1,4 @@
-# Omnichord — BLINBLIN · versión 3
+# Omnichord — BLINBLIN · versión 4
 
 Prototipo de instrumento inspirado en el Omnichord para Ableton Live en macOS.
 Incluye 48 acordes (mayores, menores, séptimas y séptimas mayores), una franja de rasgueo de
@@ -8,10 +8,11 @@ timbre, sustain y vibrato. Guarda sus parámetros con el proyecto del DAW.
 El motor usa síntesis original: todavía no es una emulación calibrada de un
 modelo concreto de Omnichord. No incluye muestras del instrumento ni ritmos.
 
-La versión 3 añade Maj7, nuevas asignaciones MIDI y del teclado del Mac, un
-órgano con apertura y coro estéreo, seis temas de color y la corrección del botón
-de órgano en standalone. Conserva el XML personalizado de BLINBLIN, los timbres
-de órgano y arpa, los volúmenes independientes y delay y reverb estéreo.
+La versión 4 añade una pestaña Tape con saturación, ruido, wow y flutter, botones
+físicos ORGAN y FOLLOW CHORDS y un botón SUSTAIN para alternar entre acordes
+memorizados y acordes que se liberan al soltar las teclas. Mantiene el XML de
+BLINBLIN, los 48 acordes, los seis temas, los timbres, los volúmenes independientes,
+el delay y la reverb estéreo.
 
 ## Compilar en macOS
 
@@ -48,7 +49,7 @@ de edición de Foleys. Conservan el diseño de `Assets/magic.xml` y los temas.
 La firma es ad hoc, sin notarización de Apple; la carga en Ableton y la fidelidad
 respecto al instrumento real requieren una prueba manual en un Mac.
 
-El artefacto incluye **Omnichord-0.3.0.pkg**. Ábrelo con el instalador de macOS:
+El artefacto incluye **Omnichord-0.4.0.pkg**. Ábrelo con el instalador de macOS:
 instala el VST3 en `/Library/Audio/Plug-Ins/VST3/Omnichord.vst3` y la aplicación
 en `/Applications/Omnichord.app`. El asistente solicita permisos de administrador.
 Después vuelve a explorar los plugins en Ableton Live. La compilación automática
@@ -71,12 +72,13 @@ El empaquetado utiliza `pkgbuild`, `pkgutil` y Python 3.
 ## Tocar
 
 - Selecciona un acorde y arrastra por la franja para rasguear hacia ambos lados.
-- Activa ORGANO DE ACORDES para escuchar el acorde sostenido; SILENCIO apaga el órgano
+- Activa ORGAN para escuchar el acorde sostenido; SILENCIO apaga el órgano
   y corta las colas.
 - Las notas MIDI C0–B3 seleccionan acordes por posición. C4 en adelante toca
-  las notas del acorde como la franja; desactiva NOTAS DEL ACORDE para tocar
+  las notas del acorde como la franja; desactiva FOLLOW CHORDS para tocar
   alturas cromáticas libres. La velocidad MIDI controla la intensidad del arpa.
-  Note Off deja decaer las voces; el pedal de sustain no está implementado.
+  Note Off deja decaer el arpa y libera el órgano si SUSTAIN está apagado;
+  el pedal MIDI de sustain no está implementado.
 - El acorde seleccionado queda memorizado y puede automatizarse en Live.
 - El rasgueo con ratón produce audio, pero no genera notas MIDI para grabar.
 
@@ -98,7 +100,7 @@ El workflow incluye una captura real del editor en el artefacto descargable.
 
 El diseño está en `Assets/magic.xml`. Las posiciones, tamaños, textos, colores y
 enlaces a parámetros se editan desde la ventana **foleys GUI magic**. Cada botón
-de acorde es un control independiente. La paleta incluye `OmniStrum` (rasgueo),
+de acorde es un control independiente. La paleta incluye `OmniSwitch` (botones físicos), `OmniStrum` (rasgueo),
 `BlinblinLogo`, `ChordDisplay` y `Speaker`.
 
 Para compilar una versión con el editor visual desde la carpeta `omnichord`,
@@ -155,12 +157,12 @@ Se emplea la numeración de Ableton Live: C3 = MIDI 60.
 Las doce teclas consecutivas de cada octava corresponden, de izquierda a derecha,
 a **Db, Ab, Eb, Bb, F, C, G, D, A, E, B, F#**. Por ejemplo, C0 selecciona Db mayor,
 C#0 selecciona Ab mayor y B3 selecciona F#Maj7. Estas cuatro filas seleccionan
-el acorde; activa ORGANO DE ACORDES para escuchar el acompañamiento sostenido.
+el acorde; activa ORGAN para escuchar el acompañamiento sostenido.
 Maj7 usa los intervalos 0, 4, 7, 11; la séptima dominante usa 0, 4, 7, 10.
 
 C4–B4 (MIDI 72–83) recorre las 12 notas de la franja del arpa en el acorde
 seleccionado. Cada bloque de 12 teclas superior transpone esa franja una octava.
-Con NOTAS DEL ACORDE desactivado, C4 en adelante toca la altura MIDI original.
+Con FOLLOW CHORDS desactivado, C4 en adelante toca la altura MIDI original.
 El acorde queda memorizado al soltar la tecla; All Notes Off/All Sound Off corta
 las voces y los efectos. Cambiar la posición gráfica de un botón no modifica
 este mapa MIDI, fijado al orden del instrumento original.
@@ -203,6 +205,28 @@ mezcla, tamaño y amortiguación. Ambos efectos son estéreo, están después de
 mezcla de órgano y arpa y comienzan con mezcla cero. Sus colas siguen sonando al
 bajar el volumen de una fuente; SILENCIO limpia también esas colas.
 Todos los ajustes se automatizan y se guardan con la sesión del DAW.
+
+## Tape y sustain de los acordes
+
+La pestaña **Tape** añade una simulación propia de cinta después del delay y la
+reverb y antes del volumen GENERAL. **TAPE** activa el efecto. **Drive** añade
+saturación suave, con compensación de ganancia y filtrado; **Noise** controla el
+hiss estéreo (cero elimina el ruido), **Wow** la variación lenta de velocidad y
+**Flutter** la rápida. Los controles van de 0 a 100 %, se suavizan al moverlos y
+se guardan y automatizan con el proyecto. El efecto usa un retardo modulado
+centrado en 4 ms para la variación de afinación. Es una implementación original.
+TAPE comienza apagado y deja la señal intacta cuando está desactivado. SILENCIO
+y los mensajes MIDI de pánico borran sus colas y cortan el ruido hasta volver a tocar.
+
+**ORGAN** activa el órgano y **FOLLOW CHORDS** hace que el arpa siga las notas
+del acorde. Ambos son botones amarillos. **SUSTAIN**, en el color del tema,
+mantiene el acorde al soltar las teclas; empieza activado para conservar el
+comportamiento de las sesiones anteriores. Si lo apagas, el órgano suena mientras
+mantienes una tecla MIDI, una tecla de acorde del Mac o un botón de acorde y se
+libera suavemente al soltar la última pulsación. Si mantienes varias, tiene
+prioridad la más reciente; al soltarla vuelve a la anterior. Los canales MIDI,
+el ratón y el teclado del Mac se siguen por separado. El arpa mantiene su
+propio decaimiento, independiente de este botón.
 
 ## Temas de color
 
