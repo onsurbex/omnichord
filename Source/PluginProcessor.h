@@ -49,16 +49,17 @@ public:
     bool clearStartupPreset(juce::String& error);
     juce::File getPresetDirectory() const { return presetHome.getChildFile("Presets"); }
     juce::String getPresetName() const { const juce::ScopedLock lock(presetLock); return presetName; }
+    juce::String getPresetSource() const { const juce::ScopedLock lock(presetLock); return presetSource; }
     unsigned getPresetRevision() const { return presetRevision.load(); }
     static juce::StringArray factoryPresetNames();
 private:
     static juce::File defaultPresetHome();
     juce::File presetHome;
     juce::ValueTree factoryPreset;
-    juce::String presetName="Inicio";
+    juce::String presetName="Inicio",presetSource="factory:0";
     std::atomic<unsigned> presetRevision{0};
     mutable juce::CriticalSection presetLock;
-    void updatePresetName(const juce::String&);
+    void updatePresetName(const juce::String&,const juce::String& source="project");
     juce::ValueTree capturePreset(const juce::String&) const;
     bool applyPreset(const juce::ValueTree&,juce::String&);
     bool writePreset(const juce::File&,const juce::ValueTree&,juce::String&) const;

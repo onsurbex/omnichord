@@ -54,11 +54,12 @@ bool ChordHarpProcessor::writePreset(const juce::File& file,const juce::ValueTre
 bool ChordHarpProcessor::savePreset(const juce::File& file,juce::String& error) {
     const auto name=file.getFileNameWithoutExtension();
     if(!writePreset(file,capturePreset(name),error)) return false;
-    updatePresetName(name); return true;
+    updatePresetName(name,"file:"+file.getFullPathName()); return true;
 }
 bool ChordHarpProcessor::loadPreset(const juce::File& file,juce::String& error) {
     if(!file.existsAsFile() || file.getSize()>1024*1024) { error="Archivo de preset no valido."; return false; }
-    return applyPreset(juce::ValueTree::fromXml(file.loadFileAsString()),error);
+    if(!applyPreset(juce::ValueTree::fromXml(file.loadFileAsString()),error)) return false;
+    updatePresetName(getPresetName(),"file:"+file.getFullPathName()); return true;
 }
 bool ChordHarpProcessor::setStartupPreset(juce::String& error) {
     return writePreset(presetHome.getChildFile("Startup.omnipreset"),capturePreset(getPresetName()),error);
@@ -87,7 +88,8 @@ bool ChordHarpProcessor::loadFactoryPreset(int index,juce::String& error) {
         set("organTone",index==2?0.7f:0.6f); set("reverbMix",index==2?0.42f:index<3?0.2f:0.1f);
         set("reverbSize",index==2?0.85f:0.5f);
     }
-    return applyPreset(data,error);
+    if(!applyPreset(data,error)) return false;
+    updatePresetName(names[index],"factory:"+juce::String(index)); return true;
 }
 
-void ChordHarpProcessor::updatePresetName(const juce::String& name) { const juce::ScopedLock lock(presetLock); presetName=name; ++presetRevision; }
+void ChordHarpProcessor::updatePresetName(const juce::String& name,const juce::String& source) { const juce::ScopedLock lock(presetLock); presetName=name; presetSource=source; ++presetRevision; }

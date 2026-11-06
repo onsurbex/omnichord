@@ -128,6 +128,10 @@ static void checkPresetLibrary() {
     require(source.loadPreset(file,error),"Saved presets must reload");
     for(int i=0;i<source.getParameters().size();++i)
         require(std::abs(source.getParameters()[i]->getValue()-expected[static_cast<size_t>(i)])<.001f,"Every plugin parameter must round-trip through a preset");
+    const auto collision=source.getPresetDirectory().getChildFile("Inicio.omnipreset");
+    require(source.savePreset(collision,error) && source.loadFactoryPreset(0,error),"Factory and user presets may share a name");
+    require(source.getPresetSource()=="factory:0","The factory preset keeps its identity despite a matching user filename");
+    require(source.loadPreset(file,error),"Restore the test snapshot before choosing its default");
     const auto layout=source.magicState.getGuiTree().toXmlString();
     require(source.setStartupPreset(error),"A complete snapshot can be chosen as startup preset");
     ChordHarpProcessor next(root);

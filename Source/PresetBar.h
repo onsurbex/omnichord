@@ -55,8 +55,9 @@ private:
         files=processor.getPresetDirectory().findChildFiles(juce::File::findFiles,false,"*.omnipreset");
         std::sort(files.begin(),files.end(),[](const auto& a,const auto& b) { return a.getFileName().compareNatural(b.getFileName())<0; });
         for(int i=0;i<files.size();++i) list.addItem(files[i].getFileNameWithoutExtension(),1000+i);
-        const auto current=processor.getPresetName(); int selected=names.indexOf(current)+1;
-        for(int i=0;i<files.size();++i) if(files[i].getFileNameWithoutExtension()==current) selected=1000+i;
+        const auto current=processor.getPresetName(),source=processor.getPresetSource(); int selected=0;
+        if(source.startsWith("factory:")) selected=source.substring(8).getIntValue()+1;
+        for(int i=0;i<files.size();++i) if("file:"+files[i].getFullPathName()==source) selected=1000+i;
         if(selected<=0) { selected=5000000; list.addItem(current,selected); }
         list.setSelectedId(selected,juce::dontSendNotification);
     }
