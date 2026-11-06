@@ -19,6 +19,41 @@ static juce::TabbedButtonBar* findTabBar(juce::Component& parent) {
     return nullptr;
 }
 
+static void checkLogoThemes(ChordHarpProcessor& processor,ChordHarpEditor& editor) {
+    auto* logo=editor.getGUIBuilder().findGuiItemWithId("logo")->getWrappedComponent();
+    const auto assertLogo=[&](bool white) {
+        const auto snapshot=logo->createComponentSnapshot(logo->getLocalBounds());
+        require(snapshot.getPixelAt(0,0).getAlpha()==0,"Logo must have a transparent background without a cream plate");
+        double brightness=0; int pixels=0;
+        for(int y=0;y<snapshot.getHeight();++y) for(int x=0;x<snapshot.getWidth();++x) {
+            const auto c=snapshot.getPixelAt(x,y);
+            if(c.getAlpha()>220) { brightness+=c.getBrightness(); ++pixels; }
+        }
+        require(pixels>100,"The chosen logo must contain visible artwork");
+        require(white?brightness/pixels>0.8:brightness/pixels<0.2,"Rendered logo must match the contrast of the panel");
+    };
+    auto* parameter=processor.state.getParameter("theme");
+    for(int theme=0;theme<6;++theme) {
+        parameter->setValueNotifyingHost(parameter->convertTo0to1(static_cast<float>(theme)));
+        juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+        assertLogo(theme==2);
+        for(const auto* id:{"pad","harpQuantize","chordSustain","tapeEnabled"})
+            require(editor.getGUIBuilder().findGuiItemWithId(id)!=nullptr,"All physical switches must survive theme changes");
+        if(theme==1) {
+            require(omnichord::themeNames()[1]=="Pinky","Pinky must replace the Crema preset without changing its index");
+            require(omnichord::logoBackground(processor.magicState.getGuiTree(),1)==juce::Colour(0xfff0d6e9),"Pinky must use the user's exact panel colour");
+        }
+    }
+    parameter->setValueNotifyingHost(0);
+    juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+    auto palette=processor.magicState.getGuiTree().getChildWithName("Styles").getChild(0).getChildWithName("Palettes").getChild(0);
+    const auto original=palette.getProperty("color-ffeee6cf");
+    palette.setProperty("color-ffeee6cf","ff202020",nullptr);
+    juce::MessageManager::getInstance()->runDispatchLoopUntil(100); assertLogo(true);
+    palette.setProperty("color-ffeee6cf",original,nullptr);
+    juce::MessageManager::getInstance()->runDispatchLoopUntil(100); assertLogo(false);
+}
+
 static void checkChordReleaseAndTape() {
     ChordHarpProcessor piano,reference;
     for(auto* synth:{&piano,&reference}) {
@@ -77,6 +112,8 @@ int main() {
                                                          BinaryData::BlinblinLogo_pngSize);
     require(bundledLogo.isValid() && bundledLogo.getWidth()==2172 && bundledLogo.getHeight()==724,
             "Original BLINBLIN PNG must be bundled and readable");
+    const auto whiteLogo=juce::ImageFileFormat::loadFrom(BinaryData::BlinblinLogo_white_png,BinaryData::BlinblinLogo_white_pngSize);
+    require(whiteLogo.isValid() && whiteLogo.hasAlphaChannel() && whiteLogo.getBounds()==bundledLogo.getBounds(),"Both original logo variants must be embedded with transparency and matching dimensions");
     require(bundledLogo.hasAlphaChannel(), "Original logo transparency must be preserved");
     ChordHarpProcessor processor;
     require(processor.getName()=="Omnichord","Public plugin name must be Omnichord");
@@ -227,6 +264,7 @@ int main() {
     auto* follow=dynamic_cast<juce::TextButton*>(builder.findGuiItemWithId("harpQuantize")->getWrappedComponent());
     require(follow && follow->getButtonText()=="FOLLOW CHORDS","Harp quantize must be a physical FOLLOW CHORDS button");
     require(theme && theme->getNumItems()==6,"Theme selector must expose six palettes");
+    checkLogoThemes(restored,*magicEditor);
     auto customPalette=restored.magicState.getGuiTree().getChildWithName("Styles").getChild(0).getChildWithName("Palettes").getChild(0);
     customPalette.setProperty("color-ffeee6cf","fff0ddbb",nullptr);
     const auto panelBefore=shell.getProperty("background-color");
