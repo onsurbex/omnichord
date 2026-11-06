@@ -12,6 +12,13 @@ const char* noteNames[]{"C","Db","D","Eb","E","F","F#","G","Ab","A","Bb","B"};
 juce::Image embeddedLogo() {
     return juce::ImageCache::getFromMemory(BinaryData::BlinblinLogo_png,BinaryData::BlinblinLogo_pngSize);
 }
+void preserveBackgroundPainting(juce::Component& component) {
+    // Foleys marks a viewport opaque even when its decorator has rounded corners.
+    // Let JUCE paint the editor behind these views instead of culling its fill.
+    if(dynamic_cast<juce::Viewport*>(&component) && dynamic_cast<foleys::GuiItem*>(component.getParentComponent()))
+        component.setOpaque(false);
+    for(int i=0;i<component.getNumChildComponents();++i) preserveBackgroundPainting(*component.getChildComponent(i));
+}
 }
 
 void InstrumentLook::drawButtonBackground(juce::Graphics& g,juce::Button& button,
@@ -427,6 +434,7 @@ void ChordHarpEditor::timerCallback() {
         if(auto* root=getGUIBuilder().findGuiItemWithId("root")) root->foleys::GuiItem::updateColours();
         repaint();
     }
+    preserveBackgroundPainting(*this);
     if(!processor.computerKeyboardEnabled() && !heldKeys.empty()) releaseComputerKeys();
 }
 void ChordHarpEditor::releaseComputerKeys() {

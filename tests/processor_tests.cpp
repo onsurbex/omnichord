@@ -11,6 +11,7 @@
 static void require(bool condition, const char* message) {
     if (!condition) { std::cerr << message << '\n'; std::exit(1); }
 }
+static bool backgroundPassed=true;
 
 static juce::TabbedButtonBar* findTabBar(juce::Component& parent) {
     if(auto* tabs=dynamic_cast<juce::TabbedButtonBar*>(&parent)) return tabs;
@@ -44,9 +45,11 @@ static void checkLogoThemes(ChordHarpProcessor& processor,ChordHarpEditor& edito
         juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
         assertLogo(theme==2);
         const auto full=editor.createComponentSnapshot(editor.getLocalBounds());
-        if(full.getPixelAt(0,0)!=juce::Colour(0xff292a2d) || full.getPixelAt(full.getWidth()-1,full.getHeight()-1)!=juce::Colour(0xff292a2d))
-            std::cerr << "Theme " << theme << " outer corners: " << full.getPixelAt(0,0).toString() << ", " << full.getPixelAt(full.getWidth()-1,full.getHeight()-1).toString() << '\n';
-        require(full.getPixelAt(0,0)==juce::Colour(0xff292a2d) && full.getPixelAt(full.getWidth()-1,full.getHeight()-1)==juce::Colour(0xff292a2d),"Every host and theme must render the same opaque neutral outer background");
+        if(full.getPixelAt(0,0)!=juce::Colour(0xff292a2d) || full.getPixelAt(full.getWidth()-1,full.getHeight()-1)!=juce::Colour(0xff292a2d)) {
+            backgroundPassed=false;
+            std::cerr << "Theme " << theme << " snapshot " << full.getWidth() << 'x' << full.getHeight() << " editor " << editor.getBounds().toString()
+                      << " opaque=" << editor.isOpaque() << " outer corners: " << full.getPixelAt(0,0).toString() << ", " << full.getPixelAt(full.getWidth()-1,full.getHeight()-1).toString() << '\n';
+        }
         for(const auto* id:{"pad","harpQuantize","chordSustain","tapeEnabled"})
             require(editor.getGUIBuilder().findGuiItemWithId(id)!=nullptr,"All physical switches must survive theme changes");
         if(theme==1) {
@@ -474,6 +477,7 @@ int main() {
     checkPresetLibrary();
     checkTempoAndAmbience();
     checkChordReleaseAndTape();
+    require(backgroundPassed,"Every host and theme must render the same opaque neutral outer background");
     processor.releaseResources();
     std::cout << "Processor checks passed: MIDI, audio, logo, visual controls, XML export/import and layout state\n";
 }
