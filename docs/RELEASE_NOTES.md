@@ -1,6 +1,9 @@
-Omnichord 0.5.1 para macOS 11 o posterior, Apple Silicon e Intel.
+Omnichord 0.5.2 para macOS 11 o posterior, Apple Silicon e Intel.
 
-Sustituye a la 0.5.0 retirada. Corrige una lectura fuera de limites en el punto de vuelta de los buffers fraccionarios y añade una prueba de regresion del redondeo.
+Añade el icono de aplicación diseñado por el usuario en `Assets/omnichord.png`.
+El standalone lo incluye en sus recursos de macOS y el PKG lo instala junto a
+la app. Se verifica el icono Retina de 1024 píxeles y su conservación en la
+aplicación instalada. Mantiene las funciones y correcciones de la 0.5.1.
 
 - Botones físicos DELAY y REVERB para activar/desactivar sin perder sus ajustes, guardados y automatizables. Pestañas compactadas dentro de un marco con margen respecto a la carcasa; tornillos metálicos de 16 px con cabeza de estrella.
 - Fondo gris neutro totalmente opaco, común a standalone, VST3 y todos los temas. Carcasa redondeada con relieve, reborde, sombreado, textura sutil y tornillos.

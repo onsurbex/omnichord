@@ -48,13 +48,17 @@ de edición de Foleys. Conservan el diseño de `Assets/magic.xml` y los temas.
 La firma es ad hoc, sin notarización de Apple; la carga en Ableton y la fidelidad
 respecto al instrumento real requieren una prueba manual en un Mac.
 
-El artefacto incluye **Omnichord-0.5.1.pkg**. Ábrelo con el instalador de macOS:
+El artefacto incluye **Omnichord-0.5.2.pkg**. Ábrelo con el instalador de macOS:
 instala el VST3 en `/Library/Audio/Plug-Ins/VST3/Omnichord.vst3` y la aplicación
 en `/Applications/Omnichord.app`. El asistente solicita permisos de administrador.
 Después vuelve a explorar los plugins en Ableton Live. La compilación automática
 comprueba el contenido del PKG, sus firmas y la instalación y reinstalación reales
 en un servidor de macOS. El VST3 y la app tienen firma ad hoc; el PKG no tiene
 certificado Developer ID Installer ni notarización de Apple.
+
+El standalone utiliza el icono original `Assets/omnichord.png`. Se incorpora a
+`Omnichord.app` y al instalador, de modo que Finder y el Dock pueden mostrarlo
+también después de instalar la aplicación.
 
 Para generar el PKG de una compilación local, firma primero ambos bundles:
 
