@@ -114,6 +114,7 @@ public:
         const auto theme=static_cast<int>(processor.state.getRawParameterValue("theme")->load());
         const auto background=omnichord::logoBackground(processor.magicState.getGuiTree(),theme);
         const auto& image=omnichord::useWhiteLogo(background)?whiteLogo:logo;
+        g.setColour(juce::Colours::white);
         g.drawImageWithin(image,0,0,getWidth(),getHeight(),juce::RectanglePlacement::centred);
     }
     void configure(foleys::GuiItem&) {}
