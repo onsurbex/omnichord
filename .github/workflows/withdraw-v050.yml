@@ -1,0 +1,18 @@
+name: Withdraw superseded v0.5.0
+
+on:
+  push:
+    branches: [work]
+    paths: ['.github/workflows/withdraw-v050.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  withdraw:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hide the installer with the circular-buffer read defect
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit v0.5.0 --repo "$GITHUB_REPOSITORY" --draft --latest=false

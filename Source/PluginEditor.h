@@ -31,6 +31,7 @@ class ChordHarpEditor final : public foleys::MagicPluginEditor,private juce::Tim
 public:
     explicit ChordHarpEditor(ChordHarpProcessor&);
     ~ChordHarpEditor() override;
+    void paint(juce::Graphics&) override;
     bool keyPressed(const juce::KeyPress&) override;
     bool keyStateChanged(bool) override;
     void focusLost(FocusChangeType) override;

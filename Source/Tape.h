@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdint>
 #include <vector>
+#include "CircularRead.h"
 
 namespace chordharp {
 // Original tape-inspired DSP: soft saturation, band limitation, speed modulation and hiss.
@@ -81,8 +82,7 @@ private:
     static float coefficient(double speed,double sampleRate) { return static_cast<float>(1-std::exp(-speed/sampleRate)); }
     void smooth(float& value,float target) { value+=smoothing*(std::clamp(target,0.0f,1.0f)-value); }
     float read(size_t c,double delay) const {
-        double position=static_cast<double>(write)-delay;
-        if(position<0) position+=static_cast<double>(buffer[c].size());
+        const double position=circularReadPosition(write,delay,buffer[c].size());
         const auto centre=static_cast<size_t>(position); const auto size=buffer[c].size();
         const float t=static_cast<float>(position-static_cast<double>(centre));
         const float a=buffer[c][(centre+size-1)%size],b=buffer[c][centre];

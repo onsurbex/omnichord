@@ -1,4 +1,4 @@
-# Omnichord — BLINBLIN · versión 4
+# Omnichord — BLINBLIN · versión 5
 
 Prototipo de instrumento inspirado en el Omnichord para Ableton Live en macOS.
 Incluye 48 acordes (mayores, menores, séptimas y séptimas mayores), una franja de rasgueo de
@@ -8,11 +8,10 @@ timbre, sustain y vibrato. Guarda sus parámetros con el proyecto del DAW.
 El motor usa síntesis original: todavía no es una emulación calibrada de un
 modelo concreto de Omnichord. No incluye muestras del instrumento ni ritmos.
 
-La versión 4 añade una pestaña Tape con saturación, ruido, wow y flutter, botones
-físicos ORGAN y FOLLOW CHORDS y un botón SUSTAIN para alternar entre acordes
-memorizados y acordes que se liberan al soltar las teclas. Mantiene el XML de
-BLINBLIN, los 48 acordes, los seis temas, los timbres, los volúmenes independientes,
-el delay y la reverb estéreo.
+La versión 5 incorpora una carcasa con volumen sobre un fondo gris opaco, registros
+de órgano de iglesia y tonewheel, presets completos con un estado de inicio
+seleccionable, predelay/EQ/primeras reflexiones en la reverb y sincronía musical
+del delay. Conserva los parámetros anteriores y sus sesiones.
 
 ## Compilar en macOS
 
@@ -49,7 +48,7 @@ de edición de Foleys. Conservan el diseño de `Assets/magic.xml` y los temas.
 La firma es ad hoc, sin notarización de Apple; la carga en Ableton y la fidelidad
 respecto al instrumento real requieren una prueba manual en un Mac.
 
-El artefacto incluye **Omnichord-0.4.1.pkg**. Ábrelo con el instalador de macOS:
+El artefacto incluye **Omnichord-0.5.1.pkg**. Ábrelo con el instalador de macOS:
 instala el VST3 en `/Library/Audio/Plug-Ins/VST3/Omnichord.vst3` y la aplicación
 en `/Applications/Omnichord.app`. El asistente solicita permisos de administrador.
 Después vuelve a explorar los plugins en Ableton Live. La compilación automática
@@ -203,11 +202,63 @@ Harp ofrece Clasico, Campana, Seno y Cuerdas, junto con ataque de 1 a 80 ms, sus
 vibrato, volumen propio y el modo de notas del acorde/cromático. GENERAL controla
 la salida de ambas fuentes después de los efectos.
 
-Delay añade tiempo de 40 a 1200 ms, feedback hasta 85 % y mezcla. Reverb ofrece
-mezcla, tamaño y amortiguación. Ambos efectos son estéreo, están después de la
+Delay añade tiempo libre de 40 a 1200 ms o divisiones sincronizadas, feedback
+hasta 85 % y mezcla. Reverb ofrece mezcla, tamaño, amortiguación, predelay,
+EQ y primeras reflexiones. Ambos efectos son estéreo, están después de la
 mezcla de órgano y arpa y comienzan con mezcla cero. Sus colas siguen sonando al
 bajar el volumen de una fuente; SILENCIO limpia también esas colas.
 Todos los ajustes se automatizan y se guardan con la sesión del DAW.
+
+## Biblioteca de presets y estado de inicio
+
+La barra superior permite elegir presets de fábrica y tu biblioteca, **Cargar**
+un archivo y **Guardar** el estado completo en un `.omnipreset`. Se incluyen
+TODOS los 44 parámetros: órgano, arpa, acordes, sustain, volúmenes, Tape, delay,
+reverb, EQ, tempo, divisiones de nota, controles del teclado y selección de tema.
+Los archivos se validan antes de cambiar el sonido. La posición y el diseño XML
+de los controles se conservan independientemente del preset.
+
+La biblioteca está en `~/Library/Application Support/BLINBLIN/Omnichord/Presets/`.
+Puedes guardar o cargar archivos desde otras carpetas con el selector de archivos.
+**Inicio → Usar el estado actual al iniciar** guarda una copia completa de todos
+los valores actuales como inicio. Cambiar luego los potenciómetros no modifica
+esa copia hasta volver a elegir la opción. **Volver al inicio de fábrica** elimina
+solo la preferencia de inicio, conservando tus presets.
+
+El standalone arranca con ese estado de inicio y conserva su configuración de
+Audio/MIDI. Las nuevas instancias VST3 utilizan también ese inicio, pero al abrir
+un proyecto de Ableton prevalece el estado que el proyecto guardó para cada
+instancia. La biblioteca incluye Inicio, Iglesia Principal, Catedral ambiental,
+Tonewheel Jazz/Gospel/Rock y Omnichord clásico.
+
+Los botones **DELAY** y **REVERB**, junto a SILENCIO, activan cada efecto con una transición suave y conservan su mezcla y demás ajustes. Sus estados se guardan en presets y en el proyecto. Las sesiones anteriores mantienen los efectos activos para respetar su sonido.
+
+## Órgano, reverb y sincronía
+
+El selector de órgano ofrece once registros: los cuatro clásicos, Principal,
+Pleno, Catedral, Flauta litúrgica y tres tonewheel. Los registros de iglesia
+combinan armónicos y registros de tubos; los tonewheel usan los nueve tiradores
+habituales, suboctava de 16 pies, foldback en agudos y percusión. **Rotary** añade
+modulación estéreo en los tonewheel; **Percusión** regula su ataque. Son modelos
+sintetizados originales. Los proyectos anteriores siguen en el modo clásico para
+mantener su timbre.
+
+La reverb añade **Predelay** de 0–250 ms, **Early Reflections** y EQ de tres bandas
+(250 Hz, 1 kHz y 5 kHz; ±12 dB). La EQ y las primeras reflexiones afectan al
+componente reverberado; MEZCLA controla su nivel frente a la señal directa.
+
+En Delay, **SYNC** sustituye el tiempo en ms por divisiones de nota. `t` indica
+tresillo y `dot` puntillo; por ejemplo 1/8t es un tresillo de corcheas y 1/8dot una
+corchea con puntillo. Se usa el BPM que entregue el DAW; sin host, el control
+**BPM standalone** define el tempo. Se admiten 20–400 BPM y retardos de hasta
+12 segundos. En Sync ambos canales respetan la misma duración musical.
+
+## Fondo y carcasa
+
+El editor rellena toda su superficie con gris neutro opaco, también en las
+esquinas del instrumento, para verse igual dentro de un host o en standalone.
+La carcasa conserva su contorno redondeado y añade profundidad, rebordes,
+sombras y textura. El fondo exterior no cambia con el tema.
 
 ## Tape y sustain de los acordes
 
@@ -266,3 +317,16 @@ c++ -std=c++17 -Wall -Wextra -Wpedantic -O2 -ISource tests/engine_tests.cpp -o w
 Las pruebas comprueban las cuatro familias de acordes, el mapa MIDI y del Mac,
 el decaimiento, el estéreo, el silencio y la estabilidad de voces a
 44.1, 48 y 96 kHz; no miden fidelidad respecto a hardware real.
+
+Con JUCE también puedes ejecutar las comprobaciones de presets, interfaz,
+tempo del host y efectos:
+
+```sh
+cmake -S . -B build -DJUCE_PATH="$HOME/Developer/JUCE" -DCHORDHARP_PLUGIN_TESTS=ON -DCHORDHARP_GUI_EDITOR=OFF
+cmake --build build --config Release --target engine_tests processor_tests ambience_tests
+ctest --test-dir build -C Release --output-on-failure
+```
+
+`ambience_tests` usa AddressSanitizer y UndefinedBehaviorSanitizer con Clang/GCC
+para verificar las lecturas de reverb, delay y Tape. Incluye el caso de redondeo
+en el extremo del búfer que se corrige en la 0.5.1.

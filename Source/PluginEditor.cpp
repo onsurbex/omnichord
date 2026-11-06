@@ -3,12 +3,21 @@
 #include "KeyboardMapping.h"
 #include "MacKeyboard.h"
 #include "Themes.h"
+#include "PresetBar.h"
+#include "DelayTimeControl.h"
 
 namespace {
 const juce::Colour ink(0xff263e38), cream(0xffeee6cf), accent(0xffb66b44);
 const char* noteNames[]{"C","Db","D","Eb","E","F","F#","G","Ab","A","Bb","B"};
 juce::Image embeddedLogo() {
     return juce::ImageCache::getFromMemory(BinaryData::BlinblinLogo_png,BinaryData::BlinblinLogo_pngSize);
+}
+void preserveBackgroundPainting(juce::Component& component) {
+    // Foleys marks a viewport opaque even when its decorator has rounded corners.
+    // Let JUCE paint the editor behind these views instead of culling its fill.
+    if(dynamic_cast<juce::Viewport*>(&component) && dynamic_cast<foleys::GuiItem*>(component.getParentComponent()))
+        component.setOpaque(false);
+    for(int i=0;i<component.getNumChildComponents();++i) preserveBackgroundPainting(*component.getChildComponent(i));
 }
 }
 
@@ -49,7 +58,7 @@ void InstrumentLook::drawButtonText(juce::Graphics& g,juce::TextButton& button,b
 void InstrumentLook::drawRotarySlider(juce::Graphics& g,int x,int y,int width,int height,
                                      float position,float start,float end,juce::Slider& slider) {
     auto area=juce::Rectangle<float>(static_cast<float>(x),static_cast<float>(y),
-                                   static_cast<float>(width),static_cast<float>(height)).reduced(13);
+                                   static_cast<float>(width),static_cast<float>(height)).reduced(height<60?6.0f:13.0f);
     const float radius=juce::jmax(1.0f,juce::jmin(area.getWidth(),area.getHeight())*0.5f);
     const auto centre=area.getCentre();
     const auto body=slider.findColour(juce::Slider::thumbColourId);
@@ -333,6 +342,54 @@ private:
     std::unique_ptr<juce::ComboBoxParameterAttachment> attachment;
 };
 
+class InstrumentBody final : public juce::Component {
+public:
+    explicit InstrumentBody(ChordHarpProcessor& p):processor(p) { setInterceptsMouseClicks(false,false); }
+    void paint(juce::Graphics& g) override {
+        const auto panel=omnichord::logoBackground(processor.magicState.getGuiTree(),static_cast<int>(processor.state.getRawParameterValue("theme")->load()));
+        const auto area=getLocalBounds().toFloat().reduced(1);
+        g.setColour(panel.darker(0.5f)); g.fillRoundedRectangle(area,54);
+        auto face=area.withTrimmedBottom(9);
+        g.setGradientFill(juce::ColourGradient(panel.brighter(0.06f),face.getTopLeft(),panel.darker(0.08f),face.getBottomLeft(),false));
+        g.fillRoundedRectangle(face,53);
+        for(int i=0;i<4;++i) {
+            g.setColour(juce::Colours::white.withAlpha(0.17f-static_cast<float>(i)*0.03f));
+            g.drawRoundedRectangle(face.reduced(2.0f+i),51.0f-i,1.0f);
+        }
+        g.setColour(juce::Colours::black.withAlpha(0.18f)); g.drawRoundedRectangle(area.reduced(1),53,1);
+        // Fine moulded texture stays behind the functional controls.
+        g.setColour(juce::Colours::black.withAlpha(0.018f));
+        for(int y=25;y<getHeight()-25;y+=12) for(int x=45;x<getWidth()-45;x+=12) g.fillRect(x+(y%3),y,1,1);
+        for(const auto point:{juce::Point<float>(32,32),juce::Point<float>(area.getRight()-32,32),
+                              juce::Point<float>(32,area.getBottom()-36),juce::Point<float>(area.getRight()-32,area.getBottom()-36)}) {
+            const juce::Rectangle<float> screw(point.x-8,point.y-8,16,16);
+            g.setColour(juce::Colours::black.withAlpha(.32f));g.fillEllipse(screw.expanded(1).translated(0,1));
+            g.setGradientFill(juce::ColourGradient(juce::Colour(0xffe1e4e8),screw.getTopLeft(),juce::Colour(0xff777e89),screw.getBottomRight(),false));
+            g.fillEllipse(screw);
+            g.setColour(juce::Colour(0xff545a64));g.drawEllipse(screw,.8f);
+            juce::Path star;star.addStar(point,6,2.2f,4.6f,.15f);
+            g.setColour(juce::Colours::white.withAlpha(.45f));g.fillPath(star,juce::AffineTransform::translation(0,.65f));
+            g.setColour(juce::Colour(0xff343942));g.fillPath(star);
+        }
+    }
+    void configure(foleys::GuiItem&) {}
+    static std::vector<std::pair<juce::String,int>> colours() { return {}; }
+    static std::vector<foleys::SettableProperty> properties(const juce::ValueTree&) { return {}; }
+private:
+    ChordHarpProcessor& processor;
+};
+class InstrumentShadow final : public juce::Component {
+public:
+    explicit InstrumentShadow(ChordHarpProcessor&) { setInterceptsMouseClicks(false,false); }
+    void paint(juce::Graphics& g) override {
+        juce::Path path; path.addRoundedRectangle(getLocalBounds().toFloat().reduced(12),54);
+        juce::DropShadow(juce::Colours::black.withAlpha(0.6f),12,{0,5}).drawForPath(g,path);
+    }
+    void configure(foleys::GuiItem&) {}
+    static std::vector<std::pair<juce::String,int>> colours() { return {}; }
+    static std::vector<foleys::SettableProperty> properties(const juce::ValueTree&) { return {}; }
+};
+
 std::unique_ptr<foleys::MagicGUIBuilder> createBuilder(ChordHarpProcessor& processor) {
     auto builder=std::make_unique<foleys::MagicGUIBuilder>(processor.magicState);
     builder->registerJUCEFactories();
@@ -352,6 +409,10 @@ std::unique_ptr<foleys::MagicGUIBuilder> createBuilder(ChordHarpProcessor& proce
     builder->registerFactory("OmniToggle",&ToggleItem::factory);
     builder->registerFactory("OmniSwitch",&SwitchItem::factory);
     builder->registerFactory("OmniChord",&ChordItem::factory);
+    builder->registerFactory("InstrumentBody",&InstrumentItem<InstrumentBody>::factory);
+    builder->registerFactory("InstrumentShadow",&InstrumentItem<InstrumentShadow>::factory);
+    builder->registerFactory("DelayTimeControl",&InstrumentItem<DelayTimeControl>::factory);
+    builder->registerFactory("PresetBar",&InstrumentItem<PresetBar>::factory);
     builder->registerFactory("ThemeSelector",&InstrumentItem<ThemeSelector>::factory);
     return builder;
 }
@@ -359,9 +420,11 @@ std::unique_ptr<foleys::MagicGUIBuilder> createBuilder(ChordHarpProcessor& proce
 
 ChordHarpEditor::ChordHarpEditor(ChordHarpProcessor& processor)
     :foleys::MagicPluginEditor(processor.magicState,createBuilder(processor)),processor(processor) {
+    setOpaque(true);
     setWantsKeyboardFocus(true);
     timerCallback(); startTimerHz(20);
 }
+void ChordHarpEditor::paint(juce::Graphics& g) { g.fillAll(juce::Colour(0xff292a2d)); }
 ChordHarpEditor::~ChordHarpEditor() { stopTimer(); releaseComputerKeys(); }
 void ChordHarpEditor::timerCallback() {
     const int theme=static_cast<int>(processor.state.getRawParameterValue("theme")->load());
@@ -370,8 +433,13 @@ void ChordHarpEditor::timerCallback() {
     if(theme!=currentTheme || layout!=themedLayout) {
         currentTheme=theme; themedLayout=layout;
         omnichord::applyTheme(layout,theme);
-        getGUIBuilder().updateColours(); repaint();
+        getGUIBuilder().updateColours();
+        // Foleys RootItem updates its children but skips its own decorator.
+        // Set that layer explicitly so it cannot cover the editor with darkgrey.
+        if(auto* root=getGUIBuilder().findGuiItemWithId("root")) root->foleys::GuiItem::updateColours();
+        repaint();
     }
+    preserveBackgroundPainting(*this);
     if(!processor.computerKeyboardEnabled() && !heldKeys.empty()) releaseComputerKeys();
 }
 void ChordHarpEditor::releaseComputerKeys() {

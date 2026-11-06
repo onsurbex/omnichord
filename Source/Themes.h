@@ -37,6 +37,7 @@ inline void paletteReferences(juce::ValueTree node,juce::ValueTree palette) {
     if(node.hasType("Palettes") || node.hasType("CustomColours")) return;
     for(int i=0;i<node.getNumProperties();++i) {
         const auto key=node.getPropertyName(i); const auto value=node.getProperty(key).toString();
+        if(node.getProperty("id").toString()=="root" && key.toString()=="background-color") continue;
         if(node.hasType("OmniSwitch") && static_cast<bool>(node.getProperty("switch-fixed-color",false)) && isColourProperty(key)) continue;
         if(isColourProperty(key) && value.length()==8 && value.containsOnly("0123456789abcdefABCDEF") && !value.startsWith("00")) {
             const juce::Identifier name("color-"+value.toLowerCase());

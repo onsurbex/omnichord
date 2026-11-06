@@ -28,8 +28,10 @@
       </Palettes>
     </Style>
   </Styles>
-  <View id="root" width="1060" height="695" resizable="0" resize-corner="0" display="contents" background-color="ff172a25" margin="0" padding="0" border="0" lookAndFeel="BLINBLIN" layout-version="4">
-    <View id="shell" pos-x="15" pos-y="15" pos-width="1030" pos-height="665" display="contents" background-color="ffeee6cf" radius="55">
+  <View id="root" width="1060" height="805" resizable="0" resize-corner="0" display="contents" background-color="ff292a2d" margin="0" padding="0" border="0" lookAndFeel="BLINBLIN" layout-version="6">
+    <InstrumentShadow id="body-shadow" pos-x="3" pos-y="63" pos-width="1054" pos-height="739" background-color="00000000" />
+    <View id="shell" pos-x="15" pos-y="75" pos-width="1030" pos-height="715" display="contents" background-color="ffeee6cf" radius="55">
+      <InstrumentBody id="instrument-body" pos-x="0" pos-y="0" pos-width="1030" pos-height="715" background-color="00000000" />
       <OmniChord id="chord-35" pos-x="535" pos-y="365" pos-width="42" pos-height="42" text="B7" parameter="chord" button-radio-group="1001" button-radio-value="35" tooltip="B7 | MIDI 58 (octava C2)" class="chord" />
       <OmniChord id="chord-32" pos-x="130" pos-y="365" pos-width="42" pos-height="42" text="Ab7" parameter="chord" button-radio-group="1001" button-radio-value="32" tooltip="Ab7 | MIDI 49 (octava C2)" class="chord" />
       <Label id="subtitle" pos-x="60" pos-y="38" pos-width="520" pos-height="22" text="BLINLBIN / HARP / ORGANO ELECTRONICO" font-size="13" />
@@ -38,7 +40,7 @@
       <Speaker id="speaker" pos-x="62" pos-y="160" pos-width="150" pos-height="60" dot-color="66263e38" background-color="16263e38" radius="15" />
       <ChordDisplay id="chord-display" pos-x="245" pos-y="160" pos-width="345" pos-height="60" display-background="ff263e38" display-text="ffeee6cf" display-caption="ACORDE EN MEMORIA" display-font-size="24" />
       <View id="divider-275" pos-x="62" pos-y="260" pos-width="481" pos-height="1" background-color="24263e38" />
-      <View id="divider-439" pos-x="62" pos-y="469" pos-width="481" pos-height="1" background-color="24263e38" />
+      <View id="divider-439" pos-x="65" pos-y="460" pos-width="545" pos-height="1" background-color="24263e38" />
       <Label id="quality-0" pos-x="28" pos-y="284" pos-width="35" pos-height="20" text="MAY" font-size="14" />
       <OmniChord id="chord-5" pos-x="245" pos-y="275" pos-width="42" pos-height="42" text="F" parameter="chord" button-radio-group="1001" button-radio-value="5" tooltip="F | MIDI 28 (octava C0)" class="chord" />
       <OmniChord id="chord-0" pos-x="290" pos-y="275" pos-width="42" pos-height="42" text="C" parameter="chord" button-radio-group="1001" button-radio-value="0" tooltip="C | MIDI 29 (octava C0)" class="chord" />
@@ -79,15 +81,15 @@
       <Slider id="gain" pos-x="490" pos-y="51" pos-width="92" pos-height="100" parameter="gain" class="knob" />
       <Label id="gain-label" pos-x="490" pos-y="30" pos-width="92" pos-height="20" text="GENERAL" font-size="13" justification="centred" />
       <OmniSwitch id="pad" pos-x="60" pos-y="227" pos-width="145" pos-height="28" text="ORGAN" parameter="pad" switch-fixed-color="1" button-color="ffcfad4a" button-on-color="fff0ca59" button-off-text="ff302c1d" button-on-text="ff302c1d" />
-      <TextButton id="silence" pos-x="650" pos-y="618" pos-width="115" pos-height="30" text="SILENCIO" onClick="silence" />
-      <View id="harp-frame" pos-x="635" pos-y="146" pos-width="350" pos-height="458" background-color="ffeee6cf" border="3" border-color="30263e38" radius="33" display="contents">
+      <TextButton id="silence" pos-x="640" pos-y="662" pos-width="140" pos-height="28" text="SILENCIO" onClick="silence" />
+      <View id="harp-frame" pos-x="635" pos-y="146" pos-width="350" pos-height="508" background-color="ffeee6cf" border="3" border-color="30263e38" radius="33" display="contents">
         <Label id="harp-label" pos-x="25" pos-y="16" pos-width="300" pos-height="22" text="OMNI HARP" font-size="12" justification="centred" />
-        <OmniStrum id="strum" pos-x="25" pos-y="47" pos-width="300" pos-height="365" harp-background="ff193328" string-color="ffb9ae7a" active-color="ffffd993" string-width="1.4" tooltip="MantÃ©n pulsado y desliza arriba o abajo" />
-        <Label id="strum-instructions" pos-x="25" pos-y="420" pos-width="300" pos-height="20" text="DESLIZA ARRIBA O ABAJO" font-size="11" justification="centred" />
+        <OmniStrum id="strum" pos-x="25" pos-y="47" pos-width="300" pos-height="415" harp-background="ff193328" string-color="ffb9ae7a" active-color="ffffd993" string-width="1.4" tooltip="MantÃ©n pulsado y desliza arriba o abajo" />
+        <Label id="strum-instructions" pos-x="25" pos-y="470" pos-width="300" pos-height="20" text="DESLIZA ARRIBA O ABAJO" font-size="11" justification="centred" />
       </View>
       <BlinblinLogo id="logo" pos-x="670" pos-y="34" pos-width="280" pos-height="86" />
-      <Label id="footer" pos-x="795" pos-y="627" pos-width="190" pos-height="20" text="BLINBLIN / OMNICHORD 04" font-size="10" />
-      <View id="sound-controls" pos-x="50" pos-y="475" pos-width="555" pos-height="175" display="tabbed" tab-height="24" tab-selected="0" background-color="ffeee6cf">
+      <Label id="footer" pos-x="670" pos-y="123" pos-width="280" pos-height="16" text="BLINBLIN / OMNICHORD 05" font-size="10" />
+      <View id="sound-controls" pos-x="65" pos-y="465" pos-width="545" pos-height="218" display="tabbed" tab-height="26" tab-selected="0" background-color="ffeee6cf" padding="4" border="1" border-color="40263e38" radius="14">
         <View id="harp-controls" tab-caption="Harp" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
           <Slider id="harpGain" pos-x="5" pos-y="0" pos-width="88" pos-height="100" parameter="harpGain" class="knob" />
           <Label id="harpGain-label" pos-x="5" pos-y="100" pos-width="88" pos-height="18" text="VOLUMEN" font-size="11" justification="centred" />
@@ -106,32 +108,48 @@
           <Label id="organGain-label" pos-x="15" pos-y="100" pos-width="90" pos-height="18" text="VOLUMEN" font-size="11" justification="centred" />
           <Slider id="organTone" pos-x="130" pos-y="0" pos-width="90" pos-height="100" parameter="organTone" class="knob" />
           <Label id="organTone-label" pos-x="130" pos-y="100" pos-width="90" pos-height="18" text="TIMBRE" font-size="11" justification="centred" />
-          <Label id="organSound-label" pos-x="245" pos-y="8" pos-width="230" pos-height="18" text="SONIDO DEL ORGANO" font-size="11" />
-          <ComboBox id="organSound" pos-x="245" pos-y="28" pos-width="230" pos-height="25" parameter="organSound" />
+          <Label id="organSound-label" pos-x="245" pos-y="8" pos-width="230" pos-height="18" text="REGISTRO DEL ORGANO" font-size="11" />
+          <ComboBox id="organSound" pos-x="245" pos-y="28" pos-width="230" pos-height="25" parameter="organModel" />
           <Label id="organOctave-label" pos-x="245" pos-y="76" pos-width="230" pos-height="18" text="OCTAVA" font-size="11" />
           <ComboBox id="organOctave" pos-x="245" pos-y="96" pos-width="230" pos-height="25" parameter="organOctave" />
           <Label id="organSpread-label" pos-x="10" pos-y="124" pos-width="73" pos-height="23" text="APERTURA" font-size="10" />
           <Slider id="organSpread" parameter="organSpread" pos-x="85" pos-y="124" pos-width="170" pos-height="23" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" class="knob" />
           <Label id="organChorus-label" pos-x="280" pos-y="124" pos-width="73" pos-height="23" text="CORO" font-size="10" />
-          <Slider id="organChorus" parameter="organChorus" pos-x="355" pos-y="124" pos-width="170" pos-height="23" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" class="knob" />
+          <Slider id="organChorus" parameter="organChorus" pos-x="355" pos-y="124" pos-width="170" pos-height="23" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" class="knob" tooltip="Coro de voces; efecto rotary en los registros tonewheel." />
+          <Label id="organRotary-label" text="ROTARY" pos-x="10" pos-y="158" pos-width="75" pos-height="23" font-size="10" />
+          <Slider id="organRotary" parameter="organRotary" pos-x="85" pos-y="158" pos-width="170" pos-height="23" class="knob" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" />
+          <Label id="organPercussion-label" text="PERCUSION" pos-x="280" pos-y="158" pos-width="75" pos-height="23" font-size="10" />
+          <Slider id="organPercussion" parameter="organPercussion" pos-x="355" pos-y="158" pos-width="170" pos-height="23" class="knob" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" />
         </View>
         <View id="delay-controls" tab-caption="Delay" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
           <Slider id="delayMix" pos-x="30" pos-y="0" pos-width="90" pos-height="100" parameter="delayMix" class="knob" />
           <Label id="delayMix-label" pos-x="30" pos-y="100" pos-width="90" pos-height="18" text="MEZCLA" font-size="11" justification="centred" />
-          <Slider id="delayTime" pos-x="190" pos-y="0" pos-width="90" pos-height="100" parameter="delayTime" class="knob" />
-          <Label id="delayTime-label" pos-x="190" pos-y="100" pos-width="90" pos-height="18" text="TIEMPO (ms)" font-size="11" justification="centred" />
+          <DelayTimeControl id="delayTime" pos-x="190" pos-y="0" pos-width="90" pos-height="100" />
+          <Label id="delayTime-label" pos-x="190" pos-y="100" pos-width="90" pos-height="18" text="TIEMPO" font-size="11" justification="centred" />
           <Slider id="delayFeedback" pos-x="350" pos-y="0" pos-width="90" pos-height="100" parameter="delayFeedback" class="knob" />
           <Label id="delayFeedback-label" pos-x="350" pos-y="100" pos-width="90" pos-height="18" text="REPETICIONES" font-size="11" justification="centred" />
-          <Label id="delay-help" pos-x="10" pos-y="125" pos-width="490" pos-height="20" text="Delay estereo: tiempo, repeticiones y mezcla." font-size="12" />
+          <OmniSwitch id="delaySync" parameter="delaySync" text="SYNC" pos-x="10" pos-y="124" pos-width="140" pos-height="28" button-color="ffdad3bc" button-on-color="ffb66b44" button-off-text="ff263e38" button-on-text="fff6efdc" />
+          <Label id="delayTempo-label" text="BPM STANDALONE" pos-x="180" pos-y="126" pos-width="140" pos-height="22" font-size="10" />
+          <Slider id="delayTempo" parameter="delayTempo" pos-x="325" pos-y="124" pos-width="180" pos-height="26" class="knob" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" />
+          <Label id="delay-help" text="Sync usa el tempo del DAW; sin host se usa el BPM standalone." pos-x="10" pos-y="164" pos-width="520" pos-height="20" font-size="10" />
         </View>
         <View id="reverb-controls" tab-caption="Reverb" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
-          <Slider id="reverbMix" pos-x="30" pos-y="0" pos-width="90" pos-height="100" parameter="reverbMix" class="knob" />
-          <Label id="reverbMix-label" pos-x="30" pos-y="100" pos-width="90" pos-height="18" text="MEZCLA" font-size="11" justification="centred" />
-          <Slider id="reverbSize" pos-x="190" pos-y="0" pos-width="90" pos-height="100" parameter="reverbSize" class="knob" />
-          <Label id="reverbSize-label" pos-x="190" pos-y="100" pos-width="90" pos-height="18" text="TAMANO" font-size="11" justification="centred" />
-          <Slider id="reverbDamping" pos-x="350" pos-y="0" pos-width="90" pos-height="100" parameter="reverbDamping" class="knob" />
-          <Label id="reverbDamping-label" pos-x="350" pos-y="100" pos-width="90" pos-height="18" text="AMORTIGUACION" font-size="11" justification="centred" />
-          <Label id="reverb-help" pos-x="10" pos-y="125" pos-width="490" pos-height="20" text="Reverb estereo aplicada al organo y al harp." font-size="12" />
+          <Slider id="reverbMix" parameter="reverbMix" pos-x="25" pos-y="0" pos-width="80" pos-height="70" class="knob" />
+          <Label id="reverbMix-label" text="MEZCLA" pos-x="10" pos-y="70" pos-width="110" pos-height="18" font-size="10" justification="centred" />
+          <Slider id="reverbSize" parameter="reverbSize" pos-x="160" pos-y="0" pos-width="80" pos-height="70" class="knob" />
+          <Label id="reverbSize-label" text="TAMANO" pos-x="145" pos-y="70" pos-width="110" pos-height="18" font-size="10" justification="centred" />
+          <Slider id="reverbDamping" parameter="reverbDamping" pos-x="295" pos-y="0" pos-width="80" pos-height="70" class="knob" />
+          <Label id="reverbDamping-label" text="AMORTIGUACION" pos-x="280" pos-y="70" pos-width="110" pos-height="18" font-size="10" justification="centred" />
+          <Slider id="reverbPredelay" parameter="reverbPredelay" pos-x="430" pos-y="0" pos-width="80" pos-height="70" class="knob" />
+          <Label id="reverbPredelay-label" text="PREDELAY ms" pos-x="415" pos-y="70" pos-width="110" pos-height="18" font-size="10" justification="centred" />
+          <Slider id="reverbLow" parameter="reverbLow" pos-x="25" pos-y="90" pos-width="80" pos-height="70" class="knob" />
+          <Label id="reverbLow-label" text="GRAVES dB" pos-x="10" pos-y="160" pos-width="110" pos-height="18" font-size="10" justification="centred" />
+          <Slider id="reverbMid" parameter="reverbMid" pos-x="160" pos-y="90" pos-width="80" pos-height="70" class="knob" />
+          <Label id="reverbMid-label" text="MEDIOS dB" pos-x="145" pos-y="160" pos-width="110" pos-height="18" font-size="10" justification="centred" />
+          <Slider id="reverbHigh" parameter="reverbHigh" pos-x="295" pos-y="90" pos-width="80" pos-height="70" class="knob" />
+          <Label id="reverbHigh-label" text="AGUDOS dB" pos-x="280" pos-y="160" pos-width="110" pos-height="18" font-size="10" justification="centred" />
+          <Slider id="reverbEarly" parameter="reverbEarly" pos-x="430" pos-y="90" pos-width="80" pos-height="70" class="knob" />
+          <Label id="reverbEarly-label" text="EARLY REFLECTIONS" pos-x="415" pos-y="160" pos-width="110" pos-height="18" font-size="10" justification="centred" />
         </View>
         <View id="tape-controls" tab-caption="Tape" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
           <Slider id="tapeNoise" parameter="tapeNoise" pos-x="30" pos-y="0" pos-width="90" pos-height="100" class="knob" suffix=" %" />
@@ -147,11 +165,11 @@
         </View>
         <View id="keyboard-controls" tab-caption="Teclado" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
           <OmniToggle id="computerKeys" pos-x="10" pos-y="0" pos-width="400" pos-height="24" text="ACTIVAR TECLADO DEL MAC" parameter="computerKeys" />
-          <Label id="midi-help" pos-x="10" pos-y="25" pos-width="535" pos-height="22" text="MIDI: C0 mayor / C1 menor / C2 septima / C3 Maj7 / C4+ arpa" font-size="10" />
-          <Label id="harp-help" pos-x="10" pos-y="49" pos-width="535" pos-height="22" text="Mac: Q W E R T Y U I O P mayores / A S D F G H J K L Ñ menores" font-size="10" />
-          <Label id="quality-help" pos-x="10" pos-y="73" pos-width="535" pos-height="22" text="Septimas: Z X C V B N M , . - / Maj7: Mayus + fila de menores" font-size="10" />
-          <Label id="chord-help" pos-x="10" pos-y="97" pos-width="535" pos-height="22" text="Db y Ab: Ctrl + las dos primeras teclas de cada fila (Maj7: + Mayus)" font-size="10" />
-          <Label id="arp-help" pos-x="10" pos-y="121" pos-width="535" pos-height="22" text="Arpa: 1 2 3 4 5 6 7 8 9 0 y las dos teclas a la derecha de 0" font-size="10" />
+          <Label id="midi-help" pos-x="10" pos-y="25" pos-width="525" pos-height="22" text="MIDI: C0 mayor / C1 menor / C2 septima / C3 Maj7 / C4+ arpa" font-size="10" />
+          <Label id="harp-help" pos-x="10" pos-y="49" pos-width="525" pos-height="22" text="Mac: Q W E R T Y U I O P mayores / A S D F G H J K L Ñ menores" font-size="10" />
+          <Label id="quality-help" pos-x="10" pos-y="73" pos-width="525" pos-height="22" text="Septimas: Z X C V B N M , . - / Maj7: Mayus + fila de menores" font-size="10" />
+          <Label id="chord-help" pos-x="10" pos-y="97" pos-width="525" pos-height="22" text="Db y Ab: Ctrl + las dos primeras teclas de cada fila (Maj7: + Mayus)" font-size="10" />
+          <Label id="arp-help" pos-x="10" pos-y="121" pos-width="525" pos-height="22" text="Arpa: 1 2 3 4 5 6 7 8 9 0 y las dos teclas a la derecha de 0" font-size="10" />
         </View>
       </View>
       <OmniChord id="chord-37" pos-x="85" pos-y="410" pos-width="42" pos-height="42" text="DbM7" parameter="chord" button-radio-group="1001" button-radio-value="37" tooltip="DbMaj7 | MIDI 60 (octava C3)" class="chord" />
@@ -170,6 +188,9 @@
       <ThemeSelector id="theme" pos-x="350" pos-y="18" pos-width="230" pos-height="27" parameter="theme" tooltip="Tema de color. Personalizado conserva los colores de tu XML." />
       <OmniSwitch id="harpQuantize" pos-x="220" pos-y="227" pos-width="165" pos-height="28" text="FOLLOW CHORDS" parameter="harpQuantize" switch-fixed-color="1" button-color="ffcfad4a" button-on-color="fff0ca59" button-off-text="ff302c1d" button-on-text="ff302c1d" />
       <OmniSwitch id="chordSustain" parameter="chordSustain" text="SUSTAIN" pos-x="400" pos-y="227" pos-width="175" pos-height="28" button-color="ffdad3bc" button-on-color="ffb66b44" button-off-text="ff263e38" button-on-text="fff6efdc" tooltip="Activado: mantiene el acorde. Apagado: el organo se libera al soltar las teclas o botones." />
+      <OmniSwitch id="delayEnabled" parameter="delayEnabled" text="DELAY" pos-x="790" pos-y="662" pos-width="90" pos-height="28" button-color="ffdad3bc" button-on-color="ffb66b44" button-off-text="ff263e38" button-on-text="fff6efdc" tooltip="Activa o desactiva delay conservando sus ajustes." />
+      <OmniSwitch id="reverbEnabled" parameter="reverbEnabled" text="REVERB" pos-x="885" pos-y="662" pos-width="95" pos-height="28" button-color="ffdad3bc" button-on-color="ffb66b44" button-off-text="ff263e38" button-on-text="fff6efdc" tooltip="Activa o desactiva reverb conservando sus ajustes." />
     </View>
+    <PresetBar id="preset-bar" pos-x="25" pos-y="8" pos-width="1010" pos-height="46" background-color="00000000" />
   </View>
 </magic>
