@@ -177,6 +177,8 @@ static void checkTempoAndAmbience() {
         return std::pair<int,double>{first,energy};
     };
     const auto dry=impulse(0,0),pre=impulse(100,0),reflections=impulse(0,1);
+    if(pre.first-dry.first<4798 || pre.first-dry.first>4802)
+        std::cerr << "Reverb first wet samples: " << dry.first << " without predelay, " << pre.first << " with 100 ms\n";
     require(pre.first-dry.first>=4798 && pre.first-dry.first<=4802,"Predelay must postpone the wet signal by 100 ms");
     require(reflections.first<dry.first && reflections.second>dry.second,"Early reflections must add a separate early response");
     const auto response=[](int band,float gain,double frequency) {
@@ -484,5 +486,5 @@ int main() {
     checkChordReleaseAndTape();
     require(backgroundPassed,"Every host and theme must render the same opaque neutral outer background");
     processor.releaseResources();
-    std::cout << "Processor checks passed: MIDI, audio, logo, visual controls, XML export/import and layout state\n";
+    std::cout << "Processor checks passed: MIDI, audio, logo, opaque themes, visual controls, layout state, complete presets, startup, host tempo and reverb\n";
 }

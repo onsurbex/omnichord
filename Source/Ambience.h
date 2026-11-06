@@ -48,7 +48,10 @@ public:
     float roomSize=.5f,damping=.5f,mix=0,predelayMs=0,early=0;
     std::array<float,3> gainDb{};
     void prepare(double sampleRate) {
-        rate=std::max(8000.0,sampleRate); late.setSampleRate(rate);
+        rate=std::max(8000.0,sampleRate);
+        // Set the wet-only targets before JUCE resets its gain smoothers.
+        // Otherwise its default dry gain leaks into the first 10 ms of output.
+        configure(); late.setSampleRate(rate);
         for(auto& b:preBuffer) b.assign(static_cast<size_t>(rate*.26)+4,0);
         for(auto& b:earlyBuffer) b.assign(static_cast<size_t>(rate*.12)+4,0);
         smoothing=1-std::exp(-1.0/(rate*.02)); reset();
