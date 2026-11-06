@@ -2,6 +2,7 @@ Omnichord 0.5.1 para macOS 11 o posterior, Apple Silicon e Intel.
 
 Sustituye a la 0.5.0 retirada. Corrige una lectura fuera de limites en el punto de vuelta de los buffers fraccionarios y añade una prueba de regresion del redondeo.
 
+- Botones físicos DELAY y REVERB para activar/desactivar sin perder sus ajustes, guardados y automatizables. Pestañas compactadas dentro de un marco con margen respecto a la carcasa; tornillos metálicos de 16 px con cabeza de estrella.
 - Fondo gris neutro totalmente opaco, común a standalone, VST3 y todos los temas. Carcasa redondeada con relieve, reborde, sombreado, textura sutil y tornillos.
 - Once selecciones de órgano: los sonidos clásicos, cuatro registros de iglesia y tres tonewheel. Síntesis aditiva de registros y nueve tiradores, suboctava de 16 pies, foldback, percusión y rotary estéreo. Controles Rotary y Percusión. Las sesiones antiguas conservan su órgano clásico.
 - Biblioteca de presets completos: guarda y recupera todos los parámetros, incluidos instrumentos, volúmenes, Tape, efectos, acordes, sustain, tema y sincronía. Archivos `.omnipreset`, presets de fábrica y elección del estado completo de inicio. El diseño del panel se conserva por separado. El standalone arranca con el inicio elegido; los proyectos del DAW conservan su propio estado.

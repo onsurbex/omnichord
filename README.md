@@ -213,7 +213,7 @@ Todos los ajustes se automatizan y se guardan con la sesión del DAW.
 
 La barra superior permite elegir presets de fábrica y tu biblioteca, **Cargar**
 un archivo y **Guardar** el estado completo en un `.omnipreset`. Se incluyen
-TODOS los parámetros: órgano, arpa, acordes, sustain, volúmenes, Tape, delay,
+TODOS los 44 parámetros: órgano, arpa, acordes, sustain, volúmenes, Tape, delay,
 reverb, EQ, tempo, divisiones de nota, controles del teclado y selección de tema.
 Los archivos se validan antes de cambiar el sonido. La posición y el diseño XML
 de los controles se conservan independientemente del preset.
@@ -230,6 +230,8 @@ Audio/MIDI. Las nuevas instancias VST3 utilizan también ese inicio, pero al abr
 un proyecto de Ableton prevalece el estado que el proyecto guardó para cada
 instancia. La biblioteca incluye Inicio, Iglesia Principal, Catedral ambiental,
 Tonewheel Jazz/Gospel/Rock y Omnichord clásico.
+
+Los botones **DELAY** y **REVERB**, junto a SILENCIO, activan cada efecto con una transición suave y conservan su mezcla y demás ajustes. Sus estados se guardan en presets y en el proyecto. Las sesiones anteriores mantienen los efectos activos para respetar su sonido.
 
 ## Órgano, reverb y sincronía
 

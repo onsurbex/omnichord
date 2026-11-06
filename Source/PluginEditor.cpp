@@ -362,9 +362,14 @@ public:
         for(int y=25;y<getHeight()-25;y+=12) for(int x=45;x<getWidth()-45;x+=12) g.fillRect(x+(y%3),y,1,1);
         for(const auto point:{juce::Point<float>(32,32),juce::Point<float>(area.getRight()-32,32),
                               juce::Point<float>(32,area.getBottom()-36),juce::Point<float>(area.getRight()-32,area.getBottom()-36)}) {
-            const juce::Rectangle<float> screw(point.x-3,point.y-3,6,6);
-            g.setColour(panel.darker(0.45f)); g.fillEllipse(screw);
-            g.setColour(panel.brighter(0.12f)); g.drawLine(screw.getX()+1,point.y,screw.getRight()-1,point.y,0.8f);
+            const juce::Rectangle<float> screw(point.x-8,point.y-8,16,16);
+            g.setColour(juce::Colours::black.withAlpha(.32f));g.fillEllipse(screw.expanded(1).translated(0,1));
+            g.setGradientFill(juce::ColourGradient(juce::Colour(0xffe1e4e8),screw.getTopLeft(),juce::Colour(0xff777e89),screw.getBottomRight(),false));
+            g.fillEllipse(screw);
+            g.setColour(juce::Colour(0xff545a64));g.drawEllipse(screw,.8f);
+            juce::Path star;star.addStar(point,6,2.2f,4.6f,.15f);
+            g.setColour(juce::Colours::white.withAlpha(.45f));g.fillPath(star,juce::AffineTransform::translation(0,.65f));
+            g.setColour(juce::Colour(0xff343942));g.fillPath(star);
         }
     }
     void configure(foleys::GuiItem&) {}

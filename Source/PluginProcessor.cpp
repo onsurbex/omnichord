@@ -111,7 +111,23 @@ juce::ValueTree upgradeLayout(juce::ValueTree layout) {
         root.addChild(shadow,0,nullptr);
     }
     if(!findNode(root,"preset-bar").isValid()) root.appendChild(findNode(defaults,"preset-bar").createCopy(),nullptr);
-    root.setProperty("layout-version",5,nullptr);
+    if(static_cast<int>(root.getProperty("layout-version",0))<6) {
+        const auto copyBounds=[&](juce::ValueTree node,const juce::ValueTree& model) {
+            for(const auto* key:{"pos-x","pos-y","pos-width","pos-height"})
+                if(model.hasProperty(key)) node.setProperty(key,model.getProperty(key),nullptr);
+        };
+        copyBounds(tabs,findNode(defaults,"sound-controls"));
+        for(const auto* key:{"tab-height","padding","border","border-color","radius"})
+            tabs.setProperty(key,findNode(defaults,"sound-controls").getProperty(key),nullptr);
+        for(auto control:findNode(defaults,"reverb-controls")) copyBounds(findNode(root,control.getProperty("id").toString()),control);
+        for(const auto* id:{"organRotary","organRotary-label","organPercussion","organPercussion-label","delay-help","silence","footer","divider-439"})
+            copyBounds(findNode(root,id),findNode(defaults,id));
+        for(auto label:findNode(root,"keyboard-controls"))
+            if(static_cast<int>(label.getProperty("pos-width"))>525) label.setProperty("pos-width",525,nullptr);
+    }
+    for(const auto* id:{"delayEnabled","reverbEnabled"})
+        if(!findNode(root,id).isValid()) shell.appendChild(findNode(defaults,id).createCopy(),nullptr);
+    root.setProperty("layout-version",6,nullptr);
     omnichord::prepareThemes(layout);
     root.setProperty("background-color","ff292a2d",nullptr);
     return layout;
@@ -167,12 +183,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"delaySync",1},"Delay Sync",false));
     p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"delayDivision",1},"Delay Note",juce::StringArray{"1/1","1/2","1/2t","1/2dot","1/4","1/4t","1/4dot","1/8","1/8t","1/8dot","1/16","1/16t","1/16dot","1/32","1/32t","1/32dot","1/64"},4));
     addFloat("delayTempo","Standalone Tempo (BPM)",20,400,120);
+    p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"delayEnabled",1},"Delay Enabled",true));
+    p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"reverbEnabled",1},"Reverb Enabled",true));
     return p;
 }
 ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(BusesProperties().withOutput("Output",juce::AudioChannelSet::stereo(),true)),state(*this,nullptr,"ChordHarp",parameters()),presetHome(presetRoot==juce::File{}?defaultPresetHome():presetRoot) {
     const char* ids[]{"gain","tone","sustain","vibrato","chord","pad","harpGain","organGain",
         "organSound","organTone","organOctave","harpSound","harpAttack","harpQuantize",
-        "delayTime","delayFeedback","delayMix","reverbSize","reverbDamping","reverbMix","computerKeys","major7","organSpread","organChorus","theme","chordSustain","tapeEnabled","tapeNoise","tapeWow","tapeFlutter","tapeDrive","organModel","organRotary","organPercussion","reverbPredelay","reverbLow","reverbMid","reverbHigh","reverbEarly","delaySync","delayDivision","delayTempo"};
+        "delayTime","delayFeedback","delayMix","reverbSize","reverbDamping","reverbMix","computerKeys","major7","organSpread","organChorus","theme","chordSustain","tapeEnabled","tapeNoise","tapeWow","tapeFlutter","tapeDrive","organModel","organRotary","organPercussion","reverbPredelay","reverbLow","reverbMid","reverbHigh","reverbEarly","delaySync","delayDivision","delayTempo","delayEnabled","reverbEnabled"};
     for(size_t i=0;i<raw.size();++i) raw[i]=state.getRawParameterValue(ids[i]);
     chordParameter=state.getParameter("chord");
     major7Parameter=state.getParameter("major7");
@@ -195,8 +213,9 @@ void ChordHarpProcessor::prepareToPlay(double rate,int blockSize) {
     engine.organModel=static_cast<int>(raw[OrganModel]->load());
     engine.prepare(rate);
     delay.milliseconds=raw[DelayTime]->load();
+    delay.mix=raw[DelayEnabled]->load()>.5f?raw[DelayMix]->load():0;
     delay.prepare(rate);
-    reverb.mix=raw[ReverbMix]->load(); reverb.predelayMs=raw[ReverbPredelay]->load(); reverb.early=raw[ReverbEarly]->load();
+    reverb.mix=raw[ReverbEnabled]->load()>.5f?raw[ReverbMix]->load():0; reverb.predelayMs=raw[ReverbPredelay]->load(); reverb.early=raw[ReverbEarly]->load();
     reverb.gainDb={raw[ReverbLow]->load(),raw[ReverbMid]->load(),raw[ReverbHigh]->load()}; reverb.prepare(rate);
     masterGain.reset(rate,0.02); masterGain.setCurrentAndTargetValue(raw[Gain]->load());
     organSilenced=false; lastChord=selectedChord(); lastPad=raw[Pad]->load()>0.5f;
@@ -263,8 +282,8 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
     bpm=juce::jlimit(20.0,400.0,bpm); currentTempo.store(bpm); hostTempo.store(fromHost);
     delay.synced=value(DelaySync)>0.5f;
     delay.milliseconds=delay.synced?static_cast<float>(chordharp::syncedDelayMs(bpm,static_cast<int>(value(DelayDivision)))):value(DelayTime);
-    delay.feedback=value(DelayFeedback); delay.mix=value(DelayMix);
-    reverb.roomSize=value(ReverbSize); reverb.damping=value(ReverbDamping); reverb.mix=value(ReverbMix);
+    delay.feedback=value(DelayFeedback); delay.mix=value(DelayEnabled)>.5f?value(DelayMix):0;
+    reverb.roomSize=value(ReverbSize); reverb.damping=value(ReverbDamping); reverb.mix=value(ReverbEnabled)>.5f?value(ReverbMix):0;
     reverb.predelayMs=value(ReverbPredelay); reverb.early=value(ReverbEarly);
     reverb.gainDb={value(ReverbLow),value(ReverbMid),value(ReverbHigh)}; reverb.configure();
     tape.enabled=value(TapeEnabled)>0.5f; tape.noiseLevel=value(TapeNoise);
@@ -358,7 +377,7 @@ void ChordHarpProcessor::setStateInformation(const void* data,int size) {
         const auto layout=juce::ValueTree::fromXml(restored.getProperty("guiLayout").toString());
         if(layout.hasType("magic") && layout.getChildWithName("View").isValid())
             magicState.setGuiValueTree(upgradeLayout(layout));
-        for(const auto* id:{"major7","organSpread","organChorus","theme","chordSustain","tapeEnabled","tapeNoise","tapeWow","tapeFlutter","tapeDrive","organRotary","organPercussion","reverbPredelay","reverbLow","reverbMid","reverbHigh","reverbEarly","delaySync","delayDivision","delayTempo"}) {
+        for(const auto* id:{"major7","organSpread","organChorus","theme","chordSustain","tapeEnabled","tapeNoise","tapeWow","tapeFlutter","tapeDrive","organRotary","organPercussion","reverbPredelay","reverbLow","reverbMid","reverbHigh","reverbEarly","delaySync","delayDivision","delayTempo","delayEnabled","reverbEnabled"}) {
             auto* parameter=state.getParameter(id);
             parameter->setValueNotifyingHost(parameter->getDefaultValue());
         }

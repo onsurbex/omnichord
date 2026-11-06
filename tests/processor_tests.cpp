@@ -51,7 +51,7 @@ static void checkLogoThemes(ChordHarpProcessor& processor,ChordHarpEditor& edito
             std::cerr << "Theme " << theme << " snapshot " << full.getWidth() << 'x' << full.getHeight() << " editor " << editor.getBounds().toString()
                       << " opaque=" << editor.isOpaque() << " outer corners: " << full.getPixelAt(0,0).toString() << ", " << full.getPixelAt(full.getWidth()-1,full.getHeight()-1).toString() << '\n';
         }
-        for(const auto* id:{"pad","harpQuantize","chordSustain","tapeEnabled"})
+        for(const auto* id:{"pad","harpQuantize","chordSustain","tapeEnabled","delayEnabled","reverbEnabled"})
             require(editor.getGUIBuilder().findGuiItemWithId(id)!=nullptr,"All physical switches must survive theme changes");
         if(theme==1) {
             require(omnichord::themeNames()[1]=="Pinky","Pinky must replace the Crema preset without changing its index");
@@ -172,6 +172,33 @@ static void checkTempoAndAmbience() {
     require(synth.getCurrentTempo()==90 && synth.tempoComesFromHost(),"Host BPM must override standalone tempo");
     synth.setPlayHead(nullptr);
     checkAmbienceDSP(require);
+}
+
+static void checkEffectBypass() {
+    for(const juce::String effect:{"delay","reverb"}) {
+        ChordHarpProcessor bypass,dry;
+        bypass.state.getParameter(effect+"Mix")->setValueNotifyingHost(.8f);
+        bypass.state.getParameter(effect+"Enabled")->setValueNotifyingHost(0);
+        for(auto* synth:{&bypass,&dry}) {
+            auto* time=synth->state.getParameter("delayTime");time->setValueNotifyingHost(time->convertTo0to1(80));
+            synth->prepareToPlay(48000,512);
+        }
+        juce::AudioBuffer<float> a(2,512),b(2,512);juce::MidiBuffer ma,mb;
+        ma.addEvent(juce::MidiMessage::noteOn(1,72,.8f),0);mb.addEvent(juce::MidiMessage::noteOn(1,72,.8f),0);
+        for(int block=0;block<60;++block) {
+            bypass.processBlock(a,ma);dry.processBlock(b,mb);
+            for(int c=0;c<2;++c) for(int i=0;i<512;++i)
+                require(a.getSample(c,i)==b.getSample(c,i),"Disabled effects must preserve the dry signal");
+        }
+        require(std::abs(bypass.state.getRawParameterValue(effect+"Mix")->load()-.8f)<.001f,"Bypass must preserve the chosen effect mix");
+        bypass.state.getParameter(effect+"Enabled")->setValueNotifyingHost(1);
+        double difference=0;
+        for(int block=0;block<50;++block) {
+            bypass.processBlock(a,ma);dry.processBlock(b,mb);
+            for(int i=0;i<512;++i) difference+=std::abs(a.getSample(0,i)-b.getSample(0,i));
+        }
+        require(difference>.01,"Re-enabling an effect must restore its audible processing");
+    }
 }
 
 int main() {
@@ -354,6 +381,24 @@ int main() {
     auto* tabs=findTabBar(*builder.findGuiItemWithId("sound-controls"));
     require(tabs && tabs->getNumTabs()==6,"The interface must expose the Tape tab");
     require(builder.findGuiItemWithId("preset-bar") && builder.findGuiItemWithId("instrument-body"),"The preset library and physical case must be present");
+    auto* shellItem=builder.findGuiItemWithId("shell");auto* panelItem=builder.findGuiItemWithId("sound-controls");
+    require(shellItem->getLocalBounds().reduced(24).contains(shellItem->getLocalArea(panelItem,panelItem->getLocalBounds())),"The tabbed panel must stay inside the instrument with a safe edge margin");
+    for(auto page:shell.getChildWithProperty("id","sound-controls")) {
+        auto* pageItem=builder.findGuiItemWithId(page.getProperty("id").toString());
+        for(auto node:page) if(auto* control=builder.findGuiItemWithId(node.getProperty("id").toString())) {
+            const auto bounds=pageItem->getLocalArea(control,control->getLocalBounds());
+            if(!pageItem->getLocalBounds().contains(bounds)) std::cerr << "Control outside tab: " << node.getProperty("id").toString() << ' ' << bounds.toString() << " in " << pageItem->getLocalBounds().toString() << '\n';
+            require(pageItem->getLocalBounds().contains(bounds),"Every tab control must remain inside its panel");
+        }
+    }
+    for(const auto* id:{"delayEnabled","reverbEnabled"}) {
+        auto* button=dynamic_cast<juce::TextButton*>(builder.findGuiItemWithId(id)->getWrappedComponent());
+        require(button && static_cast<bool>(button->getProperties()["physical-switch"]),"Delay and reverb must have physical bypass buttons");
+        button->setToggleState(false,juce::sendNotificationSync);
+        require(restored.state.getRawParameterValue(id)->load()==0,"Effect button must switch processing off");
+        button->setToggleState(true,juce::sendNotificationSync);
+        require(restored.state.getRawParameterValue(id)->load()==1,"Effect button must switch processing back on");
+    }
     tabs->setCurrentTabIndex(2);
     auto* syncButton=dynamic_cast<juce::TextButton*>(builder.findGuiItemWithId("delaySync")->getWrappedComponent());
     auto* timing=builder.findGuiItemWithId("delayTime")->getWrappedComponent();
@@ -466,6 +511,7 @@ int main() {
     require(wetTail>0.0001 && wetTail>dryTail*10,"Delay and reverb must produce audible tails after source mute");
     checkPresetLibrary();
     checkTempoAndAmbience();
+    checkEffectBypass();
     checkChordReleaseAndTape();
     require(backgroundPassed,"Every host and theme must render the same opaque neutral outer background");
     processor.releaseResources();

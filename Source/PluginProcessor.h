@@ -67,7 +67,7 @@ private:
 private:
     enum Param { Gain,Tone,Sustain,Vibrato,Chord,Pad,HarpGain,OrganGain,OrganSound,
         OrganTone,OrganOctave,HarpSound,HarpAttack,HarpQuantize,DelayTime,DelayFeedback,
-        DelayMix,ReverbSize,ReverbDamping,ReverbMix,ComputerKeys,Major7,OrganSpread,OrganChorus,Theme,ChordSustain,TapeEnabled,TapeNoise,TapeWow,TapeFlutter,TapeDrive,OrganModel,OrganRotary,OrganPercussion,ReverbPredelay,ReverbLow,ReverbMid,ReverbHigh,ReverbEarly,DelaySync,DelayDivision,DelayTempo,NumParams };
+        DelayMix,ReverbSize,ReverbDamping,ReverbMix,ComputerKeys,Major7,OrganSpread,OrganChorus,Theme,ChordSustain,TapeEnabled,TapeNoise,TapeWow,TapeFlutter,TapeDrive,OrganModel,OrganRotary,OrganPercussion,ReverbPredelay,ReverbLow,ReverbMid,ReverbHigh,ReverbEarly,DelaySync,DelayDivision,DelayTempo,DelayEnabled,ReverbEnabled,NumParams };
     std::array<std::atomic<float>*,NumParams> raw{};
     juce::RangedAudioParameter* chordParameter=nullptr;
     juce::RangedAudioParameter* major7Parameter=nullptr;
