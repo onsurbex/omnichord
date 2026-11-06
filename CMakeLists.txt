@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(Omnichord VERSION 0.4.0 LANGUAGES C CXX)
+project(Omnichord VERSION 0.4.1 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(CHORDHARP_DSP_ONLY "Build the engine tests without JUCE" OFF)
@@ -44,7 +44,7 @@ set(CHORDHARP_LOGO "${CMAKE_CURRENT_SOURCE_DIR}/Assets/BlinblinLogo.png")
 juce_add_binary_data(OmnichordBrand
     HEADER_NAME BinaryData.h
     NAMESPACE BinaryData
-    SOURCES "${CHORDHARP_LOGO}" Assets/magic.xml)
+    SOURCES "${CHORDHARP_LOGO}" Assets/BlinblinLogo_white.png Assets/magic.xml)
 target_link_libraries(Omnichord PRIVATE OmnichordBrand)
 target_compile_definitions(Omnichord PUBLIC
     JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0

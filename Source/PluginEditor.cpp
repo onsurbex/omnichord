@@ -108,20 +108,21 @@ void StrumStrip::play(int y) {
 namespace {
 class LogoView final : public juce::Component {
 public:
-    explicit LogoView(ChordHarpProcessor& p):processor(p),logo(embeddedLogo()) {}
+    explicit LogoView(ChordHarpProcessor& p):processor(p),logo(embeddedLogo()),
+        whiteLogo(juce::ImageCache::getFromMemory(BinaryData::BlinblinLogo_white_png,BinaryData::BlinblinLogo_white_pngSize)) {}
     void paint(juce::Graphics& g) override {
-        if(processor.state.getRawParameterValue("theme")->load()>0.5f) {
-            g.setColour(cream); g.fillRoundedRectangle(getLocalBounds().toFloat(),12);
-        }
+        const auto theme=static_cast<int>(processor.state.getRawParameterValue("theme")->load());
+        const auto background=omnichord::logoBackground(processor.magicState.getGuiTree(),theme);
+        const auto& image=omnichord::useWhiteLogo(background)?whiteLogo:logo;
         g.setColour(juce::Colours::white);
-        g.drawImageWithin(logo,0,0,getWidth(),getHeight(),juce::RectanglePlacement::centred);
+        g.drawImageWithin(image,0,0,getWidth(),getHeight(),juce::RectanglePlacement::centred);
     }
     void configure(foleys::GuiItem&) {}
     static std::vector<std::pair<juce::String,int>> colours() { return {}; }
     static std::vector<foleys::SettableProperty> properties(const juce::ValueTree&) { return {}; }
 private:
     ChordHarpProcessor& processor;
-    juce::Image logo;
+    juce::Image logo,whiteLogo;
 };
 
 class ChordDisplay final : public juce::Component,private juce::Timer {

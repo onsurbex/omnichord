@@ -1,19 +1,32 @@
 #pragma once
 #include <JuceHeader.h>
 #include <array>
+#include <cmath>
 
 namespace omnichord {
 // The first theme resolves every palette entry to the colour in the user's XML.
 struct Theme { const char* name; juce::uint32 panel,ink,accent,button,outer,harp,string; };
 inline const std::array<Theme,6> themes{{
     {"Personalizado",0xffeee6cf,0xff263e38,0xffb66b44,0xffdad3bc,0xff172a25,0xff193328,0xffb9ae7a},
-    {"Crema",0xfff2e7cf,0xff3f4335,0xffbd704a,0xffded2b6,0xff303a30,0xff30433b,0xffd4b77a},
+    {"Pinky",0xfff0d6e9,0xff45363e,0xffbe4b88,0xffdeb5d8,0xff3a3139,0xff453144,0xffd378bb},
     {"Medianoche",0xff242c40,0xffe3e8f4,0xff96a9ef,0xff39445e,0xff121827,0xff141d30,0xff9fadd5},
     {"Bosque",0xffdce7d8,0xff253e32,0xff55836b,0xffbdcebb,0xff1a3028,0xff243f34,0xffc2d6a0},
     {"Coral",0xfff7dfd4,0xff613d42,0xffc56c69,0xffe6beb5,0xff54343b,0xff5b3940,0xffedbd98},
     {"Lavanda",0xffe9e1f2,0xff453d60,0xff9674b7,0xffcec0de,0xff332b48,0xff403455,0xffcbb0e6}
 }};
 inline juce::StringArray themeNames() { juce::StringArray names; for(const auto& t:themes) names.add(t.name); return names; }
+inline juce::Colour logoBackground(juce::ValueTree layout,int theme) {
+    theme=juce::jlimit(0,static_cast<int>(themes.size())-1,theme);
+    const auto palette=layout.getChildWithName("Styles").getChild(0).getChildWithName("Palettes").getChild(0);
+    auto colour=layout.getChildWithName("View").getChildWithProperty("id","shell").getProperty("background-color").toString();
+    if(colour.startsWithChar('$')) colour=palette.getProperty(colour.substring(1)).toString();
+    return colour.isEmpty()?juce::Colour(themes[static_cast<size_t>(theme)].panel):juce::Colour::fromString(colour);
+}
+inline bool useWhiteLogo(juce::Colour background) {
+    const auto linear=[](float c) { return c<=0.04045f?c/12.92:std::pow((c+0.055)/1.055,2.4); };
+    const double luminance=0.2126*linear(background.getFloatRed())+0.7152*linear(background.getFloatGreen())+0.0722*linear(background.getFloatBlue());
+    return 1.05/(luminance+0.05)>(luminance+0.05)/0.05;
+}
 inline bool isColourProperty(const juce::Identifier& id) {
     const auto s=id.toString();
     return s.contains("color") || s.contains("colour") || (s.startsWith("slider-") && !s.contains("type") && !s.contains("textbox"))

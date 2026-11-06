@@ -49,7 +49,7 @@ de edición de Foleys. Conservan el diseño de `Assets/magic.xml` y los temas.
 La firma es ad hoc, sin notarización de Apple; la carga en Ableton y la fidelidad
 respecto al instrumento real requieren una prueba manual en un Mac.
 
-El artefacto incluye **Omnichord-0.4.0.pkg**. Ábrelo con el instalador de macOS:
+El artefacto incluye **Omnichord-0.4.1.pkg**. Ábrelo con el instalador de macOS:
 instala el VST3 en `/Library/Audio/Plug-Ins/VST3/Omnichord.vst3` y la aplicación
 en `/Applications/Omnichord.app`. El asistente solicita permisos de administrador.
 Después vuelve a explorar los plugins en Ableton Live. La compilación automática
@@ -91,7 +91,10 @@ y superficie de rasgueo vertical a la derecha. La rejilla de altavoz es decorati
 El logo original de BLINBLIN, `Assets/BlinblinLogo.png`, viene incluido en el
 VST3 y en la aplicación. Aparece automáticamente al abrir el instrumento,
 conservando su transparencia y proporciones, sin necesitar un archivo externo.
-La marca es fija: se ha eliminado el selector de imagen y se ignoran los logos
+El logo se muestra sin un recuadro de fondo. Se incluyen las variantes normal
+y blanca, elegidas automáticamente por contraste con el color real del panel,
+también al editar Personalizado. Pinky sustituye a Crema en el mismo índice,
+conservando la selección de los proyectos existentes. La marca es fija: se ha eliminado el selector de imagen y se ignoran los logos
 personalizados de sesiones antiguas. El editor visual permite colocar y escalar
 el componente, conservando siempre el PNG original incluido.
 El workflow incluye una captura real del editor en el artefacto descargable.
@@ -231,7 +234,7 @@ propio decaimiento, independiente de este botón.
 ## Temas de color
 
 En la parte superior del panel, abre el desplegable con los cuadrados de color.
-Cada opción incluye cuatro muestras: **Personalizado, Crema, Medianoche, Bosque,
+Cada opción incluye cuatro muestras: **Personalizado, Pinky, Medianoche, Bosque,
 Coral y Lavanda**. Cambiar de tema recolorea el panel, los controles y el arpa;
 conserva las posiciones de tu XML y la imagen original del logo. La elección se
 guarda con el proyecto de Ableton y con el estado de la aplicación standalone.
