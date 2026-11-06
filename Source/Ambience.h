@@ -3,6 +3,7 @@
 #include <array>
 #include <vector>
 #include <cmath>
+#include "CircularRead.h"
 
 namespace chordharp {
 class Ambience {
@@ -39,8 +40,7 @@ class Ambience {
     std::array<float,3> eqGain{};
     int eqTick=0;
     static float read(const std::vector<float>& buffer,size_t write,double delay) {
-        double position=static_cast<double>(write)-delay;
-        if(position<0) position+=static_cast<double>(buffer.size());
+        const double position=circularReadPosition(write,delay,buffer.size());
         const auto index=static_cast<size_t>(position); const float f=static_cast<float>(position-index);
         return buffer[index]+f*(buffer[(index+1)%buffer.size()]-buffer[index]);
     }

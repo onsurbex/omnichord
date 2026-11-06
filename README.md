@@ -48,7 +48,7 @@ de edición de Foleys. Conservan el diseño de `Assets/magic.xml` y los temas.
 La firma es ad hoc, sin notarización de Apple; la carga en Ableton y la fidelidad
 respecto al instrumento real requieren una prueba manual en un Mac.
 
-El artefacto incluye **Omnichord-0.5.0.pkg**. Ábrelo con el instalador de macOS:
+El artefacto incluye **Omnichord-0.5.1.pkg**. Ábrelo con el instalador de macOS:
 instala el VST3 en `/Library/Audio/Plug-Ins/VST3/Omnichord.vst3` y la aplicación
 en `/Applications/Omnichord.app`. El asistente solicita permisos de administrador.
 Después vuelve a explorar los plugins en Ableton Live. La compilación automática
@@ -315,3 +315,16 @@ c++ -std=c++17 -Wall -Wextra -Wpedantic -O2 -ISource tests/engine_tests.cpp -o w
 Las pruebas comprueban las cuatro familias de acordes, el mapa MIDI y del Mac,
 el decaimiento, el estéreo, el silencio y la estabilidad de voces a
 44.1, 48 y 96 kHz; no miden fidelidad respecto a hardware real.
+
+Con JUCE también puedes ejecutar las comprobaciones de presets, interfaz,
+tempo del host y efectos:
+
+```sh
+cmake -S . -B build -DJUCE_PATH="$HOME/Developer/JUCE" -DCHORDHARP_PLUGIN_TESTS=ON -DCHORDHARP_GUI_EDITOR=OFF
+cmake --build build --config Release --target engine_tests processor_tests ambience_tests
+ctest --test-dir build -C Release --output-on-failure
+```
+
+`ambience_tests` usa AddressSanitizer y UndefinedBehaviorSanitizer con Clang/GCC
+para verificar las lecturas de reverb, delay y Tape. Incluye el caso de redondeo
+en el extremo del búfer que se corrige en la 0.5.1.

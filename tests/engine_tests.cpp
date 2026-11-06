@@ -6,9 +6,16 @@
 #include "Tempo.h"
 #include <cstdlib>
 #include <iostream>
+#include <limits>
 void require(bool condition,const char* message) { if(!condition) { std::cerr<<message<<'\n'; std::exit(1); } }
 int main() {
     using namespace chordharp;
+    for(size_t length:{size_t(5764),size_t(12484),size_t(657604)})
+        for(size_t write:{size_t(0),size_t(1),size_t(1764),length-1}) {
+            const auto delay=std::nextafter(static_cast<double>(write),std::numeric_limits<double>::infinity());
+            const auto position=circularReadPosition(write,delay,length);
+            require(position>=0 && position<static_cast<double>(length),"Fractional circular reads must stay in bounds at rounded wrap endpoints");
+        }
     require(chordNote(0,0,0)==48 && chordNote(0,0,1)==52 && chordNote(0,0,3)==60,"Major voicing");
     require(chordNote(0,1,1)==51 && chordNote(0,2,3)==58,"Minor/seventh voicing");
     for(int quality=0;quality<4;++quality) for(int col=0;col<12;++col)

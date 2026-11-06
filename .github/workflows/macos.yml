@@ -28,7 +28,7 @@ jobs:
           -DCHORDHARP_PLUGIN_TESTS=ON
           -DCHORDHARP_GUI_EDITOR=OFF
       - name: Build instrument and tests
-        run: cmake --build build --config Release --parallel 3 --target Omnichord_VST3 Omnichord_Standalone engine_tests processor_tests
+        run: cmake --build build --config Release --parallel 3 --target Omnichord_VST3 Omnichord_Standalone engine_tests processor_tests ambience_tests
       - name: Test engine and JUCE processor
         run: ctest --test-dir build -C Release --output-on-failure
       - name: Check universal binaries and local signatures

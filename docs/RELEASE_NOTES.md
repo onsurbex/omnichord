@@ -1,4 +1,6 @@
-Omnichord 0.5.0 para macOS 11 o posterior, Apple Silicon e Intel.
+Omnichord 0.5.1 para macOS 11 o posterior, Apple Silicon e Intel.
+
+Sustituye a la 0.5.0 retirada. Corrige una lectura fuera de limites en el punto de vuelta de los buffers fraccionarios y añade una prueba de regresion del redondeo.
 
 - Fondo gris neutro totalmente opaco, común a standalone, VST3 y todos los temas. Carcasa redondeada con relieve, reborde, sombreado, textura sutil y tornillos.
 - Once selecciones de órgano: los sonidos clásicos, cuatro registros de iglesia y tres tonewheel. Síntesis aditiva de registros y nueve tiradores, suboctava de 16 pies, foldback, percusión y rotary estéreo. Controles Rotary y Percusión. Las sesiones antiguas conservan su órgano clásico.

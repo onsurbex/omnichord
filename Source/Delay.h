@@ -3,6 +3,7 @@
 #include <array>
 #include <cmath>
 #include <vector>
+#include "CircularRead.h"
 
 namespace chordharp {
 class StereoDelay {
@@ -36,8 +37,7 @@ public:
     }
 private:
     float read(size_t channel,double delay) const {
-        double position=static_cast<double>(write)-delay;
-        if(position<0) position+=static_cast<double>(buffer[channel].size());
+        const double position=circularReadPosition(write,delay,buffer[channel].size());
         const auto first=static_cast<size_t>(position);
         const auto second=(first+1)%buffer[channel].size();
         const float fraction=static_cast<float>(position-static_cast<double>(first));
