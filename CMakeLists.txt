@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(Omnichord VERSION 0.5.1 LANGUAGES C CXX)
+project(Omnichord VERSION 0.5.2 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(CHORDHARP_DSP_ONLY "Build the engine tests without JUCE" OFF)
@@ -26,6 +26,7 @@ juce_add_plugin(Omnichord
     PLUGIN_MANUFACTURER_CODE Chhp
     PLUGIN_CODE Ch01
     PRODUCT_NAME "Omnichord"
+    ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/Assets/omnichord.png"
     FORMATS VST3 Standalone
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
