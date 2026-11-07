@@ -15,6 +15,10 @@ static void require(bool condition, const char* message) {
     if (!condition) { std::cerr << message << '\n'; std::exit(1); }
 }
 static bool backgroundPassed=true;
+static void waitForGui(const std::function<bool()>& ready,const char* message) {
+    for(int attempt=0;attempt<40 && !ready();++attempt)juce::MessageManager::getInstance()->runDispatchLoopUntil(50);
+    require(ready(),message);
+}
 
 static juce::TabbedButtonBar* findTabBar(juce::Component& parent) {
     if(auto* tabs=dynamic_cast<juce::TabbedButtonBar*>(&parent)) return tabs;
@@ -562,7 +566,7 @@ int main() {
     juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
     auto palette=restored.magicState.getGuiTree().getChildWithName("Styles").getChild(0).getChildWithName("Palettes").getChild(0);
     require(restored.state.getRawParameterValue("theme")->load()==2,"Theme dropdown must set the selected theme");
-    require(palette.getProperty("color-ffeee6cf").toString()=="ff242c40","Midnight must recolour the actual panel palette");
+    waitForGui([&]{return palette.getProperty("color-ffeee6cf").toString()=="ff242c40";},"Midnight must recolour the actual panel palette");
     require(shell.getProperty("background-color")==panelBefore && gainNode.getProperty("pos-x")==originalX,"Themes preserve layout positions and palette references");
     require(pad->findColour(juce::TextButton::buttonOnColourId)==juce::Colour(0xfff0ca59) && follow->findColour(juce::TextButton::buttonOnColourId)==juce::Colour(0xfff0ca59),"Organ and Follow Chords stay yellow in every theme");
     require(sustainSwitch->findColour(juce::TextButton::buttonOnColourId)==juce::Colour(0xff96a9ef),"Sustain button must use the active theme colour");
@@ -676,7 +680,7 @@ int main() {
     juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
     theme->setSelectedId(1,juce::sendNotificationSync);
     juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
-    require(palette.getProperty("color-ffeee6cf").toString()=="fff0ddbb","Personalizado must recover manual palette edits after switching themes");
+    waitForGui([&]{return palette.getProperty("color-ffeee6cf").toString()=="fff0ddbb";},"Personalizado must recover manual palette edits after switching themes");
     theme->setSelectedId(3,juce::sendNotificationSync);
     juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
     maj7->setState(juce::Button::buttonDown); maj7->setState(juce::Button::buttonNormal);
