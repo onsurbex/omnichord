@@ -57,13 +57,17 @@ public:
     unsigned getPresetRevision() const { return presetRevision.load(); }
     static juce::StringArray factoryPresetNames();
     static juce::String fmOperatorID(bool organ,int op,const juce::String& field);
-    static juce::StringArray synthSoundNames(bool organ);
+    juce::StringArray synthSoundNames(bool organ) const;
     chordharp::FMPatch getFMPatch(bool organ) const;
     int getSynthChoice(bool organ) const;
     void selectSynthSound(bool organ,int choice);
     bool loadSampleLibrary(const juce::File&,juce::String& error);
     juce::StringArray sampleNames() const;
+    std::vector<std::pair<int,juce::String>> sampleChoices(bool loops=false) const;
+    std::vector<std::pair<int,juce::String>> drumChoices() const;
+    void selectSampleSound(int index,bool activate=true);
     juce::String sampleLibraryPath() const;
+    juce::String sampleLibraryReference() const;
     unsigned getSampleRevision() const {return sampleRevision.load();}
     int rhythmStep() const {return playingStep.load();}
     static juce::String rhythmStepID(int track,int step);
@@ -74,12 +78,14 @@ private:
     juce::ValueTree factoryPreset;
     juce::String presetName="Inicio",presetSource="factory:0";
     std::atomic<unsigned> presetRevision{0};
+    std::atomic<bool> presetReset{false};
     mutable juce::CriticalSection presetLock;
     void updatePresetName(const juce::String&,const juce::String& source="project");
     juce::ValueTree capturePreset(const juce::String&) const;
     bool applyPreset(const juce::ValueTree&,juce::String&);
     bool writePreset(const juce::File&,const juce::ValueTree&,juce::String&) const;
     void loadStartupPreset();
+    bool restoreSampleLibrary(const juce::String&,juce::String&);
     void readSynthParameters();
     struct SynthReferences {
         std::array<std::atomic<float>*,9> common{};
@@ -100,11 +106,12 @@ private:
     chordharp::SynthFilter sampleFilter;
     chordharp::DCBlocker sampleDC;
     std::unique_ptr<SampleLibrary> sampleLibrary;
+    juce::String factoryLibraryPath;
     std::atomic<unsigned> sampleRevision{0};
     std::atomic<int> playingStep{-1};
     mutable juce::CriticalSection libraryLock;
     bool rhythmMuted=false,lastRhythmEnabled=false;
-    std::array<std::atomic<float>*,9> rhythmRaw{};
+    std::array<std::atomic<float>*,11> rhythmRaw{};
     std::array<std::array<std::atomic<float>*,16>,5> stepRaw{};
     std::array<std::atomic<float>*,5> trackRaw{},sampleRaw{};
     void readRhythmParameters(bool,double,bool);

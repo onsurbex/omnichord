@@ -50,5 +50,27 @@ int main(){
     SampleChords chords;chords.sound=&loop;chords.rootNote=60;chords.loop=true;chords.prepare(48000,16);chords.chord(0,3,true,0);
     double chordEnergy=0;for(int i=0;i<96000;++i){const auto a=chords.next();require(std::isfinite(a[0]),"Sampled chords must stay in bounds while looping");chordEnergy+=a[0]*a[0];}
     require(chordEnergy>1,"A single sample must create an audible polyphonic chord");chords.chord(0,3,false,0);for(int i=0;i<24000;++i)chords.next();require(chords.next()[0]==0,"Sampled chords must release all voices");
+    SampleAudio beat;beat.rate=48000;beat.beats=4;
+    for(auto& c:beat.channel){c.resize(115200);for(size_t i=0;i<c.size();++i)c[i]=.1f*static_cast<float>(std::sin(tau*440*i/beat.rate));}
+    for(double tempo:{60.,100.,140.,200.}) {
+        BeatLoop player;player.prepare(48000);double si=0,co=0,shiftedSin=0,shiftedCos=0;
+        for(int i=0;i<96000;++i) {
+            const double step=tempo/(60*48000);const auto a=player.next(&beat,i*step,step);
+            require(std::isfinite(a[0]) && a[0]==a[1],"Time-stretched loops must stay finite and preserve stereo coherence");
+            if(i>24000){si+=a[0]*std::sin(tau*440*i/48000);co+=a[0]*std::cos(tau*440*i/48000);
+                shiftedSin+=a[0]*std::sin(tau*440*tempo/100*i/48000);shiftedCos+=a[0]*std::cos(tau*440*tempo/100*i/48000);}
+        }
+        require(std::hypot(si,co)>3000,"Tempo changes must preserve the recorded loop's pitch");
+        if(tempo!=100)require(std::hypot(si,co)>100*std::hypot(shiftedSin,shiftedCos),"Loop synchronization must not use pitch-changing varispeed");
+    }
+    for(double rate:{8000.,16000.,44100.,48000.,96000.,192000.}) {
+        Rhythm transport;transport.prepare(rate);transport.enabled=true;transport.useLoop=true;transport.loopSound=&beat;transport.bpm=140;
+        transport.beginBlock(true,15.99,true);double energy=0;
+        for(int i=0;i<4096;++i){const auto a=transport.next();require(std::isfinite(a[0]),"Loops must wrap safely across four-bar boundaries");energy+=a[0]*a[0];}
+        require(energy>.1,"Recorded rhythm loops must produce audio");
+        transport.beginBlock(true,0,false);for(int i=0;i<static_cast<int>(rate*.05);++i)transport.next();require(transport.next()[0]==0,"Host stop must fade recorded loops to silence");
+        transport.beginBlock(true,0,true);for(int i=0;i<1024;++i)transport.next();require(std::abs(transport.next()[0])>1e-6,"Host rewind/play must restart recorded loops");
+        transport.enabled=false;transport.reset();require(transport.next()[0]==0,"Loop panic must clear overlap and output history");
+    }
     std::cout<<"FM operators, all 32 algorithms, unison 1-7, filters, samples and tempo-synced rhythm checks passed\n";
 }

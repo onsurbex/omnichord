@@ -63,8 +63,7 @@ jobs:
           cp -R licenses package/
           cp Assets/magic.xml package/
           cp build/Omnichord-preview.png package/
-          cp build/Omnichord-midnight-preview.png package/
-          cp build/Omnichord-tape-preview.png package/
+          cp build/Omnichord-*-preview.png package/
           ditto -c -k --sequesterRsrc --keepParent package Omnichord-macOS-universal.zip
       - uses: actions/upload-artifact@v4
         with:
@@ -72,7 +71,5 @@ jobs:
           path: |
             Omnichord-*.pkg
             Omnichord-macOS-universal.zip
-            build/Omnichord-preview.png
-            build/Omnichord-midnight-preview.png
-            build/Omnichord-tape-preview.png
+            build/Omnichord*preview.png
           if-no-files-found: error

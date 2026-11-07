@@ -1,4 +1,5 @@
 #include "SampleLibrary.h"
+#include "FactorySamples.h"
 
 std::unique_ptr<SampleLibrary> SampleLibrary::readZip(const juce::File& file,juce::String& error) {
     error.clear();
@@ -29,20 +30,47 @@ std::unique_ptr<SampleLibrary> SampleLibrary::readZip(const juce::File& file,juc
         juce::AudioBuffer<float> buffer(2,count);
         if(!reader->read(&buffer,0,count,0,true,true)) {error="No se puede decodificar "+entry->filename;return {};}
         if(reader->numChannels==1)buffer.copyFrom(1,0,buffer,0,0,count);
-        SampleEntry sound;sound.name=entry->filename;sound.audio.rate=reader->sampleRate;
+        SampleEntry sound;sound.path=entry->filename.replace("\\","/");
+        const auto leaf=sound.path.substring(sound.path.lastIndexOfChar('/')+1);
+        sound.name=leaf.upToLastOccurrenceOf(".",false,false);sound.audio.rate=reader->sampleRate;
+        const auto lower=sound.path.toLowerCase();
+        if(lower.contains("drum loops/")) {
+            // The supplied loops are four bars at 100 BPM. Other imported
+            // loops may state a different tempo as their last filename token.
+            const int writtenTempo=sound.name.getTrailingIntValue();
+            const double bpm=writtenTempo>=20 && writtenTempo<=400?writtenTempo:100;
+            sound.audio.beats=std::max(1.,std::round(count/reader->sampleRate*bpm/60));
+        }
+        const auto basename=sound.name.toLowerCase();
+        sound.audio.drum=lower.contains("drum hits/") || basename.contains("kick") || basename.contains("snare")
+            || basename.contains("hat") || basename.contains("cajon") || basename.contains("clave") || basename.contains("perc");
+        sound.audio.openHat=basename.contains("open") || basename.contains("ohh");
+        for(const auto& info:chordharp::factorySamples)if(sound.name.equalsIgnoreCase(info.name)) {
+            sound.audio.root=info.root;sound.audio.gain=info.gain;sound.audio.sustain=info.sustain;
+        }
         for(size_t c=0;c<2;++c) {
             auto& data=sound.audio.channel[c];data.assign(buffer.getReadPointer(static_cast<int>(c)),buffer.getReadPointer(static_cast<int>(c))+count);
             for(auto& value:data)if(!std::isfinite(value)){error="El sample contiene audio no finito.";return {};}
         }
         result->entries.push_back(std::move(sound));
     }
+    for(size_t i=0;i<result->entries.size();++i) {
+        const auto& audio=result->entries[i].audio;
+        if(audio.beats>0)result->loops.push_back(static_cast<int>(i));
+        else if(!audio.drum)result->instruments.push_back(static_cast<int>(i));
+    }
     for(int track=0;track<5;++track)result->autoDrums[static_cast<size_t>(track)]=result->drumForTrack(track);
+    // This pack has no open hi-hat. Its auxiliary lane uses the real cajon;
+    // the alternate snare remains available in the assignment menu.
+    if(result->autoDrums[3]<0)for(size_t i=0;i<result->entries.size();++i)
+        if(result->entries[i].name.containsIgnoreCase("cajon")){result->autoDrums[3]=static_cast<int>(i);break;}
     return result;
 }
 int SampleLibrary::drumForTrack(int track) const {
     static const juce::StringArray terms[]{ {"kick","bass drum","bd_","_bd","bombo"},{"snare","sd_","_sd","caja","clap"},{"closed","chh","hat","hh_"},{"open","ohh"},{"rim","perc","tom","clave","cowbell","conga","bongo"} };
     if(track<0 || track>=5)return -1;
     for(size_t i=0;i<entries.size();++i) {
+        if(entries[i].audio.beats>0 || !entries[i].audio.drum)continue;
         const auto name=entries[i].name.toLowerCase();
         if(track==2 && (name.contains("open") || name.contains("ohh")))continue;
         for(const auto& term:terms[track])if(name.contains(term))return static_cast<int>(i);
