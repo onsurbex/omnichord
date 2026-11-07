@@ -263,7 +263,7 @@ Haz clic en un paso para crear un patrón Custom a partir del elegido. Sus
 80 pasos, el patrón, asignaciones, volumen, swing y envío a efectos se guardan
 con presets y proyectos. VOL controla la batería; FX envía parte de su señal al
 delay/reverb. Tape y GENERAL procesan toda la mezcla. SILENCIO detiene también
-los samples y la batería; pulsa PLAY de nuevo para reanudar el ritmo.
+los samples y la batería; desactiva y reactiva PLAY para reanudar el ritmo.
 
 ## Biblioteca de presets y estado de inicio
 

@@ -13,7 +13,7 @@ inline constexpr std::array<std::array<std::uint16_t,5>,6> rhythmPatterns{{
 class Rhythm {
     std::array<SampleVoice,24> voices{};double rate=48000,phase=0;std::int64_t nextStep=0;bool lastRun=false;
     bool hostPosition=false;double blockPpq=0;int frame=0;
-    int latency=0,write=0;std::array<std::array<float,2>,33> alignment{};
+    float smoothedVolume=.7f,volumeCoefficient=.001f;int latency=0,write=0;std::array<std::array<float,2>,33> alignment{};
     double scheduled(std::int64_t step) const {return (static_cast<double>(step)+(step%2!=0?std::clamp(swing,0.f,.6f):0.f))*.25;}
     void seek(double ppq) {nextStep=static_cast<std::int64_t>(std::floor(ppq*4));if(scheduled(nextStep)<ppq-1e-10)++nextStep;}
 public:
@@ -21,7 +21,7 @@ public:
     std::array<std::uint16_t,5> custom{};
     std::array<const SampleAudio*,5> samples{};
     int lastStep=-1;std::array<int,5> hits{};
-    void prepare(double sampleRate,int delay=0){rate=sampleRate;latency=std::clamp(delay,0,32);reset();}
+    void prepare(double sampleRate,int delay=0){rate=sampleRate;volumeCoefficient=static_cast<float>(1-std::exp(-1/(rate*.02)));smoothedVolume=volume;latency=std::clamp(delay,0,32);reset();}
     void reset(){alignment={};write=0;voices={};phase=0;nextStep=0;lastRun=false;lastStep=-1;hits={};}
     void beginBlock(bool hasPpq,double ppq,bool playing) {
         hostPosition=hasPpq;blockPpq=ppq;hostPlaying=playing;frame=0;
@@ -53,8 +53,8 @@ public:
             }
             phase=ppq+std::clamp(bpm,20.,400.)/(60*rate);
         }
-        ++frame;std::array<float,2> audio{};
-        for(auto& voice:voices)if(voice.audio){const auto a=voice.next(rate);audio[0]+=a[0]*volume;audio[1]+=a[1]*volume;}
+        ++frame;smoothedVolume+=(volume-smoothedVolume)*volumeCoefficient;std::array<float,2> audio{};
+        for(auto& voice:voices)if(voice.audio){const auto a=voice.next(rate);audio[0]+=a[0]*smoothedVolume;audio[1]+=a[1]*smoothedVolume;}
         alignment[static_cast<size_t>(write)]=audio;const auto output=alignment[static_cast<size_t>((write+33-latency)%33)];write=(write+1)%33;return output;
     }
 };

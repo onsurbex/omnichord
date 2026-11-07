@@ -22,8 +22,8 @@ struct SampleVoice {
         audio=sound;position=0;speed=sound?sound->rate/playbackRate*pitch:1;this->playbackRate=playbackRate;gain=velocity;envelope=0;gate=true;loop=looping;attackStep=static_cast<float>(1/(playbackRate*.0005));
     }
     void stop(float seconds=.04f) {gate=false;releaseStep=envelope/static_cast<float>(std::max(1.,playbackRate*seconds));}
-    std::array<float,2> next(double rate) {
-        if(!audio || audio->frames()<4)return {};
+    std::array<float,2> next(double /*rate*/) {
+        if(!audio || audio->frames()<4){audio=nullptr;return {};}
         envelope=gate?std::min(1.f,envelope+attackStep):std::max(0.f,envelope-releaseStep);
         if(!gate && envelope<1e-5f){audio=nullptr;return {};}
         const double end=static_cast<double>(audio->frames());

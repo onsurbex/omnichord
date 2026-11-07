@@ -153,6 +153,8 @@ ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(Bus
     magicState.addTrigger("silence",[this] {
         auto* parameter=state.getParameter("pad");
         parameter->beginChangeGesture(); parameter->setValueNotifyingHost(0); parameter->endChangeGesture();
+        auto* rhythmPlay=state.getParameter("rhythmEnabled");
+        rhythmPlay->beginChangeGesture();rhythmPlay->setValueNotifyingHost(0);rhythmPlay->endChangeGesture();
         panic.store(true);
     });
 }
