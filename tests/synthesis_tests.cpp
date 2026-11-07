@@ -63,7 +63,7 @@ int main(){
         require(std::hypot(si,co)>3000,"Tempo changes must preserve the recorded loop's pitch");
         if(tempo!=100)require(std::hypot(si,co)>100*std::hypot(shiftedSin,shiftedCos),"Loop synchronization must not use pitch-changing varispeed");
     }
-    for(double rate:{44100.,48000.,96000.}) {
+    for(double rate:{8000.,16000.,44100.,48000.,96000.,192000.}) {
         Rhythm transport;transport.prepare(rate);transport.enabled=true;transport.useLoop=true;transport.loopSound=&beat;transport.bpm=140;
         transport.beginBlock(true,15.99,true);double energy=0;
         for(int i=0;i<4096;++i){const auto a=transport.next();require(std::isfinite(a[0]),"Loops must wrap safely across four-bar boundaries");energy+=a[0]*a[0];}

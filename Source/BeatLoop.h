@@ -20,7 +20,7 @@ class BeatLoop {
     }
     double match(double expected) const {
         const double tail=previous+hop*step;
-        const int stride=std::max(1,hop/96),radius=static_cast<int>(active->rate*.006);
+        const int stride=std::max(1,(hop+95)/96),radius=static_cast<int>(active->rate*.006);
         std::array<float,128> reference{};int length=0;
         for(int i=0;i<hop;i+=stride)reference[static_cast<size_t>(length++)]=mono(tail+i*step);
         const auto error=[&](double offset) {
