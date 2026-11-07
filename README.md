@@ -431,7 +431,7 @@ el ritmo; SILENCIO y All Sound Off mantienen su función de parada completa.
 Sin posición PPQ también se respeta Play/Stop; en standalone PLAY controla
 el reloj interno.
 
-Organ sube unos 6 dB y FM 4.5 dB en la calibración de sus fuentes. Los cinco
+Organ sube unos 9 dB y FM 7.5 dB en la calibración de sus fuentes. Los cinco
 samples de fábrica tienen compensaciones individuales para acercarlos a Harp,
 sin compresión automática ni modificación de los audios. Este ajuste cambia
 el balance de los presets anteriores; sus parámetros y ajustes siguen cargando.

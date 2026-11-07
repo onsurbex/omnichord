@@ -23,8 +23,8 @@ void ChordHarpProcessor::toggleMixerSolo(int channel) {
     set(id,on?0.f:1.f);if(!on)set(mixerParameter(channel,"Enabled"),1);
 }
 void ChordHarpProcessor::readMixerParameters() {
-    // Fixed source calibration: Organ +6 dB, FM +4.5 dB; faders keep unity at 0 dB.
-    constexpr std::array<float,5> calibration{1.f,2.f,1.678804f,1.f,1.f};
+    // Fixed source calibration: Organ +9 dB, FM +7.5 dB; faders keep unity at 0 dB.
+    constexpr std::array<float,5> calibration{1.f,2.818383f,2.371374f,1.f,1.f};
     for(size_t i=0;i<5;++i) {
         const auto& r=mixerSources[i].value;auto& c=mixer.channels[i];
         c.enabled=r[0]->load()>.5f;c.solo=r[1]->load()>.5f;c.gain=r[2]->load()*calibration[i];c.pan=r[3]->load();c.delay=r[4]->load();c.reverb=r[5]->load();
