@@ -412,7 +412,7 @@ static void checkTransportAndLevels() {
         midi.addEvent(juce::MidiMessage::allNotesOff(1),0);render();require(synth.rhythmIsRunning(),"DAW All Notes Off at a loop boundary must not latch the synced rhythm off");
         host.playing=false;midi.addEvent(juce::MidiMessage::allNotesOff(1),0);for(int b=0;b<15;++b)render();require(audio.getMagnitude(0,512)<1e-7 && !synth.rhythmIsRunning() && synth.rhythmStep()==-1,"DAW Stop must release drums and stop the displayed playhead");
         host.ppq=0;host.playing=true;energy=0;for(int b=0;b<10;++b){render();energy+=audio.getMagnitude(0,512);}require(energy>.001,"DAW Play after Stop must restart the armed rhythm");
-        setActual(synth,"rhythmEnabled",0);for(int b=0;b<15;++b)render();require(!synth.rhythmIsRunning() && audio.getMagnitude(0,512)<1e-7,"Turning the rhythm channel off must also work while the DAW runs");
+        setActual(synth,"rhythmEnabled",0);for(int b=0;b<15;++b)render();require(!synth.rhythmIsRunning() && synth.dawIsPlaying() && audio.getMagnitude(0,512)<1e-7,"Turning the rhythm channel off must preserve the real DAW transport display");
         synth.setPlayHead(nullptr);
     }
     auto owner=std::make_unique<ChordHarpProcessor>();auto& synth=*owner;

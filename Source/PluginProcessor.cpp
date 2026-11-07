@@ -391,7 +391,7 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
         else {buffer.setSample(0,sample,out[0]);buffer.setSample(1,sample,out[1]);}
     }
     for(size_t i=0;i<8;++i)meters[i].store(std::max(mixer.levels[i],meters[i].load()*.8f));
-    rhythmRunning.store(rhythm.running());rhythmHostSync.store(hasTransport && rhythm.followHost);playingStep.store(rhythm.running()?rhythm.lastStep:-1);lastChord=activeChord;lastPad=chords;lastChordSustain=sustain;lastChromatic=chromatic;midi.clear();
+    dawPlaying.store(hasTransport && hostPlaying);rhythmRunning.store(rhythm.running());rhythmHostSync.store(hasTransport && rhythm.followHost);playingStep.store(rhythm.running()?rhythm.lastStep:-1);lastChord=activeChord;lastPad=chords;lastChordSustain=sustain;lastChromatic=chromatic;midi.clear();
 }
 double ChordHarpProcessor::getTailLengthSeconds() const {
     if(!raw[DelayFeedback]) return 120;

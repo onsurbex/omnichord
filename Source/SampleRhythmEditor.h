@@ -123,9 +123,9 @@ public:
 private:
     void timerCallback() override {
         const bool looping=processor.state.getRawParameterValue("rhythmUseLoop")->load()>.5f;
-        const bool host=processor.rhythmFollowsTransport(),running=processor.rhythmIsRunning();
+        const bool host=processor.rhythmFollowsTransport(),running=host?processor.dawIsPlaying():processor.rhythmIsRunning();
         play.setButtonText(host?"ARM":"PLAY");play.setTooltip(host?"Armar el ritmo: arranca y se detiene con Play/Stop del DAW.":"Reproducir o parar el ritmo.");
-        transport.setText(juce::String(host?"DAW":"INTERNO")+(running?"  > PLAY":"  [] STOP")+"  |  "+juce::String(processor.getCurrentTempo(),1)+" BPM",juce::dontSendNotification);
+        transport.setText(juce::String(host?"DAW":"INTERNO")+(running?"  > PLAY":"  [] STOP")+"  |  "+juce::String(processor.getCurrentTempo(),1)+" BPM"+(host && processor.state.getRawParameterValue("rhythmEnabled")->load()<.5f?"  |  DESARMADO":""),juce::dontSendNotification);
         if(revision!=processor.getSampleRevision() || shownLoop!=looping) {
             revision=processor.getSampleRevision();shownLoop=looping;const auto names=processor.sampleNames();const char* tracks[]{"KICK","SNARE","HAT","AUX","PERC"};
             const auto hits=processor.drumChoices();

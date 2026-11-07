@@ -79,6 +79,7 @@ public:
     juce::String sampleLibraryPath() const;
     juce::String sampleLibraryReference() const;
     unsigned getSampleRevision() const {return sampleRevision.load();}
+    bool dawIsPlaying() const {return dawPlaying.load();}
     bool rhythmIsRunning() const {return rhythmRunning.load();}
     bool rhythmFollowsTransport() const {return rhythmHostSync.load();}
     int rhythmStep() const {return playingStep.load();}
@@ -140,7 +141,7 @@ private:
     std::unique_ptr<SampleLibrary> sampleLibrary;
     juce::String factoryLibraryPath;
     std::atomic<unsigned> sampleRevision{0};
-    std::atomic<bool> rhythmRunning{false},rhythmHostSync{false};
+    std::atomic<bool> rhythmRunning{false},rhythmHostSync{false},dawPlaying{false};
     std::atomic<int> playingStep{-1};
     mutable juce::CriticalSection libraryLock;
     bool rhythmMuted=false,lastRhythmEnabled=false,lastRhythmHostPlay=false;
