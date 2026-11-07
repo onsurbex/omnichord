@@ -20,10 +20,13 @@ juce::ValueTree ChordHarpProcessor::capturePreset(const juce::String& name) cons
 }
 bool ChordHarpProcessor::applyPreset(const juce::ValueTree& input,juce::String& error) {
     // Validate numeric source values before migration casts or remaps legacy IDs.
+    int inputKnown=0;
     for(auto child:input) if(state.getParameter(child.getProperty("id").toString())) {
+        ++inputKnown;
         const auto text=child.getProperty("value").toString().trim();char* end=nullptr;const auto* bytes=text.toRawUTF8();const double value=std::strtod(bytes,&end);
         if(text.isEmpty() || end==bytes || *end!=0 || !std::isfinite(value)) {error="Valor invalido en el preset.";return false;}
     }
+    if(inputKnown==0){error="El preset no contiene parametros reconocidos.";return false;}
     const auto preset=static_cast<int>(input.getProperty("formatVersion",0))==2?migrateV6(input):input;
     if(!preset.hasType("OmnichordPreset") || static_cast<int>(preset.getProperty("formatVersion"))!=3) {
         error="Formato de preset no compatible."; return false;

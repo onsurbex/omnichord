@@ -38,7 +38,9 @@ jobs:
           import base64, pathlib
           image = pathlib.Path('build/Omnichord-mixer-panel-preview.png')
           if image.exists():
-              print('OMNI_MIXER_PREVIEW:' + base64.b64encode(image.read_bytes()).decode())
+              encoded = base64.b64encode(image.read_bytes()).decode()
+              for start in range(0, len(encoded), 4096):
+                  print('OMNI_MIXER_PREVIEW:' + encoded[start:start + 4096])
           PYIMAGE
       - name: Check universal binaries and local signatures
         run: |

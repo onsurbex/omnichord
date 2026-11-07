@@ -186,7 +186,7 @@ El acorde queda memorizado al soltar la tecla; All Notes Off/All Sound Off corta
 las voces y los efectos. Cambiar la posición gráfica de un botón no modifica
 este mapa MIDI, fijado al orden del instrumento original.
 
-En la pestaña **Teclado**, activa el control del Mac y da foco a la ventana:
+En la pestaña **Extra**, activa el control del Mac y da foco a la ventana:
 
 | Fila | Db / Ab | Eb, Bb, F, C, G, D, A, E, B, F# |
 |---|---|---|

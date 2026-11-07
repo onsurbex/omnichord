@@ -342,6 +342,19 @@ static void checkV7Performance() {
             require(block.getMagnitude(0,512)<.00001f,"CHORDS must mute the chord layers in CHROMATIC too");
         }
     }
+    for(int layer=0;layer<3;++layer) {
+        auto plain=std::make_unique<ChordHarpProcessor>(),detuned=std::make_unique<ChordHarpProcessor>();
+        for(auto* synth:{plain.get(),detuned.get()}) {
+            setActual(*synth,"playMode",1);
+            for(int c=0;c<4;++c)setActual(*synth,synth->mixerParameter(c,"Enabled").toRawUTF8(),c==layer?1.f:0.f);
+            const juce::String prefix=layer==0?"harp":layer==1?"organ":"fm";
+            setActual(*synth,(prefix+"Unison").toRawUTF8(),7);setActual(*synth,(prefix+"Detune").toRawUTF8(),synth==plain.get()?0.f:35.f);setActual(*synth,(prefix+"Drift").toRawUTF8(),0);
+            synth->prepareToPlay(48000,512);
+        }
+        juce::AudioBuffer<float> a(2,512),b(2,512);juce::MidiBuffer ma,mb;ma.addEvent(juce::MidiMessage::noteOn(1,60,.8f),0);mb.addEvent(juce::MidiMessage::noteOn(1,60,.8f),0);
+        double difference=0;for(int block=0;block<30;++block){plain->processBlock(a,ma);detuned->processBlock(b,mb);for(int i=0;i<512;++i)difference+=std::abs(a.getSample(0,i)-b.getSample(0,i));}
+        require(difference>1,"Moving each layer's Detune parameter must change actual processor audio with seven voices");
+    }
     auto owner=std::make_unique<ChordHarpProcessor>();auto& layered=*owner;
     setActual(layered,"playMode",1);setActual(layered,"organEnabled",1);setActual(layered,"fmEnabled",1);setActual(layered,"samplesEnabled",1);setActual(layered,"sampleLoop",1);
     layered.prepareToPlay(48000,512);juce::AudioBuffer<float> audio(2,512);juce::MidiBuffer midi;
