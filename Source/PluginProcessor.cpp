@@ -105,6 +105,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     }
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"rhythmEnabled",1},"Rhythm Play",false));
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"rhythmHost",1},"Rhythm Follow DAW",true));
+    p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"rhythmUseLoop",1},"Rhythm Use Recorded Loop",false));
+    p.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"rhythmLoop",1},"Rhythm Loop",0,127,0));
     p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"rhythmPattern",1},"Rhythm Pattern",juce::StringArray{"Omni Pop","Disco","Bossa","Half-time","Shuffle","Waltz","Custom"},0));
     addFloat("rhythmSwing","Rhythm Swing",0,.6f,0);addFloat("rhythmVolume","Rhythm Volume",0,1,.7f);addFloat("rhythmSend","Rhythm FX Send",0,1,0);
     p.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"organSample",1},"Organ Sample",0,127,0));
@@ -131,7 +133,7 @@ ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(Bus
         for(size_t i=0;i<9;++i)synthRefs[bank].common[i]=state.getRawParameterValue(prefix+common[i]);
         for(int op=0;op<6;++op)for(size_t i=0;i<8;++i)synthRefs[bank].op[static_cast<size_t>(op)][i]=state.getRawParameterValue(fmOperatorID(organ,op,fields[i]));
     }
-    const char* rhythmIDs[]{"rhythmEnabled","rhythmHost","rhythmPattern","rhythmSwing","rhythmVolume","rhythmSend","organSample","sampleRoot","sampleRelease"};
+    const char* rhythmIDs[]{"rhythmEnabled","rhythmHost","rhythmPattern","rhythmSwing","rhythmVolume","rhythmSend","organSample","sampleRoot","sampleRelease","rhythmUseLoop","rhythmLoop"};
     for(size_t i=0;i<rhythmRaw.size();++i)rhythmRaw[i]=state.getRawParameterValue(rhythmIDs[i]);
     const char* sampleIDs[]{"sampleChord","sampleLoop","organCutoff","organResonance","organFilterType"};
     for(size_t i=0;i<sampleRaw.size();++i)sampleRaw[i]=state.getRawParameterValue(sampleIDs[i]);
@@ -151,7 +153,14 @@ ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(Bus
 #if OMNICHORD_HAS_FACTORY_SAMPLES
     {
         juce::TemporaryFile bundledSamples(".zip");juce::String error;
-        if(bundledSamples.getFile().replaceWithData(BinaryData::FactorySamples_zip,static_cast<size_t>(BinaryData::FactorySamples_zipSize)))loadSampleLibrary(bundledSamples.getFile(),error);
+        if(bundledSamples.getFile().replaceWithData(BinaryData::FactorySamples_zip,static_cast<size_t>(BinaryData::FactorySamples_zipSize))
+            && loadSampleLibrary(bundledSamples.getFile(),error)) {
+            factoryLibraryPath=sampleLibraryPath();
+            // Start with an instrument selected in the sampler, rather than
+            // the first alphabetically sorted drum loop. Sources stay OFF.
+            if(!sampleLibrary->instruments.empty())selectSampleSound(sampleLibrary->instruments[0]);
+            state.getParameter("organModel")->setValueNotifyingHost(0);
+        }
     }
 #endif
     factoryPreset=capturePreset("Inicio");
@@ -257,10 +266,17 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
         organSilenced=true; tapeMuted=true;rhythmMuted=true;rhythm.enabled=false;rhythm.reset();sampleChords.reset();sampleFilter.reset();sampleDC.reset();
     };
     const bool stop=panic.exchange(false);
-    if(stop) { silence(); guiChordMidi.clear(); }
+    const bool presetChanged=presetReset.exchange(false);
+    if(stop || presetChanged) {
+        silence();guiChordMidi.clear();
+        if(presetChanged && !stop) {
+            organSilenced=false;rhythmMuted=false;tapeMuted=false;lastRhythmEnabled=false;
+            readRhythmParameters(hasPpq,ppq,hostPlaying);
+        }
+    }
     refreshOrgan();
     int a,n,b,m; fifo.prepareToRead(fifo.getNumReady(),a,n,b,m);
-    if(!stop) {
+    if(!stop && !presetChanged) {
         if(n+m>0) tapeMuted=false;
         for(int i=0;i<n;++i) engine.pluck(notes[static_cast<size_t>(a+i)]);
         for(int i=0;i<m;++i) engine.pluck(notes[static_cast<size_t>(b+i)]);
@@ -334,7 +350,7 @@ void ChordHarpProcessor::getStateInformation(juce::MemoryBlock& dest) {
     snapshot.removeProperty("customLogo",nullptr);
     snapshot.setProperty("presetName",getPresetName(),nullptr);
     snapshot.setProperty("synthVersion",6,nullptr);
-    snapshot.setProperty("sampleLibrary",sampleLibraryPath(),nullptr);
+    snapshot.setProperty("sampleLibrary",sampleLibraryReference(),nullptr);
     snapshot.setProperty("guiLayout",magicState.getGuiTree().toXmlString(),nullptr);
     if(auto xml=snapshot.createXml()) copyXmlToBinary(*xml,dest);
 }
@@ -343,7 +359,7 @@ void ChordHarpProcessor::setStateInformation(const void* data,int size) {
         auto restored=juce::ValueTree::fromXml(*xml);
         if(static_cast<int>(restored.getProperty("synthVersion",0))!=6)return;
         const auto samples=restored.getProperty("sampleLibrary").toString();
-        if(samples.isNotEmpty() && samples!=sampleLibraryPath()) {juce::String error;loadSampleLibrary(juce::File(samples),error);}
+        if(samples.isNotEmpty()) {juce::String error;restoreSampleLibrary(samples,error);}
         restored.removeProperty("customLogo",nullptr);
         const auto layout=juce::ValueTree::fromXml(restored.getProperty("guiLayout").toString());
         if(layout.hasType("magic") && layout.getChildWithName("View").isValid())

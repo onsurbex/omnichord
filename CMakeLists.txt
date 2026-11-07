@@ -60,7 +60,7 @@ if(EXISTS "${OMNICHORD_SAMPLE_ZIP}")
         set(OMNICHORD_HAS_FACTORY_SAMPLES 1)
     endif()
 endif()
-target_compile_definitions(Omnichord PRIVATE OMNICHORD_HAS_FACTORY_SAMPLES=${OMNICHORD_HAS_FACTORY_SAMPLES})
+target_compile_definitions(Omnichord PUBLIC OMNICHORD_HAS_FACTORY_SAMPLES=${OMNICHORD_HAS_FACTORY_SAMPLES})
 juce_add_binary_data(OmnichordBrand
     HEADER_NAME BinaryData.h
     NAMESPACE BinaryData

@@ -3,17 +3,20 @@
 #include "Themes.h"
 
 class SynthSelector final : public juce::ComboBox,private juce::Timer {
-    ChordHarpProcessor& processor;bool organ=true;
+    ChordHarpProcessor& processor;bool organ=true;unsigned revision=~0u;
 public:
     explicit SynthSelector(ChordHarpProcessor& p):processor(p) {onChange=[this]{if(getSelectedId()>0 && getSelectedId()<999)processor.selectSynthSound(organ,getSelectedId()-1);};startTimerHz(10);}
     void configure(foleys::GuiItem& item) {
         organ=item.getProperty("target").toString()!="harp";clear(juce::dontSendNotification);
-        addItemList(processor.synthSoundNames(organ),1);addSeparator();addItem("FM personalizado",999);timerCallback();
+        rebuild();timerCallback();
     }
     static std::vector<std::pair<juce::String,int>> colours() {return {{"combo-background",juce::ComboBox::backgroundColourId},{"combo-text",juce::ComboBox::textColourId},{"combo-outline",juce::ComboBox::outlineColourId}};}
     static std::vector<foleys::SettableProperty> properties(const juce::ValueTree&) {return {};}
 private:
-    void timerCallback() override {const int choice=processor.getSynthChoice(organ);setSelectedId(choice<0?999:choice+1,juce::dontSendNotification);}
+    void rebuild() {
+        clear(juce::dontSendNotification);addItemList(processor.synthSoundNames(organ),1);addSeparator();addItem("FM personalizado",999);revision=processor.getSampleRevision();
+    }
+    void timerCallback() override {if(revision!=processor.getSampleRevision())rebuild();const int choice=processor.getSynthChoice(organ);setSelectedId(choice<0?999:choice+1,juce::dontSendNotification);}
 };
 
 class FMPanel final : public juce::Component,private juce::Timer {

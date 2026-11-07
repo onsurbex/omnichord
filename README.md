@@ -10,11 +10,10 @@ seis operadores con los 32 algoritmos DX, unison de hasta siete voces y filtros
 por fuente. Incluye un sampler para los acordes y un secuenciador de batería
 sincronizado con el DAW o con el BPM de standalone.
 
-Esta rama está en desarrollo: el ZIP de samples actualmente subido a `main`
-contiene solo 2 bytes y no incluye audio. La carga de una librería válida es
-necesaria para escuchar el sampler y los ritmos. Al añadir el ZIP real en esa
-ruta, CMake lo incrusta en VST3 y standalone y la app lo carga automáticamente. No se distribuyen samples
-inventados como si fueran grabaciones del Omnichord.
+Incluye la librería **Omnichord Vol. 1** aportada por el usuario: cinco
+instrumentos sampleados (Axe, Bass, Church, Piano y Voice), seis golpes de batería
+y cuatro loops originales de cuatro compases a **100 BPM**. Los audios se
+incorporan a VST3, standalone y PKG y se cargan automáticamente.
 
 Los parámetros y los presets de síntesis cambian respecto a 0.5; los presets
 antiguos y el estado de sonido de sesiones anteriores no se importan.
@@ -238,11 +237,19 @@ Todos los ajustes se automatizan y se guardan con la sesión del DAW.
 
 ## Samples y ritmos
 
-En **Samples → CARGAR ZIP**, abre una librería con 1–128 archivos WAV, AIFF o
+Los sonidos de fábrica aparecen directamente en **Organo → SONIDO / PATCH**,
+en **Samples** y como presets completos. La nota raíz de cada grabación se
+selecciona automáticamente: Axe y Voice MIDI 72; Church y Piano MIDI 60; Bass
+MIDI 41 (F). El sampler construye las cuatro familias de acordes a partir de
+esas notas aisladas. Church incluye un loop de sustain; el resto conserva su
+decaimiento natural.
+
+En **Samples → CARGAR ZIP**, puedes abrir otra librería con 1–128 archivos WAV, AIFF o
 FLAC. Se decodifican fuera del hilo de audio y se conserva una copia del ZIP en
 `~/Library/Application Support/BLINBLIN/Omnichord/Samples/`. Los presets y las
-sesiones guardan la referencia a esa copia; al moverlos a otro Mac hay que copiar
-también ese ZIP a la misma ubicación.
+sesiones guardan la referencia a esa copia. Los presets que usan la librería de
+fábrica se recuperan automáticamente en otro Mac con Omnichord instalado.
+Las librerías importadas requieren copiar también su ZIP al trasladar el preset.
 
 Selecciona un sample, su **nota raíz MIDI** y activa SAMPLES y ORGAN. En modo de
 nota aislada se transponen tres/cuatro voces para construir las cuatro filas de
@@ -257,8 +264,17 @@ la sección; DAW sigue la posición, play/stop y tempo del host. Sin posición d
 host, se utiliza el reloj interno y el BPM actual. Waltz tiene doce pasos;
 los demás patrones tienen dieciséis. SWING retrasa las semicorcheas alternas.
 Cada pista permite elegir un sample; Auto busca nombres de bombo, caja,
-charles cerrado/abierto y percusión. Si no encuentra uno, asigna el archivo
-manualmente en su desplegable. El charles cerrado corta el abierto.
+charles, auxiliar y percusión. En la librería incluida AUX usa Cajon; Snare 2
+está disponible como alternativa. Si no encuentra uno, asigna el archivo
+manualmente en su desplegable. Si asignas un charles abierto en AUX, el cerrado lo corta; Cajon no se corta al tocar el charles.
+
+**LOOP** cambia de la rejilla de golpes a los cuatro loops grabados: 4toFloor,
+Dusty hip hop, March y Tango. Su tempo original es **100 BPM** y su duración,
+cuatro compases (16 negras). El reproductor adapta su duración al BPM actual con
+solapamiento y alineación de fragmentos (WSOLA), conservando la afinación.
+Los dos canales usan los mismos desplazamientos para conservar el estéreo.
+El groove grabado se mantiene; SWING y los pasos se editan en el modo de golpes.
+Al alejarse mucho de 100 BPM puede cambiar la textura de los ataques.
 
 Haz clic en un paso para crear un patrón Custom a partir del elegido. Sus
 80 pasos, el patrón, asignaciones, volumen, swing y envío a efectos se guardan
@@ -285,7 +301,10 @@ solo la preferencia de inicio, conservando tus presets.
 El standalone arranca con ese estado de inicio y conserva su configuración de
 Audio/MIDI. Las nuevas instancias VST3 utilizan también ese inicio, pero al abrir
 un proyecto de Ableton prevalece el estado que el proyecto guardó para cada
-instancia. La biblioteca incluye Inicio, los ocho patches FM y Clásico, Reed y Suave.
+instancia. La biblioteca incluye 23 presets: Inicio, los ocho patches FM, Clásico, Reed y
+Suave, cinco instrumentos sampleados y seis presets de ritmo (cuatro loops y
+dos patrones de golpes). Los ritmos arrancan con PLAY activado y, en el DAW,
+esperan a que el transporte esté en marcha.
 
 Los botones **DELAY** y **REVERB**, junto a SILENCIO, activan cada efecto con una transición suave y conservan su mezcla y demás ajustes. Sus estados se guardan en presets y en el proyecto.
 

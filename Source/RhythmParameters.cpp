@@ -16,6 +16,41 @@ juce::StringArray ChordHarpProcessor::sampleNames() const {
     if(sampleLibrary)for(const auto& sound:sampleLibrary->entries)names.add(sound.name);return names;
 }
 juce::String ChordHarpProcessor::sampleLibraryPath() const {const juce::ScopedLock lock(libraryLock);return sampleLibrary?sampleLibrary->source:juce::String{};}
+juce::String ChordHarpProcessor::sampleLibraryReference() const {
+    const auto path=sampleLibraryPath();return path.isNotEmpty() && path==factoryLibraryPath?juce::String("factory"):path;
+}
+bool ChordHarpProcessor::restoreSampleLibrary(const juce::String& reference,juce::String& error) {
+    const auto path=reference=="factory"?factoryLibraryPath:reference;
+    if(path.isEmpty()){error="La libreria de fabrica no esta disponible.";return false;}
+    if(path==sampleLibraryPath()){error.clear();return true;}
+    return loadSampleLibrary(juce::File(path),error);
+}
+std::vector<std::pair<int,juce::String>> ChordHarpProcessor::sampleChoices(bool loops) const {
+    const juce::ScopedLock lock(libraryLock);std::vector<std::pair<int,juce::String>> result;
+    if(sampleLibrary)for(const auto index:loops?sampleLibrary->loops:sampleLibrary->instruments)
+        result.emplace_back(index,sampleLibrary->entries[static_cast<size_t>(index)].name);
+    return result;
+}
+std::vector<std::pair<int,juce::String>> ChordHarpProcessor::drumChoices() const {
+    const juce::ScopedLock lock(libraryLock);std::vector<std::pair<int,juce::String>> result;
+    if(sampleLibrary) {
+        for(size_t i=0;i<sampleLibrary->entries.size();++i)if(sampleLibrary->entries[i].audio.drum)
+            result.emplace_back(static_cast<int>(i),sampleLibrary->entries[i].name);
+        if(result.empty())for(const int i:sampleLibrary->instruments)result.emplace_back(i,sampleLibrary->entries[static_cast<size_t>(i)].name);
+    }
+    return result;
+}
+void ChordHarpProcessor::selectSampleSound(int index) {
+    int root=60;bool loop=false;
+    {
+        const juce::ScopedLock lock(libraryLock);
+        if(!sampleLibrary || index<0 || index>=static_cast<int>(sampleLibrary->entries.size()))return;
+        const auto& audio=sampleLibrary->entries[static_cast<size_t>(index)].audio;root=audio.root;loop=audio.sustain;
+    }
+    const auto set=[&](const char* id,float value){auto* p=state.getParameter(id);p->beginChangeGesture();p->setValueNotifyingHost(p->convertTo0to1(value));p->endChangeGesture();};
+    set("organSample",static_cast<float>(index));set("sampleRoot",static_cast<float>(root));
+    set("sampleChord",0);set("sampleLoop",loop?1.f:0.f);set("sampleRelease",loop?800.f:250.f);set("organModel",4);
+}
 bool ChordHarpProcessor::loadSampleLibrary(const juce::File& file,juce::String& error) {
     auto decoded=SampleLibrary::readZip(file,error);if(!decoded)return false;
     // Cache an immutable copy so a moved download does not break sessions/presets.
@@ -34,7 +69,7 @@ bool ChordHarpProcessor::loadSampleLibrary(const juce::File& file,juce::String& 
         const juce::ScopedLock audioLock(getCallbackLock());
         const juce::ScopedLock metadataLock(libraryLock);
         sampleChords.reset();rhythm.reset();sampleFilter.reset();sampleDC.reset();
-        rhythm.samples={};sampleChords.sound=nullptr;
+        rhythm.samples={};rhythm.loopSound=nullptr;sampleChords.sound=nullptr;
         sampleLibrary.swap(decoded);++sampleRevision;
     }
     error.clear();return true;
@@ -43,6 +78,12 @@ void ChordHarpProcessor::readRhythmParameters(bool hasPpq,double ppq,bool playin
     const bool play=rhythmRaw[0]->load()>.5f;
     if(play && !lastRhythmEnabled){rhythmMuted=false;tapeMuted=false;}
     lastRhythmEnabled=play;rhythm.enabled=play && !rhythmMuted;rhythm.followHost=rhythmRaw[1]->load()>.5f;
+    rhythm.useLoop=rhythmRaw[9]->load()>.5f;rhythm.loopSound=nullptr;
+    if(sampleLibrary) {
+        const int index=static_cast<int>(rhythmRaw[10]->load());
+        if(index>=0 && index<static_cast<int>(sampleLibrary->entries.size()) && sampleLibrary->entries[static_cast<size_t>(index)].audio.beats>0)
+            rhythm.loopSound=&sampleLibrary->entries[static_cast<size_t>(index)].audio;
+    }
     rhythm.pattern=static_cast<int>(rhythmRaw[2]->load());rhythm.swing=rhythmRaw[3]->load();rhythm.volume=rhythmRaw[4]->load();rhythm.bpm=currentTempo.load();
     for(size_t t=0;t<5;++t) {
         rhythm.custom[t]=0;for(size_t s=0;s<16;++s)if(stepRaw[t][s]->load()>.5f)rhythm.custom[t]|=static_cast<std::uint16_t>(1u<<s);
@@ -52,13 +93,18 @@ void ChordHarpProcessor::readRhythmParameters(bool hasPpq,double ppq,bool playin
             if(index>=0 && index<static_cast<int>(sampleLibrary->entries.size()))rhythm.samples[t]=&sampleLibrary->entries[static_cast<size_t>(index)].audio;
         }
     }
+    rhythm.chokeOpenHat=false;
+    if(rhythm.samples[3] && sampleLibrary)for(const auto& sound:sampleLibrary->entries)if(&sound.audio==rhythm.samples[3]) {
+        rhythm.chokeOpenHat=sound.name.containsIgnoreCase("open") || sound.name.containsIgnoreCase("ohh");break;
+    }
     sampleChords.sound=nullptr;
     if(sampleLibrary) {
         const int index=static_cast<int>(rhythmRaw[6]->load());
         if(index>=0 && index<static_cast<int>(sampleLibrary->entries.size()))sampleChords.sound=&sampleLibrary->entries[static_cast<size_t>(index)].audio;
     }
     sampleChords.rootNote=static_cast<int>(rhythmRaw[7]->load());sampleChords.release=rhythmRaw[8]->load()*.001f;
-    sampleChords.wholeChord=sampleRaw[0]->load()>.5f;sampleChords.loop=sampleRaw[1]->load()>.5f;sampleChords.gain=raw[OrganGain]->load();
+    sampleChords.wholeChord=sampleRaw[0]->load()>.5f;sampleChords.loop=sampleRaw[1]->load()>.5f;
+    sampleChords.gain=raw[OrganGain]->load()*(sampleChords.sound?sampleChords.sound->gain:1.f);
     sampleFilter.cutoff=sampleRaw[2]->load();sampleFilter.resonance=sampleRaw[3]->load();sampleFilter.mode=static_cast<int>(sampleRaw[4]->load());
     rhythm.beginBlock(hasPpq,ppq,playing);
 }

@@ -7,7 +7,8 @@
 namespace chordharp {
 struct SampleAudio {
     std::array<std::vector<float>,2> channel;
-    double rate=44100;int root=60,quality=-1;bool drum=false;
+    double rate=44100,beats=0;int root=60;float gain=1;
+    bool drum=false,sustain=false;
     size_t frames() const {return channel[0].size();}
     float read(size_t c,double position) const {
         const auto& data=channel[c];const auto index=static_cast<long long>(position);const float t=static_cast<float>(position-index);

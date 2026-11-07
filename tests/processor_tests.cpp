@@ -4,6 +4,7 @@
 #include "../Source/Themes.h"
 #include "AmbienceChecks.h"
 #include "../Source/FMEditor.h"
+#include "../Source/FactorySamples.h"
 #if FOLEYS_SHOW_GUI_EDITOR_PALLETTE
 #include <foleys_gui_magic/Editor/foleys_ToolBox.h>
 #endif
@@ -230,6 +231,39 @@ static void checkSamplesAndRhythm() {
     ChordHarpProcessor presetRestored(root);require(presetRestored.loadPreset(preset,error) && presetRestored.sampleNames().size()==6,"Presets must recover the cached library");
     require(!synth.loadSampleLibrary(invalid,error) && synth.sampleNames().size()==6,"An invalid import must preserve the loaded library");
     synth.panic.store(true);synth.processBlock(audio,midi);require(audio.getMagnitude(0,512)==0,"Panic must clear sample voices and drum playback");
+}
+static void checkFactorySamples() {
+#if OMNICHORD_HAS_FACTORY_SAMPLES
+    const auto root=juce::File::getSpecialLocation(juce::File::tempDirectory).getNonexistentChildFile("Omnichord factory audio checks","",true);
+    struct Cleanup {juce::File file;~Cleanup(){file.deleteRecursively();}} cleanup{root};
+    ChordHarpProcessor synth(root);juce::String error;
+    require(synth.sampleNames().size()==15 && synth.sampleChoices().size()==5 && synth.sampleChoices(true).size()==4,"The supplied factory ZIP must bundle 5 instruments, 6 drum hits and 4 loops");
+    auto decoded=SampleLibrary::readZip(juce::File(synth.sampleLibraryPath()),error);
+    require(decoded && decoded->instruments.size()==5 && decoded->loops.size()==4,"The original recordings must decode from the installed factory library");
+    for(const int i:decoded->loops)require(decoded->entries[static_cast<size_t>(i)].audio.beats==16,"100 BPM loops must occupy exactly four bars");
+    for(const int i:decoded->autoDrums)require(i>=0,"Every sequencer lane must have a real factory drum assignment");
+    for(int i=0;i<5;++i) {
+        require(synth.loadFactoryPreset(12+i,error),"Each sampled factory sound must load");
+        require(static_cast<int>(synth.state.getRawParameterValue("sampleRoot")->load())==chordharp::factorySamples[static_cast<size_t>(i)].root,"Sample presets must select the measured MIDI root, including F bass and upper C recordings");
+        require(synth.state.getRawParameterValue("organModel")->load()==4,"A sample preset must activate the chord sampler");
+        synth.prepareToPlay(48000,512);juce::AudioBuffer<float> audio(2,512);juce::MidiBuffer midi;
+        midi.addEvent(juce::MidiMessage::noteOn(1,29,.9f),0);double energy=0;
+        for(int b=0;b<30;++b){synth.processBlock(audio,midi);energy+=audio.getMagnitude(0,512);}
+        require(energy>.01,"Every supplied instrument must sound when played as a chord");
+    }
+    for(int preset=17;preset<23;++preset) {
+        require(synth.loadFactoryPreset(preset,error),"Each recorded or sequenced rhythm preset must load");
+        synth.prepareToPlay(48000,512);juce::AudioBuffer<float> audio(2,512);juce::MidiBuffer midi;double energy=0;
+        for(int b=0;b<30;++b){synth.processBlock(audio,midi);energy+=audio.getMagnitude(0,512);}
+        require(energy>.01,"A playing rhythm preset must start after clearing the previous preset's voices");
+    }
+    const auto saved=root.getChildFile("Factory samples.omnipreset");
+    require(synth.savePreset(saved,error),"A preset using the factory pack must save");
+    const auto xml=juce::ValueTree::fromXml(saved.loadFileAsString());
+    require(xml.getProperty("sampleLibrary").toString()=="factory","Bundled sample references must be portable between user accounts");
+    ChordHarpProcessor other(root.getChildFile("another-account"));
+    require(other.loadPreset(saved,error) && other.sampleNames().size()==15,"A factory sample preset must load from a different cache directory");
+#endif
 }
 class TestPlayhead final : public juce::AudioPlayHead {
 public:
@@ -503,6 +537,24 @@ int main() {
     const auto tapePreview=editor->createComponentSnapshot(editor->getLocalBounds());
     auto tapeStream=juce::File::getCurrentWorkingDirectory().getChildFile("Omnichord-tape-preview.png").createOutputStream();
     require(tapeStream && png.writeImageToStream(tapePreview,*tapeStream),"Tape panel preview must render");
+    for(const auto& page:std::array<std::pair<int,const char*>,3>{{{2,"fm"},{3,"samples"},{4,"rhythms"}}}) {
+        tabs->setCurrentTabIndex(page.first);juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+        const auto snapshot=editor->createComponentSnapshot(editor->getLocalBounds());
+        auto stream=juce::File::getCurrentWorkingDirectory().getChildFile("Omnichord-"+juce::String(page.second)+"-preview.png").createOutputStream();
+        require(stream && png.writeImageToStream(snapshot,*stream),"The FM, sample and rhythm pages must render for review");
+    }
+    auto* rhythmPanel=builder.findGuiItemWithId("rhythmpanel")->getWrappedComponent();
+    auto* loopSwitch=dynamic_cast<juce::TextButton*>(findComponent(*rhythmPanel,"rhythm-loop-mode"));
+    require(loopSwitch!=nullptr,"Recorded loops must have a visible mode selector");
+    loopSwitch->setToggleState(true,juce::sendNotificationSync);
+    require(restored.state.getRawParameterValue("rhythmUseLoop")->load()==1,"The LOOP button must activate the recorded-loop engine");
+    juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+    {
+        const auto snapshot=editor->createComponentSnapshot(editor->getLocalBounds());
+        auto stream=juce::File::getCurrentWorkingDirectory().getChildFile("Omnichord-loop-preview.png").createOutputStream();
+        require(stream && png.writeImageToStream(snapshot,*stream),"The recorded-loop panel must render for review");
+    }
+    loopSwitch->setToggleState(false,juce::sendNotificationSync);
     tabs->setCurrentTabIndex(0);
     juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
     theme->setSelectedId(1,juce::sendNotificationSync);
@@ -592,6 +644,7 @@ int main() {
     };
     const double dryTail=tailEnergy(false),wetTail=tailEnergy(true);
     require(wetTail>0.0001 && wetTail>dryTail*10,"Delay and reverb must produce audible tails after source mute");
+    checkFactorySamples();
     checkFMPerformance();
     checkSamplesAndRhythm();
     checkPresetLibrary();

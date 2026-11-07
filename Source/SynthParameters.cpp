@@ -5,9 +5,14 @@ constexpr const char* fields[]{"Ratio","Fine","Level","Attack","Decay","Sustain"
 std::array<float,8> values(const chordharp::FMOperator& op) {return {op.ratio,op.fine,op.level,op.attack*1000,op.decay*1000,op.sustain,op.release*1000,op.velocity};}
 }
 juce::String ChordHarpProcessor::fmOperatorID(bool organ,int op,const juce::String& field) {return juce::String(organ?"organ":"harp")+"Op"+juce::String(op+1)+field;}
-juce::StringArray ChordHarpProcessor::synthSoundNames(bool organ) {
+juce::StringArray ChordHarpProcessor::synthSoundNames(bool organ) const {
     juce::StringArray names=organ?juce::StringArray{"Clasico","Reed","Suave"}:juce::StringArray{"Clasico"};
-    for(const auto* name:chordharp::fmPatchNames) names.add(name);if(organ)names.add("Samples");return names;
+    for(const auto* name:chordharp::fmPatchNames) names.add(name);
+    if(organ) {
+        names.add("Samples");
+        for(const auto& item:sampleChoices())names.add("Sample - "+item.second);
+    }
+    return names;
 }
 chordharp::FMPatch ChordHarpProcessor::getFMPatch(bool organ) const {
     const auto& refs=synthRefs[organ?1u:0u];chordharp::FMPatch p;
@@ -34,7 +39,11 @@ void ChordHarpProcessor::readSynthParameters() {
 }
 int ChordHarpProcessor::getSynthChoice(bool organ) const {
     const int model=static_cast<int>((organ?raw[OrganModel]:raw[HarpSound])->load()),offset=organ?3:1;
-    if(organ && model==4)return offset+static_cast<int>(chordharp::fmPatchNames.size());
+    if(organ && model==4) {
+        const int selected=static_cast<int>(rhythmRaw[6]->load());const auto choices=sampleChoices();
+        for(size_t i=0;i<choices.size();++i)if(choices[i].first==selected)return 12+static_cast<int>(i);
+        return 11;
+    }
     if(model<offset)return model;
     const auto current=getFMPatch(organ);
     for(int preset=0;preset<static_cast<int>(chordharp::fmPatchNames.size());++preset) {
@@ -48,6 +57,10 @@ int ChordHarpProcessor::getSynthChoice(bool organ) const {
     return -1;
 }
 void ChordHarpProcessor::selectSynthSound(bool organ,int choice) {
+    if(organ && choice>=12) {
+        const auto choices=sampleChoices();const auto index=static_cast<size_t>(choice-12);
+        if(index<choices.size())selectSampleSound(choices[index].first);return;
+    }
     const int offset=organ?3:1;if(choice<0 || choice>=offset+static_cast<int>(chordharp::fmPatchNames.size())+(organ?1:0))return;
     const auto set=[&](const juce::String& id,float value) {if(auto* p=state.getParameter(id)){p->beginChangeGesture();p->setValueNotifyingHost(p->convertTo0to1(value));p->endChangeGesture();}};
     synthUpdating[organ?1u:0u].store(true);

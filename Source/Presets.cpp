@@ -1,6 +1,7 @@
 #include "PluginProcessor.h"
 #include <cstdlib>
 #include <cmath>
+#include "FactorySamples.h"
 
 juce::File ChordHarpProcessor::defaultPresetHome() {
     auto base=juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory);
@@ -14,7 +15,7 @@ juce::ValueTree ChordHarpProcessor::capturePreset(const juce::String& name) cons
     for(auto* parameter:getParameters()) if(auto* ranged=dynamic_cast<juce::RangedAudioParameter*>(parameter)) {
         preset.appendChild(juce::ValueTree("PARAM",{{"id",ranged->paramID},{"value",ranged->convertFrom0to1(ranged->getValue())}}),nullptr);
     }
-    preset.setProperty("sampleLibrary",sampleLibraryPath(),nullptr);
+    preset.setProperty("sampleLibrary",sampleLibraryReference(),nullptr);
     return preset;
 }
 bool ChordHarpProcessor::applyPreset(const juce::ValueTree& preset,juce::String& error) {
@@ -36,7 +37,7 @@ bool ChordHarpProcessor::applyPreset(const juce::ValueTree& preset,juce::String&
     }
     if(known==0) { error="El preset no contiene parametros reconocidos."; return false; }
     const auto samples=preset.getProperty("sampleLibrary").toString();
-    if(samples.isNotEmpty() && samples!=sampleLibraryPath() && !loadSampleLibrary(juce::File(samples),error))return false;
+    if(samples.isNotEmpty() && !restoreSampleLibrary(samples,error))return false;
     // Validate the complete document before changing any parameter.
     for(auto& updating:synthUpdating)updating.store(true);
     for(auto* parameter:getParameters()) if(auto* ranged=dynamic_cast<juce::RangedAudioParameter*>(parameter)) {
@@ -46,7 +47,7 @@ bool ChordHarpProcessor::applyPreset(const juce::ValueTree& preset,juce::String&
     }
     for(auto& updating:synthUpdating)updating.store(false);
     updatePresetName(preset.getProperty("name","Preset").toString());
-    panic.store(true); error.clear(); return true;
+    presetReset.store(true); error.clear(); return true;
 }
 bool ChordHarpProcessor::writePreset(const juce::File& file,const juce::ValueTree& data,juce::String& error) const {
     if(file==juce::File{} || !file.getParentDirectory().createDirectory().wasOk()) { error="No se puede crear la carpeta del preset."; return false; }
@@ -80,7 +81,13 @@ void ChordHarpProcessor::loadStartupPreset() {
     panic.store(false);
 }
 juce::StringArray ChordHarpProcessor::factoryPresetNames() {
-    return {"Inicio","FM Piano","FM Bell","FM Brass","FM Pad","FM Bass","FM Pluck","FM Glass","FM Strings","Clasico","Reed","Suave"};
+    juce::StringArray names{"Inicio","FM Piano","FM Bell","FM Brass","FM Pad","FM Bass","FM Pluck","FM Glass","FM Strings","Clasico","Reed","Suave"};
+#if OMNICHORD_HAS_FACTORY_SAMPLES
+    for(const auto& sound:chordharp::factorySamples)names.add("Sample - "+juce::String(sound.name));
+    for(const auto* name:chordharp::factoryLoops)names.add("Loop - "+juce::String(name));
+    names.add("Ritmo - Omni Pop");names.add("Ritmo - Disco");
+#endif
+    return names;
 }
 bool ChordHarpProcessor::loadFactoryPreset(int index,juce::String& error) {
     const auto names=factoryPresetNames();
@@ -99,7 +106,31 @@ bool ChordHarpProcessor::loadFactoryPreset(int index,juce::String& error) {
             }
         }
         set("pad",1);set("chordSustain",0);set("reverbMix",index==4?.3f:.15f);
-    } else if(index>=9) {set("organModel",static_cast<float>(index-9));set("pad",1);set("chordSustain",0);}
+    } else if(index>=9 && index<12) {set("organModel",static_cast<float>(index-9));set("pad",1);set("chordSustain",0);}
+    else if(index>=12) {
+        if(!restoreSampleLibrary("factory",error))return false;
+        const auto find=[&](const juce::String& name) {
+            for(size_t i=0;i<sampleLibrary->entries.size();++i)if(sampleLibrary->entries[i].name==name)return static_cast<int>(i);
+            return -1;
+        };
+        if(index<17) {
+            const auto& info=chordharp::factorySamples[static_cast<size_t>(index-12)];const int selected=find(info.name);
+            if(selected<0){error="Falta el sample de fabrica: "+juce::String(info.name);return false;}
+            set("organModel",4);set("organSample",static_cast<float>(selected));set("sampleRoot",static_cast<float>(info.root));
+            set("sampleLoop",info.sustain?1.f:0.f);set("sampleChord",0);set("sampleRelease",info.sustain?800.f:250.f);
+            set("organOctave",index==13?0.f:2.f);set("organCutoff",12000);set("pad",1);set("chordSustain",0);
+        } else {
+            set("rhythmEnabled",1);set("delayTempo",100);set("pad",0);
+            if(index<21) {
+                const int selected=find(chordharp::factoryLoops[static_cast<size_t>(index-17)]);
+                if(selected<0){error="Falta el loop de fabrica.";return false;}
+                set("rhythmUseLoop",1);set("rhythmLoop",static_cast<float>(selected));
+            } else {
+                set("rhythmUseLoop",0);set("rhythmPattern",index==21?0.f:1.f);
+                if(index==22){const int alternate=find("Snare 2");if(alternate>=0)set("rhythmSample1",static_cast<float>(alternate+1));}
+            }
+        }
+    }
     if(!applyPreset(data,error)) return false;
     updatePresetName(names[index],"factory:"+juce::String(index)); return true;
 }
