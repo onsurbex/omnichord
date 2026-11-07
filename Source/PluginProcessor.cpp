@@ -48,6 +48,8 @@ juce::ValueTree upgradeLayout(juce::ValueTree layout) {
     }
     auto types=layout.getChildWithName("Styles").getChild(0).getChildWithName("Types");
     for(const auto* type:{"SynthSelector","FMPanel","SamplePanel","RhythmPanel","MixerPanel","ModeLabels"})if(!types.getChildWithName(type).isValid())types.appendChild(defaults.getChildWithName("Styles").getChild(0).getChildWithName("Types").getChildWithName(type).createCopy(),nullptr);
+    findNode(root,"sound-controls").setProperty("tab-selected","uiMainTab",nullptr);
+    findNode(root,"fx-tabs").setProperty("tab-selected","uiFxTab",nullptr);
     root.setProperty("layout-version",10,nullptr);omnichord::prepareThemes(layout);root.setProperty("background-color","ff292a2d",nullptr);return layout;
 }
 }

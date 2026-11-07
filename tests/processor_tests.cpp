@@ -639,6 +639,7 @@ int main() {
     require(findComponent(*timing,"delay-ms")->isVisible() && !findComponent(*timing,"delay-note")->isVisible(),"Free delay must show milliseconds");
     fxTabs->setCurrentTabIndex(2);
     juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+    require(tabs->getCurrentTabIndex()==6 && builder.findGuiItemWithId("tape-controls")->isVisible(),"Selecting an FX subtab must keep the main FX page selected and visible");
     const auto tapePreview=editor->createComponentSnapshot(editor->getLocalBounds());
     auto tapeStream=juce::File::getCurrentWorkingDirectory().getChildFile("Omnichord-tape-preview.png").createOutputStream();
     require(tapeStream && png.writeImageToStream(tapePreview,*tapeStream),"Tape panel preview must render");

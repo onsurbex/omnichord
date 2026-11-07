@@ -94,7 +94,7 @@
       </View>
       <BlinblinLogo id="logo" pos-x="670" pos-y="34" pos-width="280" pos-height="86" />
       <Label id="footer" pos-x="670" pos-y="123" pos-width="280" pos-height="16" text="BLINBLIN / OMNICHORD 07" font-size="10" />
-      <View id="sound-controls" pos-x="65" pos-y="425" pos-width="545" pos-height="262" display="tabbed" tab-height="26" tab-selected="0" background-color="ffeee6cf" padding="4" border="1" border-color="40263e38" radius="14">
+      <View id="sound-controls" pos-x="65" pos-y="425" pos-width="545" pos-height="262" display="tabbed" tab-height="26" tab-selected="uiMainTab" background-color="ffeee6cf" padding="4" border="1" border-color="40263e38" radius="14">
         <View id="mixer-controls" tab-caption="Mixer" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
           <MixerPanel id="mixer" pos-x="0" pos-y="0" pos-width="537" pos-height="228" />
         </View>
@@ -154,7 +154,7 @@
           <RhythmPanel id="rhythmpanel" pos-x="5" pos-y="0" pos-width="527" pos-height="184" />
         </View>
         <View id="fx-controls" tab-caption="FX" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
-          <View id="fx-tabs" display="tabbed" tab-height="24" tab-selected="0" pos-x="0" pos-y="0" pos-width="537" pos-height="228" padding="0" border="0" background-color="ffeee6cf">
+          <View id="fx-tabs" display="tabbed" tab-height="24" tab-selected="uiFxTab" pos-x="0" pos-y="0" pos-width="537" pos-height="228" padding="0" border="0" background-color="ffeee6cf">
             <View id="delay-controls" tab-caption="Delay" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
               <Slider id="delayMix" pos-x="30" pos-y="0" pos-width="90" pos-height="100" parameter="delayMix" class="knob" />
               <Label id="delayMix-label" pos-x="30" pos-y="100" pos-width="90" pos-height="18" text="RETORNO" font-size="11" justification="centred" />
