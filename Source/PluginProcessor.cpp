@@ -34,7 +34,7 @@ juce::ValueTree upgradeLayout(juce::ValueTree layout) {
                 const auto id=child.getProperty("id").toString();
                 if((id.startsWith("chord-") && child.hasType("OmniChord")) || id.startsWith("quality-"))child.setProperty("pos-y",static_cast<int>(child.getProperty("pos-y"))-44,nullptr);
             }
-            for(const auto* id:{"subtitle","title","description","speaker","chord-display","pad","harpQuantize","chordSustain","divider-275","divider-439","sound-controls"}) {
+            for(const auto* id:{"subtitle","title","description","speaker","chord-display","pad","harpQuantize","chordSustain","divider-275","divider-439","sound-controls","gain"}) {
                 auto old=findNode(root,id),fresh=findNode(defaults,id);
                 for(const auto* key:{"pos-y","pos-height"})if(fresh.hasProperty(key))old.setProperty(key,fresh.getProperty(key),nullptr);
             }

@@ -41,7 +41,7 @@
       <OmniChord id="chord-32" pos-x="130" pos-y="321" pos-width="42" pos-height="42" text="Ab7" parameter="chord" button-radio-group="1001" button-radio-value="32" tooltip="Ab7 | MIDI 49 (octava C2)" class="chord" />
       <Label id="subtitle" pos-x="60" pos-y="28" pos-width="520" pos-height="22" text="BLINLBIN / HARP / ORGANO ELECTRONICO" font-size="13" />
       <Label id="title" pos-x="59" pos-y="51" pos-width="400" pos-height="50" text="Omnichord" font-size="45" />
-      <Label id="description" pos-x="62" pos-y="103" pos-width="500" pos-height="16" text="48 ACORDES / 5 FUENTES / MIXER" font-size="12" />
+      <Label id="description" pos-x="62" pos-y="103" pos-width="400" pos-height="16" text="48 ACORDES / 5 FUENTES / MIXER" font-size="12" />
       <Speaker id="speaker" pos-x="62" pos-y="120" pos-width="150" pos-height="60" dot-color="66263e38" background-color="16263e38" radius="15" />
       <ChordDisplay id="chord-display" pos-x="245" pos-y="120" pos-width="345" pos-height="60" display-background="ff263e38" display-text="ffeee6cf" display-caption="ACORDE EN MEMORIA" display-font-size="24" />
       <View id="divider-275" pos-x="62" pos-y="222" pos-width="481" pos-height="1" background-color="24263e38" />
@@ -83,7 +83,7 @@
       <OmniChord id="chord-25" pos-x="85" pos-y="321" pos-width="42" pos-height="42" text="Db7" parameter="chord" button-radio-group="1001" button-radio-value="25" tooltip="Db7 | MIDI 48 (octava C2)" class="chord" />
       <OmniChord id="chord-27" pos-x="175" pos-y="321" pos-width="42" pos-height="42" text="Eb7" parameter="chord" button-radio-group="1001" button-radio-value="27" tooltip="Eb7 | MIDI 50 (octava C2)" class="chord" />
       <OmniChord id="chord-34" pos-x="220" pos-y="321" pos-width="42" pos-height="42" text="Bb7" parameter="chord" button-radio-group="1001" button-radio-value="34" tooltip="Bb7 | MIDI 51 (octava C2)" class="chord" />
-      <Slider id="gain" pos-x="490" pos-y="51" pos-width="92" pos-height="100" parameter="gain" class="knob" />
+      <Slider id="gain" pos-x="490" pos-y="51" pos-width="92" pos-height="66" parameter="gain" class="knob" />
       <Label id="gain-label" pos-x="490" pos-y="30" pos-width="92" pos-height="20" text="GENERAL" font-size="13" justification="centred" />
       <OmniSwitch id="pad" pos-x="60" pos-y="190" pos-width="145" pos-height="28" text="CHORDS" parameter="pad" switch-fixed-color="1" button-color="ffcfad4a" button-on-color="fff0ca59" button-off-text="ff302c1d" button-on-text="ff302c1d" tooltip="Activa o silencia las capas Organ, FM y Samples; Harp y Ritmos son independientes." />
       <TextButton id="silence" pos-x="640" pos-y="662" pos-width="140" pos-height="28" text="SILENCIO" onClick="silence" />
