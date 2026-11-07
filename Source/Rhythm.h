@@ -13,28 +13,32 @@ inline constexpr std::array<std::array<std::uint16_t,5>,6> rhythmPatterns{{
 }};
 class Rhythm {
     std::array<SampleVoice,24> voices{};double rate=48000,phase=0;std::int64_t nextStep=0;bool lastRun=false;
-    bool hostPosition=false,hostTransport=false;double blockPpq=0;int frame=0;
+    int previousLength=16;bool hostPosition=false,hostTransport=false;double blockPpq=0;int frame=0;
     float smoothedVolume=.7f,volumeCoefficient=.001f;int latency=0,write=0;std::array<std::array<float,2>,33> alignment{};
     BeatLoop loopPlayer;float loopGain=0;bool loopSeek=false;double loopPhase=0;
-    double scheduled(std::int64_t step) const {return (static_cast<double>(step)+(step%2!=0?std::clamp(swing,0.f,.6f):0.f))*.25;}
+    int wrappedStep(std::int64_t step) const {const int n=activeLength();return static_cast<int>((step%n+n)%n);}
+    double scheduled(std::int64_t step) const {return (static_cast<double>(step)+(wrappedStep(step)%2!=0?std::clamp(swing,0.f,.6f):0.f))*.25;}
     void seek(double ppq) {nextStep=static_cast<std::int64_t>(std::floor(ppq*4));if(scheduled(nextStep)<ppq-1e-10)++nextStep;}
 public:
-    bool enabled=false,followHost=true,hostPlaying=false;double bpm=120;int pattern=0;float swing=0,volume=.7f;
+    bool enabled=false,followHost=true,hostPlaying=false;double bpm=120;int pattern=0,length=16;float swing=0,volume=.7f;
     bool useLoop=false,chokeOpenHat=true;const SampleAudio* loopSound=nullptr;
     std::array<std::uint16_t,5> custom{};
     std::array<const SampleAudio*,5> samples{};
     int lastStep=-1;std::array<int,5> hits{};
     void prepare(double sampleRate,int delay=0){rate=sampleRate;volumeCoefficient=static_cast<float>(1-std::exp(-1/(rate*.02)));smoothedVolume=volume;latency=std::clamp(delay,0,32);loopPlayer.prepare(rate);reset();}
-    void reset(){alignment={};write=0;voices={};phase=0;nextStep=0;lastRun=false;lastStep=-1;hits={};loopPlayer.reset();loopGain=0;loopPhase=0;loopSeek=false;}
+    int activeLength() const {return useLoop?16:std::min(std::clamp(length,1,16),pattern==5?12:16);}
+    void reset(){previousLength=activeLength();alignment={};write=0;voices={};phase=0;nextStep=0;lastRun=false;lastStep=-1;hits={};loopPlayer.reset();loopGain=0;loopPhase=0;loopSeek=false;}
     bool running() const {return enabled && (!hostTransport || !followHost || hostPlaying);}
     void beginBlock(bool hasPpq,double ppq,bool playing,bool hasTransport=false) {
         hostPosition=hasPpq;hostTransport=hasTransport || hasPpq;blockPpq=ppq;hostPlaying=playing;frame=0;
-        const bool run=running();
+        const bool run=running(),resized=previousLength!=activeLength();previousLength=activeLength();
         if(hostPosition && followHost) {
             const double expected=phase;
-            if(!lastRun || std::abs(ppq-expected)>std::max(.01,60000/(std::max(20.,bpm)*rate))){seek(ppq);loopSeek=true;}
+            if(resized || !lastRun || std::abs(ppq-expected)>std::max(.01,60000/(std::max(20.,bpm)*rate))){seek(ppq);loopSeek=true;}
             phase=ppq;
         } else if(run && !lastRun){phase=0;nextStep=0;loopSeek=true;}
+        else if(resized)seek(phase);
+        if(resized && run)lastStep=wrappedStep(static_cast<std::int64_t>(std::floor(phase*4)));
         if(!run && lastRun){for(auto& voice:voices)voice.stop(.005f);lastStep=-1;}
         lastRun=run;
     }
@@ -50,7 +54,7 @@ public:
             const double ppq=(hostPosition && followHost)?blockPpq+frame*std::clamp(bpm,20.,400.)/(60*rate):phase;
             for(int event=0;event<4;++event) {
                 if(ppq+1e-10<scheduled(nextStep))break;
-                const int length=pattern==5?12:16;const int step=static_cast<int>((nextStep%length+length)%length);lastStep=step;
+                const int step=wrappedStep(nextStep);lastStep=step;
                 const auto& grid=pattern<6?rhythmPatterns[static_cast<size_t>(std::clamp(pattern,0,5))]:custom;
                 if(!useLoop)for(size_t track=0;track<5;++track)if((grid[track]&(1u<<step))!=0)trigger(static_cast<int>(track),step%4==0?1.f:.82f);
                 ++nextStep;

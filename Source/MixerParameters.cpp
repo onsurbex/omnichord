@@ -66,6 +66,7 @@ void ChordHarpProcessor::readMixerParameters() {
     for(size_t i=0;i<2;++i) {
         const auto& r=mixerReturns[i];auto& c=mixer.returns[i];c.enabled=r[0]->load()>.5f;c.solo=r[1]->load()>.5f;c.gain=r[2]->load();c.width=r[3]->load();
     }
+    mixer.clipperEnabled=masterClipperRaw->load()>.5f;
     mixer.master=mixerRaw[0]->load();mixer.masterEnabled=mixerRaw[1]->load()>.5f;mixer.width=mixerRaw[2]->load();mixer.fxEnabled=mixerRaw[3]->load()>.5f;
 }
 void ChordHarpProcessor::liveNoteOn(int note,int source,float velocity) {

@@ -300,7 +300,7 @@ static void checkTempoAndAmbience() {
 static void checkEffectBypass() {
     for(const juce::String effect:{"delay","reverb"}) {
         ChordHarpProcessor bypass,dry;
-        bypass.state.getParameter(effect+"Mix")->setValueNotifyingHost(.8f);
+        bypass.state.getParameter(effect+"Mix")->setValueNotifyingHost(bypass.state.getParameter(effect+"Mix")->convertTo0to1(.8f));
         bypass.state.getParameter(effect=="delay"?"harpDelaySend":"harpReverbSend")->setValueNotifyingHost(.8f);
         bypass.state.getParameter(effect+"Enabled")->setValueNotifyingHost(0);
         for(auto* synth:{&bypass,&dry}) {
@@ -489,8 +489,58 @@ static void checkSoloLeds(ChordHarpProcessor& processor,juce::Component& editor,
     setActual(processor,"delayEnabled",1);processor.toggleMixerSolo(7);
 }
 
+static void checkPatternLengthGainAndClipper() {
+    auto owner=std::make_unique<ChordHarpProcessor>();auto& synth=*owner;const float maximum=std::pow(10.f,6.f/20.f);
+    for(int c=0;c<8;++c) {
+        auto* p=synth.state.getParameter(synth.mixerParameter(c,"Gain"));require(std::abs(p->getNormalisableRange().end-maximum)<1e-6,"Every mixer fader must reach +6 dB");
+        require(p->getText(1,0)=="+6.0 dB" && std::abs(p->convertFrom0to1(p->getValueForText("+6 dB"))-maximum)<1e-6,"Positive dB entry must map to actual amplification");
+        if(c<5)for(const char* role:{"DelaySend","ReverbSend"})require(std::abs(synth.state.getParameter(synth.mixerParameter(c,role))->getNormalisableRange().end-maximum)<1e-6,"Send knobs must reach +6 dB too");
+    }
+    for(const char* id:{"delayWidth","reverbWidth","masterWidth"}) {
+        auto* p=synth.state.getParameter(id);require(p->getText(p->convertTo0to1(1.5f),0)=="150 %","Mixer Width must be displayed as a percentage");
+        require(p->convertFrom0to1(p->getValueForText("200 %"))==2,"Two hundred percent Width must map to its real maximum");
+    }
+    setActual(synth,"rhythmPattern",5);require(synth.rhythmPatternLength()==12,"Waltz must retain its twelve-step cycle");synth.editRhythmStep(0,3,true);
+    require(synth.rhythmPatternLength()==12,"Editing Waltz must not silently expand it to sixteen steps");
+    synth.resizeRhythmPattern(16);synth.editRhythmStep(0,14,true);synth.resizeRhythmPattern(5);synth.editRhythmStep(0,14,false);
+    require(synth.rhythmPatternLength()==5 && synth.state.getRawParameterValue("rhythmStep0_14")->load()==1,"Shortening must preserve hidden steps and prevent edits beyond the active length");
+    synth.resizeRhythmPattern(0);require(synth.rhythmPatternLength()==1,"Patterns must clamp to at least one step");synth.resizeRhythmPattern(33);require(synth.rhythmPatternLength()==16,"Patterns must clamp to sixteen steps");
+    synth.resizeRhythmPattern(7);setActual(synth,"sampleGain",maximum);setActual(synth,"masterClipper",0);
+    const auto file=juce::File::getSpecialLocation(juce::File::tempDirectory).getNonexistentChildFile("new-pattern-controls",".omnipreset",false);juce::String error;
+    require(synth.savePreset(file,error),"New pattern, gain and clipper settings must save");auto restored=std::make_unique<ChordHarpProcessor>();require(restored->loadPreset(file,error),"The new controls must reload");file.deleteFile();
+    require(restored->rhythmPatternLength()==7 && restored->state.getRawParameterValue("masterClipper")->load()==0 && std::abs(restored->state.getRawParameterValue("sampleGain")->load()-maximum)<1e-6,"A complete preset must preserve short length, +6 dB and clipper bypass");
+    juce::MemoryBlock memory;synth.getStateInformation(memory);restored->setStateInformation(memory.getData(),static_cast<int>(memory.getSize()));require(restored->rhythmPatternLength()==7 && restored->state.getRawParameterValue("masterClipper")->load()==0,"DAW state must preserve the new controls too");
+    auto old=synth.state.copyState();old.setProperty("synthVersion",7,nullptr);old.removeChild(old.getChildWithProperty("id","rhythmLength"),nullptr);old.removeChild(old.getChildWithProperty("id","masterClipper"),nullptr);old.getChildWithProperty("id","sampleGain").setProperty("value",1.f,nullptr);
+    juce::AudioProcessor::copyXmlToBinary(*old.createXml(),memory);restored->setStateInformation(memory.getData(),static_cast<int>(memory.getSize()));
+    require(restored->rhythmPatternLength()==16 && restored->state.getRawParameterValue("masterClipper")->load()==1 && restored->state.getRawParameterValue("sampleGain")->load()==1,"Old projects must retain unity gain and use defaults for the new controls");
+    auto clipped=std::make_unique<ChordHarpProcessor>(),bypass=std::make_unique<ChordHarpProcessor>();
+    for(auto* p:{clipped.get(),bypass.get()}) {
+        setActual(*p,"playMode",1);for(int c=0;c<4;++c){setActual(*p,p->mixerParameter(c,"Enabled").toRawUTF8(),1);setActual(*p,p->mixerParameter(c,"Gain").toRawUTF8(),maximum);}setActual(*p,"gain",maximum);setActual(*p,"masterClipper",p==clipped.get()?1.f:0.f);p->prepareToPlay(48000,512);
+    }
+    juce::AudioBuffer<float> a(2,512),b(2,512);juce::MidiBuffer ma,mb;for(int note:{60,64,67}){ma.addEvent(juce::MidiMessage::noteOn(1,note,1.f),0);mb.addEvent(juce::MidiMessage::noteOn(1,note,1.f),0);}float high=0;
+    for(int block=0;block<40;++block){clipped->processBlock(a,ma);bypass->processBlock(b,mb);require(a.getMagnitude(0,512)<=1,"The enabled master clipper must bound boosted audio");high=std::max(high,b.getMagnitude(0,512));}require(high>1,"Clipper bypass must allow real boosted float audio above 0 dBFS");
+}
+static void checkPatternRuler(ChordHarpProcessor& processor,juce::Component& panel,juce::Component& reviewPanel) {
+    auto* ruler=findComponent(panel,"rhythm-ruler");auto* transport=findComponent(panel,"rhythm-transport");require(ruler && transport && panel.getLocalBounds().contains(ruler->getBounds()) && panel.getLocalBounds().contains(transport->getBounds()),"The ruler and transport must fit inside the rhythm panel");
+    setActual(processor,"rhythmUseLoop",0);setActual(processor,"rhythmLength",16);setActual(processor,"rhythmPattern",0);setActual(processor,"rhythmEnabled",1);processor.editRhythmStep(0,2,true);processor.editRhythmStep(0,14,true);
+    processor.prepareToPlay(48000,512);juce::AudioBuffer<float> audio(2,512);juce::MidiBuffer midi;for(int block=0;block<26;++block)processor.processBlock(audio,midi);juce::MessageManager::getInstance()->runDispatchLoopUntil(150);
+    for(int t=0;t<5;++t)for(int s=0;s<16;++s){auto* cell=dynamic_cast<juce::TextButton*>(findComponent(panel,ChordHarpProcessor::rhythmStepID(t,s)));require(cell && cell->getButtonText().isEmpty(),"Drum step cells must not repeat the ruler numbers");}
+    auto* first=dynamic_cast<juce::TextButton*>(findComponent(panel,"rhythmStep0_0"));auto* third=dynamic_cast<juce::TextButton*>(findComponent(panel,"rhythmStep0_2"));
+    require(first->findColour(juce::TextButton::buttonColourId)!=third->findColour(juce::TextButton::buttonColourId) && first->findColour(juce::TextButton::buttonOnColourId)!=third->findColour(juce::TextButton::buttonOnColourId),"Both empty and enabled cells must alternate shading every two columns");
+    const auto rulerImage=ruler->createComponentSnapshot(ruler->getLocalBounds());const int current=processor.rhythmStep();require(current>=0,"Playing rhythm must advance the numbered ruler");
+    require(rulerImage.getPixelAt(current*25+4,4)==sampleui::palette(processor,"color-ffb66b44"),"The current ruler number must use the theme accent");
+    const auto save=[&](const char* name){juce::PNGImageFormat png;auto stream=juce::File::getCurrentWorkingDirectory().getChildFile(name).createOutputStream();require(stream!=nullptr,"Pattern review image must open");stream->setPosition(0);stream->truncate();require(png.writeImageToStream(reviewPanel.createComponentSnapshot(reviewPanel.getLocalBounds()),*stream),"Full and shortened rhythm panels must render");};
+    save("Omnichord-rhythm-panel-preview.png");
+    const juce::Point<float> start(398,11);const auto now=juce::Time::getCurrentTime();juce::MouseEvent down(juce::Desktop::getInstance().getMainMouseSource(),start,juce::ModifierKeys(juce::ModifierKeys::leftButtonModifier),1,0,0,0,0,ruler,ruler,now,start,now,1,false);
+    ruler->mouseDown(down);const auto moved=down.withNewPosition(juce::Point<float>(198,11));ruler->mouseDrag(moved);ruler->mouseUp(moved);processor.processBlock(audio,midi);juce::MessageManager::getInstance()->runDispatchLoopUntil(150);
+    require(processor.rhythmPatternLength()==8 && !findComponent(panel,"rhythmStep0_14")->isVisible() && processor.state.getRawParameterValue("rhythmStep0_14")->load()==1,"Dragging the ruler edge must shorten the real sequence and retain hidden notes");save("Omnichord-rhythm-short-panel-preview.png");
+    const auto second=down.withNewPosition(juce::Point<float>(198,11));ruler->mouseDown(second);ruler->mouseDrag(second.withNewPosition(start));ruler->mouseUp(second.withNewPosition(start));juce::MessageManager::getInstance()->runDispatchLoopUntil(150);
+    require(processor.rhythmPatternLength()==16 && findComponent(panel,"rhythmStep0_14")->isVisible(),"Dragging the edge back out must restore all sixteen columns");setActual(processor,"rhythmEnabled",0);
+}
+
 int main() {
     juce::ScopedJuceInitialiser_GUI gui;
+    checkPatternLengthGainAndClipper();
     checkSoloCleanup();
     checkTransportAndLevels();
     checkV7Performance();
@@ -729,6 +779,7 @@ int main() {
             require(pageItem->getLocalBounds().contains(bounds),"Every tab control must remain inside its panel");
         }
     }
+    auto* clipSwitch=dynamic_cast<juce::TextButton*>(findComponent(*builder.findGuiItemWithId("mixer")->getWrappedComponent(),"mixer-clipper"));require(clipSwitch!=nullptr,"Master must expose a physical clipper switch");clipSwitch->setToggleState(false,juce::sendNotificationSync);require(restored.state.getRawParameterValue("masterClipper")->load()==0,"CLIP must disable the master soft clipper");clipSwitch->setToggleState(true,juce::sendNotificationSync);
     // Layer LEDs share mixer power without selecting their tab.
     auto* mixer=builder.findGuiItemWithId("mixer")->getWrappedComponent();
     auto* readout=dynamic_cast<juce::Label*>(findComponent(*mixer,"mixer-db-0"));require(readout!=nullptr,"Mixer must show persistent dB readouts");
@@ -798,6 +849,7 @@ int main() {
         require(stream && png.writeImageToStream(snapshot,*stream),"The FM, sample and rhythm pages must render for review");
     }
     auto* rhythmPanel=builder.findGuiItemWithId("rhythmpanel")->getWrappedComponent();
+    checkPatternRuler(restored,*rhythmPanel,*panelItem);
     auto* loopSwitch=dynamic_cast<juce::TextButton*>(findComponent(*rhythmPanel,"rhythm-loop-mode"));
     require(loopSwitch!=nullptr,"Recorded loops must have a visible mode selector");
     loopSwitch->setToggleState(true,juce::sendNotificationSync);
@@ -830,8 +882,8 @@ int main() {
     require(static_cast<int>(reloadedShell.getChildWithProperty("id","gain").getProperty("pos-x"))==123,
             "Foleys Load XML must recover the exported position");
 #endif
-    restored.state.getParameter("delayMix")->setValueNotifyingHost(0.35f);
-    restored.state.getParameter("reverbMix")->setValueNotifyingHost(0.25f);
+    restored.state.getParameter("delayMix")->setValueNotifyingHost(restored.state.getParameter("delayMix")->convertTo0to1(0.35f));
+    restored.state.getParameter("reverbMix")->setValueNotifyingHost(restored.state.getParameter("reverbMix")->convertTo0to1(0.25f));
     restored.state.getParameter("tapeEnabled")->setValueNotifyingHost(1);
     restored.state.getParameter("tapeNoise")->setValueNotifyingHost(0.4f);
     restored.state.getParameter("tapeWow")->setValueNotifyingHost(0.6f);
@@ -864,7 +916,7 @@ int main() {
     legacyShell.getChildWithProperty("id","gain").setProperty("pos-x",321,nullptr);
     legacyShell.appendChild(juce::ValueTree("LogoPicker",{{"id","logo-picker"}}),nullptr);
     legacySession.magicState.setGuiValueTree(legacyLayout);
-    legacySession.state.getParameter("gain")->setValueNotifyingHost(0.23f);
+    legacySession.state.getParameter("gain")->setValueNotifyingHost(legacySession.state.getParameter("gain")->convertTo0to1(0.23f));
     juce::MemoryBlock oldSession;
     legacySession.getStateInformation(oldSession);
     auto upgradedOwner=std::make_unique<ChordHarpProcessor>();auto& upgraded=*upgradedOwner;

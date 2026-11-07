@@ -86,6 +86,8 @@ public:
     int rhythmStep() const {return playingStep.load();}
     static juce::String rhythmStepID(int track,int step);
     void editRhythmStep(int track,int step,bool on);
+    int rhythmPatternLength() const;
+    void resizeRhythmPattern(int length);
 private:
     static juce::File defaultPresetHome();
     juce::File presetHome;
@@ -119,6 +121,7 @@ private:
     std::array<SourceReferences,5> mixerSources{};
     std::array<std::array<std::atomic<float>*,4>,2> mixerReturns{};
     std::array<std::atomic<float>*,9> mixerRaw{};
+    std::atomic<float>* masterClipperRaw=nullptr;
     std::array<std::atomic<float>*,7> organRefs{};
     std::array<std::atomic<float>*,3> sampleFilterRefs{};
     std::array<std::atomic<float>,8> meters{};
@@ -152,7 +155,8 @@ private:
     std::atomic<int> playingStep{-1};
     mutable juce::CriticalSection libraryLock;
     bool rhythmMuted=false,lastRhythmEnabled=false,lastRhythmHostPlay=false;
-    std::array<std::atomic<float>*,11> rhythmRaw{};
+    void makeRhythmCustom();
+    std::array<std::atomic<float>*,12> rhythmRaw{};
     std::array<std::array<std::atomic<float>*,16>,5> stepRaw{};
     std::array<std::atomic<float>*,5> trackRaw{},sampleRaw{};
     void readRhythmParameters(bool,double,bool,bool);

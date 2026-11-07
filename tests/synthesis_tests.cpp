@@ -40,6 +40,19 @@ int main(){
     Rhythm rhythm;rhythm.enabled=true;rhythm.prepare(48000);for(auto& s:rhythm.samples)s=&impulse;
     for(int block=0;block<750;++block){rhythm.beginBlock(false,0,false);for(int i=0;i<512;++i){auto a=rhythm.next();require(std::isfinite(a[0]),"Drum output must remain finite");}}
     require(rhythm.hits[0]==8&&rhythm.hits[1]==8&&rhythm.hits[2]==32,"Standalone rhythm must stay on the 120 BPM grid over four bars");
+    // Short and odd-length patterns retain their musical phase, including swing.
+    for(int length=1;length<=16;++length) {
+        Rhythm shortened;shortened.enabled=true;shortened.pattern=6;shortened.length=length;shortened.swing=.4f;shortened.custom[0]=0xffff;shortened.samples[0]=&impulse;shortened.prepare(48000);shortened.beginBlock(false,0,false);
+        std::vector<int> at;for(int frame=0;frame<length*12000;++frame){const int old=shortened.hits[0];shortened.next();if(shortened.hits[0]>old)at.push_back(frame);require(shortened.lastStep>=0 && shortened.lastStep<length,"The playhead must remain within the shortened pattern");}
+        require(static_cast<int>(at.size())==length*2,"Every enabled step must play once per shortened cycle");
+        for(int i=0;i<length*2;++i){const int expected=i*6000+((i%length)%2?2400:0);require(std::abs(at[static_cast<size_t>(i)]-expected)<=1,"Odd-length swing must restart at the correct cycle boundary without drifting");}
+    }
+    {
+        Rhythm edited;edited.enabled=true;edited.pattern=6;edited.custom[0]=0xffff;edited.samples[0]=&impulse;edited.prepare(48000);
+        edited.beginBlock(true,2.75,true);edited.next();edited.length=4;edited.beginBlock(true,2.76,true);edited.next();require(edited.lastStep<4,"Changing length during playback must immediately constrain the playhead");
+        edited.beginBlock(true,3,true);edited.next();require(edited.lastStep==0,"A shortened pattern must still follow the absolute DAW grid");
+        edited.length=5;edited.beginBlock(true,-.25,true);edited.next();require(edited.lastStep==4,"Negative DAW preroll positions must wrap safely in short patterns");
+    }
     rhythm.reset();rhythm.beginBlock(false,0,false,true);for(int i=0;i<512;++i)rhythm.next();require(rhythm.hits[0]==0 && !rhythm.running(),"A host without PPQ must still obey Stop");
     rhythm.beginBlock(false,0,true,true);rhythm.next();require(rhythm.hits[0]==1 && rhythm.running(),"A host without PPQ must start the armed rhythm on Play");
     rhythm.reset();rhythm.custom={0,2,0,0,0};rhythm.pattern=6;rhythm.swing=.4f;rhythm.beginBlock(true,.27,true);int hit=-1;
