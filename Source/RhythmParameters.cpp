@@ -93,10 +93,7 @@ void ChordHarpProcessor::readRhythmParameters(bool hasPpq,double ppq,bool playin
             if(index>=0 && index<static_cast<int>(sampleLibrary->entries.size()))rhythm.samples[t]=&sampleLibrary->entries[static_cast<size_t>(index)].audio;
         }
     }
-    rhythm.chokeOpenHat=false;
-    if(rhythm.samples[3] && sampleLibrary)for(const auto& sound:sampleLibrary->entries)if(&sound.audio==rhythm.samples[3]) {
-        rhythm.chokeOpenHat=sound.name.containsIgnoreCase("open") || sound.name.containsIgnoreCase("ohh");break;
-    }
+    rhythm.chokeOpenHat=rhythm.samples[3] && rhythm.samples[3]->openHat;
     sampleChords.sound=nullptr;
     if(sampleLibrary) {
         const int index=static_cast<int>(rhythmRaw[6]->load());

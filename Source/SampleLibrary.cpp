@@ -44,6 +44,7 @@ std::unique_ptr<SampleLibrary> SampleLibrary::readZip(const juce::File& file,juc
         const auto basename=sound.name.toLowerCase();
         sound.audio.drum=lower.contains("drum hits/") || basename.contains("kick") || basename.contains("snare")
             || basename.contains("hat") || basename.contains("cajon") || basename.contains("clave") || basename.contains("perc");
+        sound.audio.openHat=basename.contains("open") || basename.contains("ohh");
         for(const auto& info:chordharp::factorySamples)if(sound.name.equalsIgnoreCase(info.name)) {
             sound.audio.root=info.root;sound.audio.gain=info.gain;sound.audio.sustain=info.sustain;
         }
