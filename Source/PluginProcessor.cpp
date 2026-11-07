@@ -328,7 +328,8 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
     };
     const auto silence=[&](bool keepHostRhythm=false) {
         engine.reset();organLayer.reset();fmLayer.reset();sampleChords.reset();sampleFilter.reset();sampleDC.reset();
-        delay.reset();reverb.reset();tape.reset();heldChords.clear();held=-1;liveNotes={};pedals={};guiChordLatched=false;
+        if(!keepHostRhythm){delay.reset();reverb.reset();tape.reset();}
+        heldChords.clear();held=-1;liveNotes={};pedals={};guiChordLatched=false;
         organSilenced=true;tapeMuted=!keepHostRhythm;if(!keepHostRhythm){rhythmMuted=true;rhythm.enabled=false;rhythm.reset();}
     };
     const bool stop=panic.exchange(false),presetChanged=presetReset.exchange(false);

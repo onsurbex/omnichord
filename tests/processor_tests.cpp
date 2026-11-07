@@ -415,6 +415,13 @@ static void checkTransportAndLevels() {
         setActual(synth,"rhythmEnabled",0);for(int b=0;b<15;++b)render();require(!synth.rhythmIsRunning() && synth.dawIsPlaying() && audio.getMagnitude(0,512)<1e-7,"Turning the rhythm channel off must preserve the real DAW transport display");
         synth.setPlayHead(nullptr);
     }
+    {
+        auto a=std::make_unique<ChordHarpProcessor>(),b=std::make_unique<ChordHarpProcessor>();TransportPlayhead host;host.playing=true;
+        for(auto* synth:{a.get(),b.get()}){setActual(*synth,"harpEnabled",0);setActual(*synth,"rhythmEnabled",1);setActual(*synth,"rhythmDelaySend",.4f);setActual(*synth,"rhythmReverbSend",.3f);setActual(*synth,"tapeEnabled",1);synth->prepareToPlay(48000,512);synth->setPlayHead(&host);}
+        juce::AudioBuffer<float> audio(2,512),control(2,512);juce::MidiBuffer events,none;
+        for(int block=0;block<60;++block){if(block==30)events.addEvent(juce::MidiMessage::allNotesOff(1),0);a->processBlock(audio,events);b->processBlock(control,none);host.ppq+=512*host.bpm/(60*48000.);if(block>=30)for(int c=0;c<2;++c)for(int i=0;i<512;++i)require(audio.getSample(c,i)==control.getSample(c,i),"DAW All Notes Off must preserve the continuous rhythm, effect tails and Tape history");}
+        a->setPlayHead(nullptr);b->setPlayHead(nullptr);
+    }
     auto owner=std::make_unique<ChordHarpProcessor>();auto& synth=*owner;
     for(const char* id:{"gain","harpGain","organGain","fmGain","sampleGain","rhythmVolume","delayMix","reverbMix","harpDelaySend"}) {
         auto* parameter=synth.state.getParameter(id);require(parameter->getText(parameter->convertTo0to1(1),0)=="0.0 dB","Unity gain must display zero dB");
