@@ -5,6 +5,11 @@
 
 namespace chordharp {
 using Stereo=std::array<float,2>;
+inline float softClip(float input) {
+    constexpr float knee=.75f;
+    const float level=std::abs(input);
+    return level<=knee?input:std::copysign(knee+(1-knee)*std::tanh((level-knee)/(1-knee)),input);
+}
 inline Stereo stereoWidth(Stereo x,float width) {
     const float mid=(x[0]+x[1])*.5f,side=(x[0]-x[1])*.5f*width;
     return {mid+side,mid-side};
@@ -21,14 +26,14 @@ public:
     struct Channel {bool enabled=true,solo=false;float gain=1,pan=0,delay=0,reverb=0;};
     struct Return {bool enabled=true,solo=false;float gain=.7f,width=1;};
     std::array<Channel,5> channels{};std::array<Return,2> returns{};
-    bool masterEnabled=true,fxEnabled=true;float master=0.65f,width=1;
+    bool masterEnabled=true,fxEnabled=true,clipperEnabled=true;float master=0.65f,width=1;
     struct Feeds {Stereo dry{},delay{},reverb{};};
     std::array<float,8> levels{};
     void prepare(double rate) {
         coefficient=static_cast<float>(1-std::exp(-1/(rate*.02)));rampLength=std::max(1,static_cast<int>(rate*.02));levels={};
         for(size_t i=0;i<5;++i){gain[i]=channels[i].enabled?channels[i].gain:0;pan[i]=channels[i].pan;sends[i]={channels[i].delay,channels[i].reverb};}
         for(size_t i=0;i<2;++i){returnGain[i]=returns[i].enabled && fxEnabled?returns[i].gain:0;returnWidth[i]=returns[i].width;}
-        masterGain=masterTarget=masterEnabled?master:0;masterLeft=0;masterWidth=width;drySolo=1;
+        masterGain=masterTarget=masterEnabled?master:0;masterLeft=0;masterWidth=width;drySolo=1;clipMix=clipTarget=clipperEnabled?1.f:0.f;clipLeft=0;clipRampLength=std::max(1,static_cast<int>(rate*.005));
     }
     void beginBlock() {levels={};}
     Feeds feed(const std::array<Stereo,5>& inputs) {
@@ -60,13 +65,16 @@ public:
         const float target=masterEnabled?master:0.f;
         if(target!=masterTarget){masterTarget=target;masterLeft=rampLength;masterStep=(target-masterGain)/static_cast<float>(masterLeft);}
         if(masterLeft>0){masterGain+=masterStep;if(--masterLeft==0)masterGain=masterTarget;}
-        for(auto& x:afterTape)x=std::tanh(x*masterGain);
+        const float clipGoal=clipperEnabled?1.f:0.f;
+        if(clipGoal!=clipTarget){clipTarget=clipGoal;clipLeft=clipRampLength;clipStep=(clipGoal-clipMix)/static_cast<float>(clipLeft);}
+        if(clipLeft>0){clipMix+=clipStep;if(--clipLeft==0)clipMix=clipTarget;}
+        for(auto& x:afterTape){x*=masterGain;if(clipLeft==0 && clipperEnabled)x=softClip(x);else if(clipMix>0)x+=clipMix*(softClip(x)-x);}
         levels[7]=std::max(levels[7],std::max(std::abs(afterTape[0]),std::abs(afterTape[1])));return afterTape;
     }
 private:
     std::array<float,5> gain{},pan{};std::array<std::array<float,2>,5> sends{};
     std::array<float,2> returnGain{},returnWidth{};float masterGain=.65f,masterWidth=1,drySolo=1,coefficient=.001f;
-    float masterTarget=.65f,masterStep=0;int masterLeft=0,rampLength=960;
+    int clipLeft=0,clipRampLength=240;float clipMix=1,clipTarget=1,clipStep=0,masterTarget=.65f,masterStep=0;int masterLeft=0,rampLength=960;
     void smooth(float& value,float target){value+=coefficient*(target-value);if(std::abs(value-target)<1e-7f)value=target;}
 };
 }

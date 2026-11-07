@@ -146,7 +146,12 @@ void InstrumentLook::drawRotarySlider(juce::Graphics& g,int x,int y,int width,in
     g.fillEllipse(knob); g.setColour(cream.withAlpha(0.35f)); g.drawEllipse(knob.reduced(2),1);
     g.setColour(indicator);
     const auto needle=[&](float angle){g.drawLine({centre.getPointOnCircumference(radius*.46f,angle),centre.getPointOnCircumference(radius*.86f,angle)},2.f);};
-    if(spread){const float mid=(start+end)*.5f,open=position*(end-start)*.5f;needle(mid-open);needle(mid+open);}
+    if(spread) {
+        const float mid=(start+end)*.5f,open=position*(end-start)*.5f;juce::Path sector;
+        if(open>.001f){sector.addPieSegment(knob.reduced(radius*.18f),mid-open,mid+open,0);g.setColour(indicator.withAlpha(.5f));g.fillPath(sector);}
+        g.setColour(indicator);
+        for(const float angle:{mid-open,mid+open})g.drawLine({centre,centre.getPointOnCircumference(radius*.82f,angle)},1.5f);
+    }
     else needle(start+position*(end-start));
 }
 

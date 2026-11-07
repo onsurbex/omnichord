@@ -1,15 +1,23 @@
 #include "PluginProcessor.h"
 
 juce::String ChordHarpProcessor::rhythmStepID(int track,int step) {return "rhythmStep"+juce::String(track)+"_"+juce::String(step);}
+int ChordHarpProcessor::rhythmPatternLength() const {
+    return std::min(juce::jlimit(1,16,static_cast<int>(rhythmRaw[11]->load())),static_cast<int>(rhythmRaw[2]->load())==5?12:16);
+}
+void ChordHarpProcessor::makeRhythmCustom() {
+    const int pattern=static_cast<int>(rhythmRaw[2]->load());if(pattern>=6)return;
+    const int length=rhythmPatternLength();
+    const auto set=[&](const juce::String& id,float v){auto* p=state.getParameter(id);p->setValueNotifyingHost(p->convertTo0to1(v));};
+    for(int t=0;t<5;++t)for(int step=0;step<16;++step)set(rhythmStepID(t,step),(chordharp::rhythmPatterns[static_cast<size_t>(pattern)][static_cast<size_t>(t)]&(1u<<step))!=0?1.f:0.f);
+    set("rhythmLength",static_cast<float>(length));set("rhythmPattern",6);
+}
+void ChordHarpProcessor::resizeRhythmPattern(int length) {
+    length=juce::jlimit(1,16,length);if(length==rhythmPatternLength())return;
+    makeRhythmCustom();auto* p=state.getParameter("rhythmLength");p->setValueNotifyingHost(p->convertTo0to1(static_cast<float>(length)));
+}
 void ChordHarpProcessor::editRhythmStep(int track,int step,bool on) {
-    if(track<0 || track>=5 || step<0 || step>=16)return;
-    const auto set=[&](const juce::String& id,float value){auto* p=state.getParameter(id);p->beginChangeGesture();p->setValueNotifyingHost(p->convertTo0to1(value));p->endChangeGesture();};
-    const int pattern=static_cast<int>(rhythmRaw[2]->load());
-    if(pattern<6) {
-        for(int t=0;t<5;++t)for(int s=0;s<16;++s)set(rhythmStepID(t,s),(chordharp::rhythmPatterns[static_cast<size_t>(pattern)][static_cast<size_t>(t)]&(1u<<s))!=0?1.f:0.f);
-        set("rhythmPattern",6);
-    }
-    set(rhythmStepID(track,step),on?1.f:0.f);
+    if(track<0 || track>=5 || step<0 || step>=rhythmPatternLength())return;
+    makeRhythmCustom();auto* p=state.getParameter(rhythmStepID(track,step));p->beginChangeGesture();p->setValueNotifyingHost(on?1.f:0.f);p->endChangeGesture();
 }
 juce::StringArray ChordHarpProcessor::sampleNames() const {
     const juce::ScopedLock lock(libraryLock);juce::StringArray names;
@@ -94,7 +102,7 @@ void ChordHarpProcessor::readRhythmParameters(bool hasPpq,double ppq,bool playin
         if(index>=0 && index<static_cast<int>(sampleLibrary->entries.size()) && sampleLibrary->entries[static_cast<size_t>(index)].audio.beats>0)
             rhythm.loopSound=&sampleLibrary->entries[static_cast<size_t>(index)].audio;
     }
-    rhythm.pattern=static_cast<int>(rhythmRaw[2]->load());rhythm.swing=rhythmRaw[3]->load();rhythm.volume=1;rhythm.bpm=currentTempo.load();
+    rhythm.pattern=static_cast<int>(rhythmRaw[2]->load());rhythm.length=static_cast<int>(rhythmRaw[11]->load());rhythm.swing=rhythmRaw[3]->load();rhythm.volume=1;rhythm.bpm=currentTempo.load();
     for(size_t t=0;t<5;++t) {
         rhythm.custom[t]=0;for(size_t s=0;s<16;++s)if(stepRaw[t][s]->load()>.5f)rhythm.custom[t]|=static_cast<std::uint16_t>(1u<<s);
         rhythm.samples[t]=nullptr;

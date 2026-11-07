@@ -9,6 +9,13 @@
 static void require(bool c,const char* text){if(!c){std::cerr<<text<<'\n';std::exit(1);}}
 int main(){
     using namespace chordharp;
+    require(softClip(.5f)==.5f && softClip(-.5f)==-.5f,"The soft clipper must leave normal-level samples unchanged");
+    float previous=0;for(int i=0;i<=4000;++i){const float x=i*.001f,y=softClip(x);require(y>=previous && y<=1 && softClip(-x)==-y,"Soft clipping must be monotonic, symmetric and bounded");previous=y;}
+    MixerDSP clipping;clipping.master=1;clipping.clipperEnabled=false;clipping.prepare(48000);
+    require(clipping.output({1.5f,-1.5f})==Stereo{1.5f,-1.5f},"Clipper bypass must pass over-unity float audio without hidden limiting");
+    clipping.clipperEnabled=true;for(int n=0;n<300;++n)clipping.output({2,-2});auto clipped=clipping.output({2,-2});require(clipped[0]<=1 && clipped[1]>=-1 && clipped[0]>.75,"The enabled master clipper must round peaks after its smooth transition");
+    clipping.clipperEnabled=false;for(int n=0;n<300;++n)clipping.output({2,-2});require(clipping.output({2,-2})==Stereo{2,-2},"Disabling the clipper must reach exact bypass after the fade");
+    clipping.master=1.9952623f;clipping.prepare(48000);require(std::abs(clipping.output({.2f,.2f})[0]-.39905246f)<1e-6,"The master must really amplify audio by +6 dB with clipping bypassed");
     const auto left=stereoPan({0,1},-1.f);require(left[0]>.5f && left[1]==0,"Hard pan must fold the right input into the left speaker");
     const auto mono=stereoWidth({.8f,.2f},0);require(mono[0]==mono[1],"Width zero must produce mono");
     const auto wide=stereoWidth({.8f,.2f},2);require(std::abs(wide[0]-wide[1])>1,"Width two must widen the side component");

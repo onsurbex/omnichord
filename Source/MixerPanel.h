@@ -21,7 +21,7 @@ class MixerPanel final : public juce::Component,private juce::Timer {
     std::array<juce::Slider,5> pans,delaySends,reverbSends;
     std::array<juce::Slider,3> widths;
     std::array<std::unique_ptr<MixerSwitch>,8> buttons;
-    juce::TextButton tape{"Tape"};
+    juce::TextButton tape{"Tape"},clipper{"CLIP"};
     std::vector<std::unique_ptr<juce::SliderParameterAttachment>> sliderAttachments;
     std::vector<std::unique_ptr<juce::ButtonParameterAttachment>> buttonAttachments;
     std::array<float,8> peak{};
@@ -47,10 +47,12 @@ public:
                 auto& pan=pans[static_cast<size_t>(c)];pan.setSliderStyle(juce::Slider::LinearHorizontal);pan.getProperties().set("centre-fill",true);pan.setTextBoxStyle(juce::Slider::NoTextBox,false,0,0);pan.setPopupDisplayEnabled(true,true,nullptr);attach(pan,p.mixerParameter(c,"Pan"));
                 knob(delaySends[static_cast<size_t>(c)]);attach(delaySends[static_cast<size_t>(c)],p.mixerParameter(c,"DelaySend"));delaySends[static_cast<size_t>(c)].setTooltip("Envio post-fader a Delay");
                 knob(reverbSends[static_cast<size_t>(c)]);attach(reverbSends[static_cast<size_t>(c)],p.mixerParameter(c,"ReverbSend"));reverbSends[static_cast<size_t>(c)].setTooltip("Envio post-fader a Reverb");
-            } else {knob(widths[static_cast<size_t>(c-5)]);widths[static_cast<size_t>(c-5)].getProperties().set("width-spread",true);attach(widths[static_cast<size_t>(c-5)],p.mixerParameter(c,"Width"));widths[static_cast<size_t>(c-5)].setTooltip("Width: 0 mono, 1 estereo original, 2 ampliado");}
+            } else {knob(widths[static_cast<size_t>(c-5)]);widths[static_cast<size_t>(c-5)].getProperties().set("width-spread",true);attach(widths[static_cast<size_t>(c-5)],p.mixerParameter(c,"Width"));widths[static_cast<size_t>(c-5)].setTooltip("Width: 0 % mono, 100 % estereo original, 200 % ampliado");}
         }
         tape.setComponentID("mixer-tape");tape.setClickingTogglesState(true);tape.setWantsKeyboardFocus(false);tape.getProperties().set("physical-switch",true);tape.getProperties().set("compact-switch",true);tape.setTooltip("Tape insertado en Master");addAndMakeVisible(tape);
-        buttonAttachments.push_back(std::make_unique<juce::ButtonParameterAttachment>(*p.state.getParameter("tapeEnabled"),tape));timerCallback();startTimerHz(25);
+        buttonAttachments.push_back(std::make_unique<juce::ButtonParameterAttachment>(*p.state.getParameter("tapeEnabled"),tape));
+        clipper.setComponentID("mixer-clipper");clipper.setClickingTogglesState(true);clipper.setWantsKeyboardFocus(false);clipper.getProperties().set("physical-switch",true);clipper.getProperties().set("compact-switch",true);clipper.setTooltip("Soft clipper del Master: suaviza los picos cerca de 0 dBFS. Apagado deja pasar la señal sin recortar.");addAndMakeVisible(clipper);
+        buttonAttachments.push_back(std::make_unique<juce::ButtonParameterAttachment>(*p.state.getParameter("masterClipper"),clipper));timerCallback();startTimerHz(25);
     }
     void resized() override {
         for(int c=0;c<8;++c) {
@@ -58,12 +60,12 @@ public:
             if(c<5){delaySends[static_cast<size_t>(c)].setBounds(x+8,0,38,32);reverbSends[static_cast<size_t>(c)].setBounds(x+8,33,38,32);pans[static_cast<size_t>(c)].setBounds(x+1,67,53,17);}
             else widths[static_cast<size_t>(c-5)].setBounds(x+8,33,38,32);
         }
-        tape.setBounds(50+7*59,2,56,27);
+        tape.setBounds(50+6*59,2,56,27);clipper.setBounds(50+7*59,2,56,27);
     }
     void paint(juce::Graphics& g) override {
         const auto ink=sampleui::palette(processor,"color-ff263e38"),accent=sampleui::palette(processor,"color-ffb66b44");
         g.setColour(ink);g.setFont(juce::FontOptions(10.f));
-        g.drawText("Dly send",0,5,48,22,juce::Justification::centredLeft);g.drawText("Rev send",0,38,48,22,juce::Justification::centredLeft);g.drawText("Pan",0,65,48,20,juce::Justification::centredLeft);
+        g.drawText("Dly send",0,5,48,22,juce::Justification::centredLeft);g.drawText("Rev send",0,38,48,22,juce::Justification::centredLeft);g.drawText("Pan",0,65,48,20,juce::Justification::centredLeft);g.drawText("MSTR FX",50+5*59,5,56,22,juce::Justification::centred);
         g.setFont(juce::FontOptions(8.5f));g.drawFittedText("Ctrl+clic\n= solo",{0,123,47,38},juce::Justification::centred,2);
         for(int c=0;c<8;++c) {
             const int x=50+c*59;
