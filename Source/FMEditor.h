@@ -92,7 +92,7 @@ public:
         help.setBounds(0,165,525,20);
     }
 private:
-    void timerCallback() override {const int selected=processor.getSynthChoice(fm);sound.setSelectedId(selected<0?999:selected+1,juce::dontSendNotification);sampleui::colours(processor,*this);}
+    void timerCallback() override {const int selected=processor.getSynthChoice(fm);sound.setSelectedId(selected<0?999:selected+1,juce::dontSendNotification);sampleui::colours(processor,*this);for(auto& knob:knobs){knob.setColour(juce::Slider::thumbColourId,sampleui::palette(processor,"color-ff263e38"));knob.setColour(juce::Slider::rotarySliderFillColourId,sampleui::palette(processor,"color-ffb66b44"));}}
 };
 
 class FMPanel final : public juce::Component,private juce::Timer {
