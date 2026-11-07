@@ -12,7 +12,8 @@ sincronizado con el DAW o con el BPM de standalone.
 
 Esta rama está en desarrollo: el ZIP de samples actualmente subido a `main`
 contiene solo 2 bytes y no incluye audio. La carga de una librería válida es
-necesaria para escuchar el sampler y los ritmos. No se distribuyen samples
+necesaria para escuchar el sampler y los ritmos. Al añadir el ZIP real en esa
+ruta, CMake lo incrusta en VST3 y standalone y la app lo carga automáticamente. No se distribuyen samples
 inventados como si fueran grabaciones del Omnichord.
 
 Los parámetros y los presets de síntesis cambian respecto a 0.5; los presets

@@ -47,10 +47,24 @@ if(APPLE)
 endif()
 # Bundle the original logo into both plugin formats, without a runtime file path.
 set(CHORDHARP_LOGO "${CMAKE_CURRENT_SOURCE_DIR}/Assets/BlinblinLogo.png")
+# Embed the real factory pack when present. A placeholder is never treated as audio.
+set(OMNICHORD_HAS_FACTORY_SAMPLES 0)
+set(OMNICHORD_FACTORY_ASSETS "")
+set(OMNICHORD_SAMPLE_ZIP "${CMAKE_CURRENT_SOURCE_DIR}/samples/omnichord_samples.zip")
+if(EXISTS "${OMNICHORD_SAMPLE_ZIP}")
+    file(SIZE "${OMNICHORD_SAMPLE_ZIP}" OMNICHORD_SAMPLE_BYTES)
+    file(READ "${OMNICHORD_SAMPLE_ZIP}" OMNICHORD_SAMPLE_SIGNATURE LIMIT 4 HEX)
+    if(OMNICHORD_SAMPLE_BYTES GREATER 22 AND OMNICHORD_SAMPLE_SIGNATURE STREQUAL "504b0304")
+        configure_file("${OMNICHORD_SAMPLE_ZIP}" "${CMAKE_CURRENT_BINARY_DIR}/FactorySamples.zip" COPYONLY)
+        set(OMNICHORD_FACTORY_ASSETS "${CMAKE_CURRENT_BINARY_DIR}/FactorySamples.zip")
+        set(OMNICHORD_HAS_FACTORY_SAMPLES 1)
+    endif()
+endif()
+target_compile_definitions(Omnichord PRIVATE OMNICHORD_HAS_FACTORY_SAMPLES=${OMNICHORD_HAS_FACTORY_SAMPLES})
 juce_add_binary_data(OmnichordBrand
     HEADER_NAME BinaryData.h
     NAMESPACE BinaryData
-    SOURCES "${CHORDHARP_LOGO}" Assets/BlinblinLogo_white.png Assets/magic.xml)
+    SOURCES "${CHORDHARP_LOGO}" Assets/BlinblinLogo_white.png Assets/magic.xml ${OMNICHORD_FACTORY_ASSETS})
 target_link_libraries(Omnichord PRIVATE OmnichordBrand)
 target_compile_definitions(Omnichord PUBLIC
     JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0

@@ -38,7 +38,8 @@ struct SampleVoice {
             }
             position+=speed;if(position>=finish)position=start+cross+std::fmod(position-finish,std::max(1.,finish-start-cross));
         } else position+=speed;
-        for(auto& value:result)value*=gain*envelope;return result;
+        for(auto& value:result)value*=gain*envelope;
+        return result;
     }
 };
 }

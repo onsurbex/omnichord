@@ -161,6 +161,29 @@ static void checkPresetLibrary() {
     require(source.clearStartupPreset(error),"The default can be returned to factory settings");
     ChordHarpProcessor factory(root);require(factory.state.getRawParameterValue("organModel")->load()==0 && factory.state.getRawParameterValue("pad")->load()==0,"Factory startup must be deterministic and silent");
 }
+static void checkFMPerformance() {
+    ChordHarpProcessor synth;
+    synth.selectSynthSound(false,4); // FM Pad: audible sustain until note-off.
+    for(int op=1;op<=6;++op) {
+        auto* p=synth.state.getParameter("harpOp"+juce::String(op)+"Release");p->setValueNotifyingHost(p->convertTo0to1(20));
+    }
+    synth.state.getParameter("sustain")->setValueNotifyingHost(synth.state.getParameter("sustain")->convertTo0to1(.8f));
+    synth.prepareToPlay(48000,512);require(synth.getLatencySamples()==16,"The FM FIR latency must be reported to the host");
+    juce::AudioBuffer<float> audio(2,512);juce::MidiBuffer midi;
+    midi.addEvent(juce::MidiMessage::noteOn(3,72,.9f),0);
+    for(int b=0;b<70;++b)synth.processBlock(audio,midi);
+    require(audio.getMagnitude(0,512)>.0001f,"A MIDI FM note must sustain while held");
+    synth.selectChord(19);synth.processBlock(audio,midi);
+    midi.addEvent(juce::MidiMessage::noteOff(3,72),128);
+    for(int b=0;b<70;++b)synth.processBlock(audio,midi);
+    require(audio.getMagnitude(0,512)<.00001f,"FM note-off must release its original MIDI voice after the selected chord changes");
+    synth.selectSynthSound(true,9);synth.selectSynthSound(false,7);
+    synth.state.getParameter("organOp6Fine")->setValueNotifyingHost(.8f);
+    juce::MemoryBlock state;synth.getStateInformation(state);
+    ChordHarpProcessor restored;restored.setStateInformation(state.getData(),static_cast<int>(state.getSize()));
+    for(const auto* id:{"organOp6Fine","organAlgorithm","harpAlgorithm","harpOp4Ratio","organOp2Sustain"})
+        require(synth.state.getRawParameterValue(id)->load()==restored.state.getRawParameterValue(id)->load(),"FM bank settings must survive project recall");
+}
 static void checkSamplesAndRhythm() {
     const auto root=juce::File::getSpecialLocation(juce::File::tempDirectory).getNonexistentChildFile("Omnichord sample checks","",true);
     struct Cleanup {juce::File file;~Cleanup(){file.deleteRecursively();}} cleanup{root};
@@ -569,6 +592,7 @@ int main() {
     };
     const double dryTail=tailEnergy(false),wetTail=tailEnergy(true);
     require(wetTail>0.0001 && wetTail>dryTail*10,"Delay and reverb must produce audible tails after source mute");
+    checkFMPerformance();
     checkSamplesAndRhythm();
     checkPresetLibrary();
     checkTempoAndAmbience();

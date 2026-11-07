@@ -148,6 +148,12 @@ ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(Bus
     const auto uiFile=juce::File(__FILE__).getParentDirectory().getSiblingFile("Assets").getChildFile("magic.xml");
     magicState.setResourcesFolder(uiFile.getFullPathName());
 #endif
+#if OMNICHORD_HAS_FACTORY_SAMPLES
+    {
+        juce::TemporaryFile bundledSamples(".zip");juce::String error;
+        if(bundledSamples.getFile().replaceWithData(BinaryData::FactorySamples_zip,static_cast<size_t>(BinaryData::FactorySamples_zipSize)))loadSampleLibrary(bundledSamples.getFile(),error);
+    }
+#endif
     factoryPreset=capturePreset("Inicio");
     loadStartupPreset();
     magicState.addTrigger("silence",[this] {
