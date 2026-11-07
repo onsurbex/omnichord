@@ -1,4 +1,12 @@
-Omnichord 0.7.1 para macOS 11 o posterior, Apple Silicon e Intel.
+Omnichord 0.7.2 para macOS 11 o posterior, Apple Silicon e Intel.
+
+Novedades de 0.7.2:
+
+- El LED de cada pestaña parpadea en amarillo mientras su canal está en solo. El aviso permanece visible al cambiar de página. FX también parpadea si Delay o Reverb están en solo.
+- Apagar un canal elimina automáticamente su solo desde mixer, pestañas o automatización. CHORDS y FX limpian los solos de sus grupos. Al reactivarlos no vuelve el solo anterior.
+- Presets y proyectos descartan solos guardados en canales apagados. Ctrl+clic en MSTR conserva la función de limpiar todos los solos.
+
+Incluye las mejoras de 0.7.1:
 
 - Ritmos sincronizados con Play/Stop, tempo y posición del DAW, incluidos rebobinado y loops. Con el canal Ritmos armado y DAW activado, la reproducción arranca al pulsar Play en el host. All Notes Off del DAW conserva el ritmo sincronizado; Stop lo detiene. También respeta el transporte cuando no hay posición PPQ. Standalone mantiene su reloj interno.
 - Estado de transporte visible y botón ARM cuando se sigue al DAW. SILENCIO y All Sound Off siguen funcionando como parada completa.

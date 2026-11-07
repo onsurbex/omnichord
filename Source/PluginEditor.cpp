@@ -19,19 +19,30 @@ juce::String tabParameter(const juce::String& name) {
     if(name=="FX")return "fxEnabled";if(name=="Delay")return "delayEnabled";if(name=="Reverb")return "reverbEnabled";if(name=="Tape")return "tapeEnabled";
     return {};
 }
-class TabLed final : public juce::TextButton {
+class TabLed final : public juce::TextButton,private juce::Timer {
     ChordHarpProcessor& processor;std::unique_ptr<juce::ButtonParameterAttachment> attachment;
+    std::array<std::atomic<float>*,2> solos{};bool hadSolo=false;
+    bool soloActive() const {return (solos[0] && solos[0]->load()>.5f) || (solos[1] && solos[1]->load()>.5f);}
+    void timerCallback() override {
+        const bool solo=soloActive();if(solo || solo!=hadSolo)repaint();
+        if(solo!=hadSolo)setTooltip(solo?"Solo activo. Desactivalo en el mixer; apagar el canal tambien lo quita.":"Activar/desactivar sin cambiar de pestana");
+        hadSolo=solo;
+    }
 public:
     TabLed(ChordHarpProcessor& p,const juce::String& id):processor(p) {
         setComponentID("tab-led-"+id);setClickingTogglesState(true);setWantsKeyboardFocus(false);setMouseCursor(juce::MouseCursor::PointingHandCursor);setTooltip("Activar/desactivar sin cambiar de pestana");
         attachment=std::make_unique<juce::ButtonParameterAttachment>(*p.state.getParameter(id),*this);
+        for(int i=0;i<7;++i)if(id==p.mixerParameter(i,"Enabled"))solos[0]=p.state.getRawParameterValue(p.mixerParameter(i,"Solo"));
+        if(id=="fxEnabled"){solos[0]=p.state.getRawParameterValue("delaySolo");solos[1]=p.state.getRawParameterValue("reverbSolo");}
+        timerCallback();startTimerHz(20);
     }
     void paintButton(juce::Graphics& g,bool hover,bool) override {
-        const auto colour=sampleui::palette(processor,"color-ffb66b44"),ink=sampleui::palette(processor,"color-ff263e38");
+        const bool solo=soloActive(),lit=getToggleState() && (!solo || (juce::Time::getMillisecondCounter()/250)%2==0);
+        const auto colour=solo?juce::Colour(0xfff0ca59):sampleui::palette(processor,"color-ffb66b44"),ink=sampleui::palette(processor,"color-ff263e38");
         auto r=juce::Rectangle<float>(7,7).withCentre(getLocalBounds().toFloat().getCentre());
         g.setColour(ink.withAlpha(.45f));g.fillEllipse(r.expanded(1));
-        g.setColour(getToggleState()?colour.brighter(hover?.3f:.1f):ink.withAlpha(.18f));g.fillEllipse(r);
-        g.setColour(juce::Colours::white.withAlpha(getToggleState()?.65f:.25f));g.fillEllipse(r.getX()+1.3f,r.getY()+1,2,1.5f);
+        g.setColour(lit?colour.brighter(hover?.3f:.1f):ink.withAlpha(.18f));g.fillEllipse(r);
+        g.setColour(juce::Colours::white.withAlpha(lit?.65f:.25f));g.fillEllipse(r.getX()+1.3f,r.getY()+1,2,1.5f);
     }
 };
 void installTabLeds(juce::Component& parent,ChordHarpProcessor& p,std::vector<std::unique_ptr<juce::Component>>& owned) {

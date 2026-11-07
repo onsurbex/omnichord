@@ -9,6 +9,7 @@
 #include <foleys_gui_magic/Editor/foleys_ToolBox.h>
 #endif
 #include <cstdlib>
+#include <set>
 #include <iostream>
 
 static void require(bool condition, const char* message) {
@@ -443,8 +444,54 @@ static void checkTransportAndLevels() {
     }
 }
 
+static void checkSoloCleanup() {
+    auto owner=std::make_unique<ChordHarpProcessor>();auto& synth=*owner;
+    for(int c=0;c<7;++c) {
+        synth.toggleMixerSolo(c);const auto solo=synth.mixerParameter(c,"Solo"),power=synth.mixerParameter(c,"Enabled");
+        require(synth.state.getRawParameterValue(solo)->load()==1 && synth.state.getRawParameterValue(power)->load()==1,"Solo must activate its channel");
+        setActual(synth,power.toRawUTF8(),0);
+        require(synth.state.getRawParameterValue(solo)->load()==0,"Power off must clear solo immediately without an editor or audio callback");
+        setActual(synth,power.toRawUTF8(),1);require(synth.state.getRawParameterValue(solo)->load()==0,"Power on must not resurrect the previous solo");
+    }
+    synth.toggleMixerSolo(0);for(int c=1;c<=3;++c)synth.toggleMixerSolo(c);
+    setActual(synth,"pad",0);for(const auto* id:{"organSolo","fmSolo","sampleSolo"})require(synth.state.getRawParameterValue(id)->load()==0,"CHORDS off must clear every chord-layer solo");
+    require(synth.state.getRawParameterValue("harpSolo")->load()==1,"Disabling CHORDS must preserve an unrelated Harp solo");setActual(synth,"harpEnabled",0);
+    for(int c=5;c<7;++c)synth.toggleMixerSolo(c);setActual(synth,"fxEnabled",0);
+    require(synth.state.getRawParameterValue("delaySolo")->load()==0 && synth.state.getRawParameterValue("reverbSolo")->load()==0,"FX off must clear both return solos");
+    synth.toggleMixerSolo(1);synth.toggleMixerSolo(2);synth.toggleMixerSolo(3);setActual(synth,"organEnabled",0);setActual(synth,"fmEnabled",0);
+    require(synth.state.getRawParameterValue("organSolo")->load()==0 && synth.state.getRawParameterValue("fmSolo")->load()==0 && synth.state.getRawParameterValue("sampleSolo")->load()==1,"Turning off several soloed layers must preserve only the remaining active solos");
+    synth.toggleMixerSolo(7);
+    // Old or externally edited states may contain a disabled, soloed channel.
+    setActual(synth,"organEnabled",0);setActual(synth,"organSolo",1);
+    juce::MemoryBlock state;synth.getStateInformation(state);auto restored=std::make_unique<ChordHarpProcessor>();restored->setStateInformation(state.getData(),static_cast<int>(state.getSize()));
+    require(restored->state.getRawParameterValue("organSolo")->load()==0,"Recalling a project must discard a stale solo on a disabled channel");
+    const auto file=juce::File::getSpecialLocation(juce::File::tempDirectory).getNonexistentChildFile("solo-cleanup",".omnipreset",false);juce::String error;
+    require(synth.savePreset(file,error) && restored->loadPreset(file,error),"A complete solo-state preset must save and load");file.deleteFile();
+    require(restored->state.getRawParameterValue("organSolo")->load()==0,"Recalling a preset must discard a stale solo on a disabled channel");
+}
+static void checkSoloLeds(ChordHarpProcessor& processor,juce::Component& editor,juce::TabbedButtonBar& tabs,juce::Component& mixer) {
+    const auto colours=[&](juce::Component& led,int frames) {
+        std::set<juce::uint32> seen;
+        for(int n=0;n<frames;++n){juce::MessageManager::getInstance()->runDispatchLoopUntil(60);const auto image=led.createComponentSnapshot(led.getLocalBounds());seen.insert(image.getPixelAt(image.getWidth()/2,image.getHeight()/2).getARGB());}
+        return seen.size();
+    };
+    processor.toggleMixerSolo(7);tabs.setCurrentTabIndex(1);juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+    auto* organ=dynamic_cast<juce::TextButton*>(findComponent(editor,"tab-led-organEnabled"));auto* fx=dynamic_cast<juce::TextButton*>(findComponent(editor,"tab-led-fxEnabled"));
+    require(organ && fx,"The persistent main tabs must expose Organ and FX LEDs");
+    processor.toggleMixerSolo(1);require(colours(*organ,14)>1,"A soloed channel LED must visibly blink while another tab is open");
+    require(processor.state.getRawParameterValue("organEnabled")->load()==1 && processor.state.getRawParameterValue("organSolo")->load()==1 && tabs.getCurrentTabIndex()==1,"LED blinking must neither switch the layer off nor navigate away");
+    organ->setToggleState(false,juce::sendNotificationSync);require(processor.state.getRawParameterValue("organSolo")->load()==0,"Switching a soloed tab LED off must clear solo");
+    organ->setToggleState(true,juce::sendNotificationSync);require(colours(*organ,7)==1,"The LED must become steady after solo is cleared");
+    processor.toggleMixerSolo(1);auto* button=dynamic_cast<juce::TextButton*>(findComponent(mixer,"mixer-power-1"));button->setToggleState(false,juce::sendNotificationSync);
+    require(processor.state.getRawParameterValue("organSolo")->load()==0,"The mixer power button must clear solo too");button->setToggleState(true,juce::sendNotificationSync);
+    processor.toggleMixerSolo(5);require(colours(*fx,14)>1,"The main FX tab must blink for a soloed return even when its nested tab is hidden");
+    setActual(processor,"delayEnabled",0);require(processor.state.getRawParameterValue("delaySolo")->load()==0 && colours(*fx,7)==1,"Disabling the last soloed return must stop the main FX warning");
+    setActual(processor,"delayEnabled",1);processor.toggleMixerSolo(7);
+}
+
 int main() {
     juce::ScopedJuceInitialiser_GUI gui;
+    checkSoloCleanup();
     checkTransportAndLevels();
     checkV7Performance();
     checkFactorySamples();
@@ -704,6 +751,7 @@ int main() {
         led->setToggleState(true,juce::sendNotificationSync);require(restored.state.getRawParameterValue(id)->load()==1,"LED must switch its layer on");
         require(tabs->getCurrentTabIndex()==selected,"Using the LED must leave the current tab selected");
     }
+    checkSoloLeds(restored,*editor,*tabs,*mixer);
     for(const auto* id:{"harpUnison","organUnison"}) {
         auto* voices=dynamic_cast<juce::ComboBox*>(builder.findGuiItemWithId(id)->getWrappedComponent());
         require(voices && voices->getNumItems()==7,"Foleys Voices selector must contain all seven choices");

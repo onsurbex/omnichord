@@ -54,6 +54,7 @@ bool ChordHarpProcessor::applyPreset(const juce::ValueTree& input,juce::String& 
         const auto normalized=value.isValid()?ranged->convertTo0to1(juce::jlimit(ranged->getNormalisableRange().start,ranged->getNormalisableRange().end,static_cast<float>(value.getProperty("value")))):ranged->getDefaultValue();
         ranged->beginChangeGesture(); ranged->setValueNotifyingHost(normalized); ranged->endChangeGesture();
     }
+    clearDisabledMixerSolos();
     for(auto& updating:synthUpdating)updating.store(false);
     updatePresetName(preset.getProperty("name","Preset").toString());
     presetReset.store(true); error.clear(); return true;

@@ -229,8 +229,9 @@ ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(Bus
         }
     }
 #endif
+    registerSoloCleanup();
     factoryPreset=capturePreset("Inicio");
-    loadStartupPreset();
+    loadStartupPreset();clearDisabledMixerSolos();
     magicState.addTrigger("silence",[this] {
         auto* parameter=state.getParameter("pad");
         parameter->beginChangeGesture(); parameter->setValueNotifyingHost(0); parameter->endChangeGesture();
@@ -420,7 +421,7 @@ void ChordHarpProcessor::setStateInformation(const void* data,int size) {
         const auto layout=juce::ValueTree::fromXml(restored.getProperty("guiLayout").toString());
         if(layout.hasType("magic") && layout.getChildWithName("View").isValid())
             magicState.setGuiValueTree(upgradeLayout(layout));
-        state.replaceState(restored);presetReset.store(true);
+        state.replaceState(restored);clearDisabledMixerSolos();presetReset.store(true);
         updatePresetName(restored.getProperty("presetName","Proyecto").toString());
     }
 }

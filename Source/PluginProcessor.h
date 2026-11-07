@@ -15,9 +15,10 @@
 #include "MixerDSP.h"
 #include <atomic>
 
-class ChordHarpProcessor final : public juce::AudioProcessor {
+class ChordHarpProcessor final : public juce::AudioProcessor,private juce::AudioProcessorValueTreeState::Listener {
 public:
     explicit ChordHarpProcessor(juce::File presetRoot={});
+    ~ChordHarpProcessor() override;
     void prepareToPlay(double, int) override;
     void releaseResources() override {}
     bool isBusesLayoutSupported(const BusesLayout&) const override;
@@ -101,6 +102,12 @@ private:
     bool restoreSampleLibrary(const juce::String&,juce::String&);
     void readSynthParameters();
     void readMixerParameters();
+    void registerSoloCleanup();
+    void clearMixerSolo(int channel);
+    void clearDisabledMixerSolos();
+    void parameterChanged(const juce::String&,float) override;
+    std::array<juce::String,7> mixerEnableIDs{};
+    std::array<juce::RangedAudioParameter*,7> soloParameters{},enableParameters{};
     juce::ValueTree migrateV6(juce::ValueTree);
     struct SynthReferences {
         std::array<std::atomic<float>*,9> common{};

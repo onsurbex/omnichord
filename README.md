@@ -1,4 +1,4 @@
-# Omnichord — BLINBLIN · versión 0.7.1
+# Omnichord — BLINBLIN · versión 0.7.2
 
 Prototipo de instrumento inspirado en el Omnichord para Ableton Live en macOS.
 Incluye 48 acordes (mayores, menores, séptimas y séptimas mayores), una franja de rasgueo de
@@ -61,7 +61,7 @@ de edición de Foleys. Conservan el diseño de `Assets/magic.xml` y los temas.
 La firma es ad hoc, sin notarización de Apple; la carga en Ableton y la fidelidad
 respecto al instrumento real requieren una prueba manual en un Mac.
 
-El artefacto incluye **Omnichord-0.7.1.pkg**. Ábrelo con el instalador de macOS:
+El artefacto incluye **Omnichord-0.7.2.pkg**. Ábrelo con el instalador de macOS:
 instala el VST3 en `/Library/Audio/Plug-Ins/VST3/Omnichord.vst3` y la aplicación
 en `/Applications/Omnichord.app`. El asistente solicita permisos de administrador.
 Después vuelve a explorar los plugins en Ableton Live. La compilación automática
@@ -446,3 +446,16 @@ FM abre en una vista sencilla: preset, voces, octava y seis potes (Color,
 Filter, Resonancia, Detune, Width y Drift). AVANZADO abre los seis operadores,
 algoritmos y envolventes; SENCILLO vuelve a los potes sin cambiar el patch.
 Ambas vistas comparten los parámetros y sirven para las capas HARP y FM.
+
+## Revisión 0.7.2: aviso y limpieza de solo
+
+El LED de la pestaña de un canal en solo parpadea en amarillo, incluso cuando
+se edita otra página. Si Delay o Reverb están en solo, también parpadea FX
+en la fila principal. Varios solos parpadean con la misma fase. El parpadeo
+es visual y no cambia el encendido del canal ni el audio.
+
+Apagar un canal desde el mixer, su pestaña o la automatización quita su solo.
+Apagar CHORDS limpia los solos de Organ, FM y Samples; apagar FX limpia los
+de Delay y Reverb. Encender de nuevo un canal no recupera su solo anterior.
+Los presets y proyectos también descartan solos guardados en canales apagados.
+Ctrl+clic en MSTR sigue quitando todos los solos.
