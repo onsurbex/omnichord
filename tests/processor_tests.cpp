@@ -53,7 +53,7 @@ static void checkLogoThemes(ChordHarpProcessor& processor,ChordHarpEditor& edito
             std::cerr << "Theme " << theme << " snapshot " << full.getWidth() << 'x' << full.getHeight() << " editor " << editor.getBounds().toString()
                       << " opaque=" << editor.isOpaque() << " outer corners: " << full.getPixelAt(0,0).toString() << ", " << full.getPixelAt(full.getWidth()-1,full.getHeight()-1).toString() << '\n';
         }
-        for(const auto* id:{"pad","harpQuantize","chordSustain","tapeEnabled","delayEnabled","reverbEnabled"})
+        for(const auto* id:{"pad","harpQuantize","chordSustain","tapeEnabled"})
             require(editor.getGUIBuilder().findGuiItemWithId(id)!=nullptr,"All physical switches must survive theme changes");
         if(theme==1) {
             require(omnichord::themeNames()[1]=="Pinky","Pinky must replace the Crema preset without changing its index");
@@ -74,6 +74,7 @@ static void checkChordReleaseAndTape() {
     ChordHarpProcessor piano,reference;
     for(auto* synth:{&piano,&reference}) {
         synth->state.getParameter("pad")->setValueNotifyingHost(1);
+        synth->state.getParameter("organEnabled")->setValueNotifyingHost(1);
         synth->state.getParameter("chordSustain")->setValueNotifyingHost(0);
         synth->prepareToPlay(48000,512);
     }
@@ -160,7 +161,7 @@ static void checkPresetLibrary() {
     for(int i=0;i<ChordHarpProcessor::factoryPresetNames().size();++i) require(next.loadFactoryPreset(i,error),"Every factory preset must load");
     require(source.magicState.getGuiTree().toXmlString()==layout,"Loading sound presets must preserve the edited panel layout");
     require(source.clearStartupPreset(error),"The default can be returned to factory settings");
-    ChordHarpProcessor factory(root);require(factory.state.getRawParameterValue("organModel")->load()==0 && factory.state.getRawParameterValue("pad")->load()==0,"Factory startup must be deterministic and silent");
+    ChordHarpProcessor factory(root);require(factory.state.getRawParameterValue("organModel")->load()==0 && factory.state.getRawParameterValue("organEnabled")->load()==0,"Factory startup must be deterministic and silent");
 }
 static void checkFMPerformance() {
     ChordHarpProcessor synth;
@@ -178,10 +179,10 @@ static void checkFMPerformance() {
     midi.addEvent(juce::MidiMessage::noteOff(3,72),128);
     for(int b=0;b<70;++b)synth.processBlock(audio,midi);
     require(audio.getMagnitude(0,512)<.00001f,"FM note-off must release its original MIDI voice after the selected chord changes");
-    synth.selectSynthSound(true,9);synth.selectSynthSound(false,7);
+    synth.selectSynthSound(true,7);synth.selectSynthSound(false,7);
     synth.state.getParameter("organOp6Fine")->setValueNotifyingHost(.8f);
     juce::MemoryBlock state;synth.getStateInformation(state);
-    ChordHarpProcessor restored;restored.setStateInformation(state.getData(),static_cast<int>(state.getSize()));
+    auto restoredOwner=std::make_unique<ChordHarpProcessor>();auto& restored=*restoredOwner;restored.setStateInformation(state.getData(),static_cast<int>(state.getSize()));
     for(const auto* id:{"organOp6Fine","organAlgorithm","harpAlgorithm","harpOp4Ratio","organOp2Sustain"})
         require(synth.state.getRawParameterValue(id)->load()==restored.state.getRawParameterValue(id)->load(),"FM bank settings must survive project recall");
 }
@@ -213,7 +214,7 @@ static void checkSamplesAndRhythm() {
         "Replacing the larger factory pack must select the new instrument and its root instead of keeping an invalid index");
     require(juce::File(synth.sampleLibraryPath()).existsAsFile() && synth.sampleLibraryPath()!=file.getFullPathName(),"Imported samples must be cached for session recall");
     const auto set=[&](const char* id,float value){auto* p=synth.state.getParameter(id);p->setValueNotifyingHost(p->convertTo0to1(value));};
-    set("organModel",4);set("pad",1);set("chordSustain",0);set("sampleLoop",1);
+    set("samplesEnabled",1);set("pad",1);set("chordSustain",0);set("sampleLoop",1);
     synth.prepareToPlay(48000,512);juce::AudioBuffer<float> audio(2,512);juce::MidiBuffer midi;
     midi.addEvent(juce::MidiMessage::noteOn(1,24,.8f),0);
     for(int i=0;i<70;++i)synth.processBlock(audio,midi);
@@ -248,7 +249,7 @@ static void checkFactorySamples() {
     for(int i=0;i<5;++i) {
         require(synth.loadFactoryPreset(12+i,error),"Each sampled factory sound must load");
         require(static_cast<int>(synth.state.getRawParameterValue("sampleRoot")->load())==chordharp::factorySamples[static_cast<size_t>(i)].root,"Sample presets must select the measured MIDI root, including F bass and upper C recordings");
-        require(synth.state.getRawParameterValue("organModel")->load()==4,"A sample preset must activate the chord sampler");
+        require(synth.state.getRawParameterValue("samplesEnabled")->load()==1,"A sample preset must activate the chord sampler");
         synth.prepareToPlay(48000,512);juce::AudioBuffer<float> audio(2,512);juce::MidiBuffer midi;
         midi.addEvent(juce::MidiMessage::noteOn(1,29,.9f),0);double energy=0;
         for(int b=0;b<30;++b){synth.processBlock(audio,midi);energy+=audio.getMagnitude(0,512);}
@@ -286,6 +287,7 @@ static void checkEffectBypass() {
     for(const juce::String effect:{"delay","reverb"}) {
         ChordHarpProcessor bypass,dry;
         bypass.state.getParameter(effect+"Mix")->setValueNotifyingHost(.8f);
+        bypass.state.getParameter(effect=="delay"?"harpDelaySend":"harpReverbSend")->setValueNotifyingHost(.8f);
         bypass.state.getParameter(effect+"Enabled")->setValueNotifyingHost(0);
         for(auto* synth:{&bypass,&dry}) {
             auto* time=synth->state.getParameter("delayTime");time->setValueNotifyingHost(time->convertTo0to1(80));
@@ -309,6 +311,60 @@ static void checkEffectBypass() {
     }
 }
 
+static void setActual(ChordHarpProcessor& p,const char* id,float value) {
+    auto* parameter=p.state.getParameter(id);require(parameter!=nullptr,"Test parameter must exist");parameter->setValueNotifyingHost(parameter->convertTo0to1(value));
+}
+static void checkV7Performance() {
+    for(int layer=0;layer<4;++layer) {
+        auto owner=std::make_unique<ChordHarpProcessor>();auto& synth=*owner;
+        for(int c=0;c<4;++c)setActual(synth,synth.mixerParameter(c,"Enabled").toRawUTF8(),c==layer?1.f:0.f);
+        setActual(synth,"playMode",1);setActual(synth,"chordSustain",0);setActual(synth,"sampleLoop",1);setActual(synth,"sampleRelease",30);
+        if(layer==2){synth.selectSynthSound(true,3);for(int op=1;op<=6;++op)setActual(synth,ChordHarpProcessor::fmOperatorID(true,op-1,"Release").toRawUTF8(),20);}
+        synth.prepareToPlay(48000,512);juce::AudioBuffer<float> block(2,512);juce::MidiBuffer midi;
+        // C3 is a real note in CHROMATIC, not a chord selector. Same pitch, different channels.
+        midi.addEvent(juce::MidiMessage::noteOn(1,60,.8f),100);midi.addEvent(juce::MidiMessage::noteOn(2,60,.8f),120);
+        double energy=0;for(int b=0;b<20;++b){synth.processBlock(block,midi);if(b==0)require(block.getMagnitude(0,0,100)==0,"Chromatic notes must respect MIDI sample offsets");energy+=block.getMagnitude(0,512);}
+        require(energy>.01,"Every independent layer must play chromatic MIDI notes");
+        midi.addEvent(juce::MidiMessage::noteOff(1,60),0);for(int b=0;b<15;++b)synth.processBlock(block,midi);
+        require(block.getMagnitude(0,512)>.00001f,"Releasing one MIDI channel must preserve the same note held on another channel");
+        midi.addEvent(juce::MidiMessage::controllerEvent(2,64,127),0);midi.addEvent(juce::MidiMessage::noteOff(2,60),50);
+        for(int b=0;b<15;++b)synth.processBlock(block,midi);
+        require(block.getMagnitude(0,512)>.00001f,"CC64 must hold chromatic notes after note-off");
+        midi.addEvent(juce::MidiMessage::controllerEvent(2,64,0),0);
+        for(int b=0;b<250;++b)synth.processBlock(block,midi);
+        require(block.getMagnitude(0,512)<.00001f,"Pedal-up must release every sustained chromatic voice");
+        midi.addEvent(juce::MidiMessage::midiClock(),0);synth.processBlock(block,midi); // one-byte event regression
+        if(layer==1) {
+            setActual(synth,"organEnabled",0);midi.addEvent(juce::MidiMessage::noteOn(1,62,.9f),0);synth.processBlock(block,midi);
+            setActual(synth,"organEnabled",1);for(int b=0;b<20;++b)synth.processBlock(block,midi);
+            require(block.getMagnitude(0,512)>.001f,"Enabling a layer must restore notes that are already held");
+            setActual(synth,"pad",0);for(int b=0;b<150;++b)synth.processBlock(block,midi);
+            require(block.getMagnitude(0,512)<.00001f,"CHORDS must mute the chord layers in CHROMATIC too");
+        }
+    }
+    auto owner=std::make_unique<ChordHarpProcessor>();auto& layered=*owner;
+    setActual(layered,"playMode",1);setActual(layered,"organEnabled",1);setActual(layered,"fmEnabled",1);setActual(layered,"samplesEnabled",1);setActual(layered,"sampleLoop",1);
+    layered.prepareToPlay(48000,512);juce::AudioBuffer<float> audio(2,512);juce::MidiBuffer midi;
+    midi.addEvent(juce::MidiMessage::noteOn(1,60,.8f),0);midi.addEvent(juce::MidiMessage::noteOn(1,64,.8f),64);
+    for(int b=0;b<20;++b)layered.processBlock(audio,midi);
+    for(int c=0;c<4;++c)require(layered.mixerLevel(c)>.00001f,"Harp, Organ, FM and Samples must all reach their own mixer meters together");
+    layered.computerNoteOn(67);layered.processBlock(audio,midi);layered.computerNoteOff(67);layered.processBlock(audio,midi);
+    setActual(layered,"masterWidth",0);for(int b=0;b<40;++b)layered.processBlock(audio,midi);
+    for(int i=0;i<512;++i)require(std::abs(audio.getSample(0,i)-audio.getSample(1,i))<.00001f,"Master Width must act on the complete processor output");
+    setActual(layered,"tapeEnabled",1);setActual(layered,"tapeNoise",1);setActual(layered,"masterEnabled",0);
+    for(int b=0;b<10;++b)layered.processBlock(audio,midi);require(audio.getMagnitude(0,512)==0,"Master power must mute even Tape noise");
+    layered.toggleMixerSolo(2);require(layered.state.getRawParameterValue("fmSolo")->load()==1,"Mixer solo must reach its parameter");layered.toggleMixerSolo(7);require(layered.state.getRawParameterValue("fmSolo")->load()==0,"Ctrl Master must clear all solos");
+    // A genuine v0.6 document: no independent layer/mixer IDs yet.
+    auto old=juce::ValueTree("OmnichordPreset",{{"formatVersion",2},{"name","v6 FM"}});
+    const auto add=[&](const char* id,float value){old.appendChild(juce::ValueTree("PARAM",{{"id",id},{"value",value}}),nullptr);};
+    add("organModel",3);add("organGain",.6f);add("organUnison",7);add("organDetune",30);add("delayMix",.2f);add("reverbMix",.3f);add("rhythmSend",.5f);
+    const auto file=juce::File::getSpecialLocation(juce::File::tempDirectory).getNonexistentChildFile("v6-migration",".omnipreset",false);juce::String error;
+    file.replaceWithText(old.toXmlString());require(layered.loadPreset(file,error),"v0.6 presets must migrate to independent layers");file.deleteFile();
+    require(layered.state.getRawParameterValue("fmEnabled")->load()==1 && layered.state.getRawParameterValue("organEnabled")->load()==0
+        && layered.state.getRawParameterValue("fmUnison")->load()==7 && std::abs(layered.state.getRawParameterValue("rhythmDelaySend")->load()-.1f)<1e-5f
+        && layered.state.getRawParameterValue("delayMix")->load()==1,"Migration must preserve FM, unison and old effect sends");
+}
+
 int main() {
     juce::ScopedJuceInitialiser_GUI gui;
     const auto bundledLogo=juce::ImageFileFormat::loadFrom(BinaryData::BlinblinLogo_png,
@@ -318,7 +374,7 @@ int main() {
     const auto whiteLogo=juce::ImageFileFormat::loadFrom(BinaryData::BlinblinLogo_white_png,BinaryData::BlinblinLogo_white_pngSize);
     require(whiteLogo.isValid() && whiteLogo.hasAlphaChannel() && whiteLogo.getBounds()==bundledLogo.getBounds(),"Both original logo variants must be embedded with transparency and matching dimensions");
     require(bundledLogo.hasAlphaChannel(), "Original logo transparency must be preserved");
-    ChordHarpProcessor processor;
+    auto processorOwner=std::make_unique<ChordHarpProcessor>();auto& processor=*processorOwner;
     require(processor.getName()=="Omnichord","Public plugin name must be Omnichord");
     juce::AudioBuffer<float> audio(2, 512);
     juce::MidiBuffer midi;
@@ -364,7 +420,7 @@ int main() {
     processor.state.state.setProperty("customLogo",logoData,nullptr);
     juce::MemoryBlock saved;
     processor.getStateInformation(saved);
-    ChordHarpProcessor restored;
+    auto restoredOwner=std::make_unique<ChordHarpProcessor>();auto& restored=*restoredOwner;
     restored.setStateInformation(saved.getData(), static_cast<int>(saved.getSize()));
     require(std::abs(restored.state.getRawParameterValue("tone")->load() - 0.8f) < 0.001f,
             "DAW state must restore parameters");
@@ -426,6 +482,7 @@ int main() {
     auto shell=restored.magicState.getGuiTree().getChildWithName("View").getChildWithProperty("id","shell");
     auto gainNode=shell.getChildWithProperty("id","gain");
     require(gainNode.isValid(),"XML must expose the gain layout node");
+    restored.state.getParameter("organEnabled")->setValueNotifyingHost(1);
     restored.prepareToPlay(48000,512);
 #if FOLEYS_SHOW_GUI_EDITOR_PALLETTE
     builder.getMagicToolBox().setVisible(false);
@@ -465,7 +522,7 @@ int main() {
     chordButton->setState(juce::Button::buttonDown); chordButton->setState(juce::Button::buttonNormal); require(restored.selectedChord()==13,"Selecting a regular chord clears Maj7");
     auto* theme=dynamic_cast<juce::ComboBox*>(builder.findGuiItemWithId("theme")->getWrappedComponent());
     require(builder.findGuiItemWithId("tape-controls") && builder.findGuiItemWithId("chordSustain"),"Tape tab and chord sustain switch must exist");
-    require(pad->getButtonText()=="ORGAN" && static_cast<bool>(pad->getProperties()["physical-switch"]),"Organ must use a physical push button");
+    require(pad->getButtonText()=="CHORDS" && static_cast<bool>(pad->getProperties()["physical-switch"]),"Organ must use a physical push button");
     auto* follow=dynamic_cast<juce::TextButton*>(builder.findGuiItemWithId("harpQuantize")->getWrappedComponent());
     require(follow && follow->getButtonText()=="FOLLOW CHORDS","Harp quantize must be a physical FOLLOW CHORDS button");
     require(theme && theme->getNumItems()==6,"Theme selector must expose six palettes");
@@ -499,10 +556,10 @@ int main() {
     require(std::abs(restored.state.getRawParameterValue("organOp6Ratio")->load()-3.5f)<.001f
         && restored.state.getRawParameterValue("organAlgorithm")->load()==32,"The FM editor must bind the selected bank and operator");
     restored.selectSynthSound(true,4);
-    require(restored.getSynthChoice(true)==4 && restored.state.getRawParameterValue("organModel")->load()==3,"Selecting an FM sound must load its operators and activate FM");
+    require(restored.getSynthChoice(true)==4 && restored.state.getRawParameterValue("fmEnabled")->load()==1,"Selecting an FM sound must load its operators and activate FM");
     restored.state.getParameter("organModel")->setValueNotifyingHost(0);
     auto* tabs=findTabBar(*builder.findGuiItemWithId("sound-controls"));
-    require(tabs && tabs->getNumTabs()==9,"The interface must expose the Tape tab");
+    require(tabs && tabs->getNumTabs()==8,"The interface must expose the Tape tab");
     require(builder.findGuiItemWithId("preset-bar") && builder.findGuiItemWithId("instrument-body"),"The preset library and physical case must be present");
     auto* shellItem=builder.findGuiItemWithId("shell");auto* panelItem=builder.findGuiItemWithId("sound-controls");
     require(shellItem->getLocalBounds().reduced(24).contains(shellItem->getLocalArea(panelItem,panelItem->getLocalBounds())),"The tabbed panel must stay inside the instrument with a safe edge margin");
@@ -514,15 +571,44 @@ int main() {
             require(pageItem->getLocalBounds().contains(bounds),"Every tab control must remain inside its panel");
         }
     }
-    for(const auto* id:{"delayEnabled","reverbEnabled"}) {
-        auto* button=dynamic_cast<juce::TextButton*>(builder.findGuiItemWithId(id)->getWrappedComponent());
-        require(button && static_cast<bool>(button->getProperties()["physical-switch"]),"Delay and reverb must have physical bypass buttons");
+    // Layer LEDs share mixer power without selecting their tab.
+    auto* mixer=builder.findGuiItemWithId("mixer")->getWrappedComponent();
+    require(mixer && findComponent(*mixer,"delayWidth") && findComponent(*mixer,"reverbWidth") && findComponent(*mixer,"masterWidth"),"Mixer must expose Width for both returns and Master");
+    for(int channel=0;channel<8;++channel) {
+        auto* button=dynamic_cast<juce::TextButton*>(findComponent(*mixer,"mixer-power-"+juce::String(channel)));
+        require(button!=nullptr,"Each mixer channel must have a physical power button");
         button->setToggleState(false,juce::sendNotificationSync);
-        require(restored.state.getRawParameterValue(id)->load()==0,"Effect button must switch processing off");
+        require(restored.state.getRawParameterValue(restored.mixerParameter(channel,"Enabled"))->load()==0,"Mixer power must switch its parameter off");
         button->setToggleState(true,juce::sendNotificationSync);
-        require(restored.state.getRawParameterValue(id)->load()==1,"Effect button must switch processing back on");
+        require(restored.state.getRawParameterValue(restored.mixerParameter(channel,"Enabled"))->load()==1,"Mixer power must switch its parameter on");
     }
-    tabs->setCurrentTabIndex(5);
+    for(const auto* id:{"organEnabled","delayEnabled","reverbEnabled"}) {
+        auto* led=dynamic_cast<juce::TextButton*>(findComponent(*editor,"tab-led-"+juce::String(id)));
+        require(led!=nullptr,"Activatable tabs must have clickable LEDs");const int selected=tabs->getCurrentTabIndex();
+        led->setToggleState(false,juce::sendNotificationSync);require(restored.state.getRawParameterValue(id)->load()==0,"LED must switch its layer off");
+        led->setToggleState(true,juce::sendNotificationSync);require(restored.state.getRawParameterValue(id)->load()==1,"LED must switch its layer on");
+        require(tabs->getCurrentTabIndex()==selected,"Using the LED must leave the current tab selected");
+    }
+    for(const auto* id:{"harpUnison","organUnison"}) {
+        auto* voices=dynamic_cast<juce::ComboBox*>(builder.findGuiItemWithId(id)->getWrappedComponent());
+        require(voices && voices->getNumItems()==7,"Foleys Voices selector must contain all seven choices");
+        voices->setSelectedId(7,juce::sendNotificationSync);require(restored.state.getRawParameterValue(id)->load()==7,"Selecting seven voices must set the actual engine value to seven");
+    }
+    auto* fmVoices=dynamic_cast<juce::ComboBox*>(findComponent(*fm,"fm-voices"));
+    require(fmVoices && fmVoices->getNumItems()==7,"FM must expose all seven unison voices too");
+    fmVoices->setSelectedId(7,juce::sendNotificationSync);require(restored.state.getRawParameterValue("fmUnison")->load()==7,"FM voices must bind the independent FM engine");
+    auto* modes=builder.findGuiItemWithId("play-modes")->getWrappedComponent();
+    auto* mode=dynamic_cast<juce::TextButton*>(findComponent(*modes,"mode-chromatic"));require(mode!=nullptr,"CHROMATIC paper label must exist");
+    mode->triggerClick();juce::MessageManager::getInstance()->runDispatchLoopUntil(100);require(restored.chromaticMode(),"Paper label must select CHROMATIC");
+    dynamic_cast<juce::TextButton*>(findComponent(*modes,"mode-chord"))->triggerClick();juce::MessageManager::getInstance()->runDispatchLoopUntil(100);require(!restored.chromaticMode(),"Paper label must return to CHORD");
+    tabs->setCurrentTabIndex(0);juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+    {
+        const auto snapshot=panelItem->createComponentSnapshot(panelItem->getLocalBounds());
+        auto stream=juce::File::getCurrentWorkingDirectory().getChildFile("Omnichord-mixer-panel-preview.png").createOutputStream();
+        require(stream && png.writeImageToStream(snapshot,*stream),"The mixer panel must render for visual review");
+    }
+    tabs->setCurrentTabIndex(6);
+    auto* fxTabs=findTabBar(*builder.findGuiItemWithId("fx-controls"));require(fxTabs && fxTabs->getNumTabs()==3,"FX must contain Delay, Reverb and Tape");fxTabs->setCurrentTabIndex(0);
     auto* syncButton=dynamic_cast<juce::TextButton*>(builder.findGuiItemWithId("delaySync")->getWrappedComponent());
     auto* timing=builder.findGuiItemWithId("delayTime")->getWrappedComponent();
     require(syncButton && timing,"Delay sync and time controls must exist");
@@ -535,12 +621,12 @@ int main() {
     syncButton->setToggleState(false,juce::sendNotificationSync);
     juce::MessageManager::getInstance()->runDispatchLoopUntil(150);
     require(findComponent(*timing,"delay-ms")->isVisible() && !findComponent(*timing,"delay-note")->isVisible(),"Free delay must show milliseconds");
-    tabs->setCurrentTabIndex(7);
+    fxTabs->setCurrentTabIndex(2);
     juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
     const auto tapePreview=editor->createComponentSnapshot(editor->getLocalBounds());
     auto tapeStream=juce::File::getCurrentWorkingDirectory().getChildFile("Omnichord-tape-preview.png").createOutputStream();
     require(tapeStream && png.writeImageToStream(tapePreview,*tapeStream),"Tape panel preview must render");
-    for(const auto& page:std::array<std::pair<int,const char*>,3>{{{2,"fm"},{3,"samples"},{4,"rhythms"}}}) {
+    for(const auto& page:std::array<std::pair<int,const char*>,3>{{{3,"fm"},{4,"samples"},{5,"rhythms"}}}) {
         tabs->setCurrentTabIndex(page.first);juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
         const auto snapshot=editor->createComponentSnapshot(editor->getLocalBounds());
         auto stream=juce::File::getCurrentWorkingDirectory().getChildFile("Omnichord-"+juce::String(page.second)+"-preview.png").createOutputStream();
@@ -588,7 +674,7 @@ int main() {
     restored.state.getParameter("tapeDrive")->setValueNotifyingHost(0.7f);
     juce::MemoryBlock layoutState;
     restored.getStateInformation(layoutState);
-    ChordHarpProcessor sessionRestored;
+    auto sessionRestoredOwner=std::make_unique<ChordHarpProcessor>();auto& sessionRestored=*sessionRestoredOwner;
     sessionRestored.setStateInformation(layoutState.getData(),static_cast<int>(layoutState.getSize()));
     require(sessionRestored.selectedChord()==37 && sessionRestored.state.getRawParameterValue("theme")->load()==2,"Sessions must restore Maj7 and colour theme");
     require(sessionRestored.state.getRawParameterValue("tapeEnabled")->load()==1
@@ -602,11 +688,12 @@ int main() {
     require(std::abs(sessionRestored.state.getRawParameterValue("delayMix")->load()-0.35f)<0.001f
         && std::abs(sessionRestored.state.getRawParameterValue("reverbMix")->load()-0.25f)<0.001f,
         "Effects must survive DAW state restoration");
-    ChordHarpProcessor legacySession;
+    auto legacySessionOwner=std::make_unique<ChordHarpProcessor>();auto& legacySession=*legacySessionOwner;
     auto legacyLayout=legacySession.magicState.getGuiTree().createCopy();
     auto legacyRoot=legacyLayout.getChildWithName("View");
-    legacyRoot.setProperty("layout-version",6,nullptr);
+    legacyRoot.setProperty("layout-version",8,nullptr);
     auto legacyShell=legacyRoot.getChildWithProperty("id","shell");
+    for(auto node:legacyShell) if(node.getProperty("id").toString().startsWith("chord-") || node.getProperty("id").toString().startsWith("quality-")) node.setProperty("pos-y",static_cast<int>(node.getProperty("pos-y"))+44,nullptr);
     auto legacyTabs=legacyShell.getChildWithProperty("id","sound-controls");
     legacyTabs.removeChild(legacyTabs.getChildWithProperty("id","fm-controls"),nullptr);
     legacyShell.getChildWithProperty("id","gain").setProperty("pos-x",321,nullptr);
@@ -615,22 +702,22 @@ int main() {
     legacySession.state.getParameter("gain")->setValueNotifyingHost(0.23f);
     juce::MemoryBlock oldSession;
     legacySession.getStateInformation(oldSession);
-    ChordHarpProcessor upgraded;
+    auto upgradedOwner=std::make_unique<ChordHarpProcessor>();auto& upgraded=*upgradedOwner;
     upgraded.setStateInformation(oldSession.getData(),static_cast<int>(oldSession.getSize()));
     auto upgradedShell=upgraded.magicState.getGuiTree().getChildWithName("View").getChildWithProperty("id","shell");
     require(upgradedShell.getChildWithProperty("id","sound-controls").isValid()
         && !upgradedShell.getChildWithProperty("id","logo-picker").isValid(),"Legacy layouts must gain v2 controls and lose logo replacement");
     require(upgradedShell.getChildWithProperty("id","chord-47").isValid() && static_cast<int>(upgradedShell.getChildWithProperty("id","gain").getProperty("pos-x"))==321,"Upgrading the synthesis panel preserves the user layout");
     require(upgradedShell.getChildWithProperty("id","chordSustain").hasType("OmniSwitch")
-        && upgradedShell.getChildWithProperty("id","pad").getProperty("text").toString()=="ORGAN"
-        && upgradedShell.getChildWithProperty("id","sound-controls").getChildWithProperty("id","tape-controls").isValid(),"Old layouts must gain Tape and physical sustain controls");
+        && upgradedShell.getChildWithProperty("id","pad").getProperty("text").toString()=="CHORDS"
+        && upgradedShell.getChildWithProperty("id","sound-controls").getChildWithProperty("id","fx-controls").getChildWithProperty("id","tape-controls").isValid(),"Old layouts must gain Tape and physical sustain controls");
     require(std::abs(upgraded.state.getRawParameterValue("gain")->load()-0.23f)<0.001f,"Layout migration must preserve sound parameters");
     // Compare a muted source with and without effects: only the effects may keep sounding.
     const auto tailEnergy=[](bool effects) {
         ChordHarpProcessor synth;
         synth.state.getParameter("delayTime")->setValueNotifyingHost(synth.state.getParameter("delayTime")->convertTo0to1(100));
-        synth.state.getParameter("delayMix")->setValueNotifyingHost(effects?0.6f:0.0f);
-        synth.state.getParameter("reverbMix")->setValueNotifyingHost(effects?0.35f:0.0f);
+        synth.state.getParameter("harpDelaySend")->setValueNotifyingHost(effects?0.6f:0.0f);
+        synth.state.getParameter("harpReverbSend")->setValueNotifyingHost(effects?0.35f:0.0f);
         synth.prepareToPlay(48000,512);
         juce::AudioBuffer<float> block(2,512); juce::MidiBuffer events;
         events.addEvent(juce::MidiMessage::noteOn(1,72,1.0f),0);
@@ -647,6 +734,7 @@ int main() {
     };
     const double dryTail=tailEnergy(false),wetTail=tailEnergy(true);
     require(wetTail>0.0001 && wetTail>dryTail*10,"Delay and reverb must produce audible tails after source mute");
+    checkV7Performance();
     checkFactorySamples();
     checkFMPerformance();
     checkSamplesAndRhythm();

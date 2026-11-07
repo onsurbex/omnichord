@@ -11,15 +11,21 @@ juce::File ChordHarpProcessor::defaultPresetHome() {
     return base.getChildFile("BLINBLIN/Omnichord");
 }
 juce::ValueTree ChordHarpProcessor::capturePreset(const juce::String& name) const {
-    juce::ValueTree preset("OmnichordPreset",{{"formatVersion",2},{"name",name}});
+    juce::ValueTree preset("OmnichordPreset",{{"formatVersion",3},{"name",name}});
     for(auto* parameter:getParameters()) if(auto* ranged=dynamic_cast<juce::RangedAudioParameter*>(parameter)) {
         preset.appendChild(juce::ValueTree("PARAM",{{"id",ranged->paramID},{"value",ranged->convertFrom0to1(ranged->getValue())}}),nullptr);
     }
     preset.setProperty("sampleLibrary",sampleLibraryReference(),nullptr);
     return preset;
 }
-bool ChordHarpProcessor::applyPreset(const juce::ValueTree& preset,juce::String& error) {
-    if(!preset.hasType("OmnichordPreset") || static_cast<int>(preset.getProperty("formatVersion"))!=2) {
+bool ChordHarpProcessor::applyPreset(const juce::ValueTree& input,juce::String& error) {
+    // Validate numeric source values before migration casts or remaps legacy IDs.
+    for(auto child:input) if(state.getParameter(child.getProperty("id").toString())) {
+        const auto text=child.getProperty("value").toString().trim();char* end=nullptr;const auto* bytes=text.toRawUTF8();const double value=std::strtod(bytes,&end);
+        if(text.isEmpty() || end==bytes || *end!=0 || !std::isfinite(value)) {error="Valor invalido en el preset.";return false;}
+    }
+    const auto preset=static_cast<int>(input.getProperty("formatVersion",0))==2?migrateV6(input):input;
+    if(!preset.hasType("OmnichordPreset") || static_cast<int>(preset.getProperty("formatVersion"))!=3) {
         error="Formato de preset no compatible."; return false;
     }
     juce::StringArray seen; int known=0;
@@ -97,16 +103,16 @@ bool ChordHarpProcessor::loadFactoryPreset(int index,juce::String& error) {
     if(index>0 && index<=8) {
         for(const bool organ:{false,true}) {
             const auto patch=chordharp::synthPatch(index-1,organ);const juce::String prefix=organ?"organ":"harp";
-            set(organ?"organModel":"harpSound",organ?3.f:1.f);set((prefix+"Algorithm").toRawUTF8(),static_cast<float>(patch.algorithm+1));
-            set((prefix+"Feedback").toRawUTF8(),static_cast<float>(patch.feedback));set((prefix+"Cutoff").toRawUTF8(),12000);
+            set(organ?"fmEnabled":"harpSound",1);set((prefix+"Algorithm").toRawUTF8(),static_cast<float>(patch.algorithm+1));
+            set((prefix+"Feedback").toRawUTF8(),static_cast<float>(patch.feedback));set(organ?"fmCutoff":"harpCutoff",12000);
             const char* fields[]{"Ratio","Fine","Level","Attack","Decay","Sustain","Release","Velocity"};
             for(int op=0;op<6;++op) {
                 const auto& o=patch.op[static_cast<size_t>(op)];const float values[]{o.ratio,o.fine,o.level,o.attack*1000,o.decay*1000,o.sustain,o.release*1000,o.velocity};
                 for(size_t field=0;field<8;++field)set(fmOperatorID(organ,op,fields[field]).toRawUTF8(),values[field]);
             }
         }
-        set("pad",1);set("chordSustain",0);set("reverbMix",index==4?.3f:.15f);
-    } else if(index>=9 && index<12) {set("organModel",static_cast<float>(index-9));set("pad",1);set("chordSustain",0);}
+        set("pad",1);set("chordSustain",0);set("harpReverbSend",index==4?.3f:.15f);set("fmReverbSend",index==4?.3f:.15f);
+    } else if(index>=9 && index<12) {set("organModel",static_cast<float>(index-9));set("organEnabled",1);set("pad",1);set("chordSustain",0);}
     else if(index>=12) {
         if(!restoreSampleLibrary("factory",error))return false;
         const auto find=[&](const juce::String& name) {
@@ -116,9 +122,9 @@ bool ChordHarpProcessor::loadFactoryPreset(int index,juce::String& error) {
         if(index<17) {
             const auto& info=chordharp::factorySamples[static_cast<size_t>(index-12)];const int selected=find(info.name);
             if(selected<0){error="Falta el sample de fabrica: "+juce::String(info.name);return false;}
-            set("organModel",4);set("organSample",static_cast<float>(selected));set("sampleRoot",static_cast<float>(info.root));
+            set("samplesEnabled",1);set("organSample",static_cast<float>(selected));set("sampleRoot",static_cast<float>(info.root));
             set("sampleLoop",info.sustain?1.f:0.f);set("sampleChord",0);set("sampleRelease",info.sustain?800.f:250.f);
-            set("organOctave",index==13?0.f:2.f);set("organCutoff",12000);set("pad",1);set("chordSustain",0);
+            set("sampleOctave",index==13?0.f:2.f);set("sampleCutoff",12000);set("pad",1);set("chordSustain",0);
         } else {
             set("rhythmEnabled",1);set("delayTempo",100);set("pad",0);
             if(index<21) {

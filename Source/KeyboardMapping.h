@@ -44,4 +44,10 @@ inline int harpFromComputerKey(char32_t key) {
     if(key==U'¡' || key==U'=') return 11;
     return -1;
 }
+inline int chromaticFromComputerKey(char32_t key,int octave) {
+    key=upperKey(key);const int base=12*(std::clamp(octave,-2,6)+2);
+    constexpr std::u32string_view piano=U"AWSEDFTGYHUJKOLPÑ";
+    const auto found=piano.find(key);if(found!=std::u32string_view::npos)return base+static_cast<int>(found);
+    const int upper=harpFromComputerKey(key);return upper<0?-1:base+12+upper;
+}
 }
