@@ -461,6 +461,7 @@ int main() {
     require(guiReady,"GUI callbacks must finish before inspecting the Foleys toolbox");
     {
         auto* panel=dynamic_cast<ChordHarpEditor*>(editor.get())->getGUIBuilder().findGuiItemWithId("sound-controls");
+        require(dynamic_cast<ChordHarpEditor*>(editor.get())->getGUIBuilder().findGuiItemWithId("mixer-controls")->isVisible(),"A fresh editor must show the Mixer page without clicking a tab");
         auto stream=juce::File::getCurrentWorkingDirectory().getChildFile("Omnichord-mixer-panel-preview.png").createOutputStream();
         require(stream && png.writeImageToStream(panel->createComponentSnapshot(panel->getLocalBounds()),*stream),"The initial mixer screenshot must render");
     }
