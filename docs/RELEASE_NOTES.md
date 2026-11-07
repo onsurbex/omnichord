@@ -1,16 +1,14 @@
-Omnichord 0.6.0 para macOS 11 o posterior, Apple Silicon e Intel.
+Omnichord 0.7.0 para macOS 11 o posterior, Apple Silicon e Intel.
 
-- Motor FM original de seis operadores con 32 algoritmos DX y bancos independientes de órgano y arpa. Ratio, fine, nivel, ADSR, velocidad y feedback editables; ocho patches iniciales. Se mantienen Clásico, Reed y Suave.
-- Unison de 1–7 voces con detune, panorama y drift independientes. Filtro LP/BP/HP por fuente. Sustituyen los controles Coro y Apertura. La polifonía del arpa se adapta al número de copias (32 notas con 1–3 voces, 16 con 7).
-- Sampler de acordes con importación ZIP, nota raíz, loop con crossfade y release. Modo de nota aislada para construir acordes o de acorde grabado para transponerlo conservando sus intervalos.
-- Ritmos de cinco pistas con seis patrones, edición de 16 pasos, swing, volumen y envío a efectos. Sincronía de tempo y transporte/posición del DAW; reloj y BPM propios en standalone.
-- Presets completos y proyectos guardan todos los parámetros FM, pasos, asignaciones y la referencia a la librería de samples. La importación conserva una copia local del ZIP para recuperar los recursos.
-- Conserva los temas, el logo automático por contraste, la carcasa opaca con relieve, los botones físicos, Tape, delay/reverb configurables y el icono de la app instalada.
+- Mixer como primera pestaña: Harp, Organ, FM, Samples, Ritmos, Delay, Rev y MSTR. Cada fuente tiene volumen, panorama y envíos post-fader independientes a Delay/Reverb. Retornos paralelos, con Width en Delay, Rev y Master. Tape insertado en Master.
+- Capas simultáneas de órgano subtractivo, FM de seis operadores y samples. Diez registros de órgano, incluidos Principal, Pleno, Flauta y Tonewheel. El botón amarillo CHORDS gobierna las tres capas de acordes.
+- Botones físicos de canal y LEDs pulsables en las pestañas. Ctrl+clic activa solo; Ctrl+clic en MSTR elimina los solos. Medidores por canal.
+- Etiquetas negras CHORD/CHROMATIC. CHORD conserva el funcionamiento del Omnichord. CHROMATIC interpreta todo el MIDI como notas normales y polifónicas, con Note Off y pedal CC64 por canal. El teclado del Mac usa una distribución de piano y cambia de octava con Z/X. La botonera gráfica conserva sus acordes en ambos modos.
+- Corregido el selector Voices vacío: los parámetros enteros anuncian sus siete opciones a Foleys. Detune actúa sobre 2–7 voces, con controles independientes para Harp, Organ y FM y ayuda en la interfaz.
+- Presets completos y proyectos incluyen todas las capas, envíos, solos, Width y modos. Migración de presets/proyectos de 0.6 a la nueva mezcla. Los de 0.5 no se importan.
 
-Librería incluida **Omnichord Vol. 1**: cinco instrumentos (Omni Axe C, Omni Bass F, Omni Church C, Omni Piano C y Omni Voice C), seis golpes (Kick, Hat, Snare 1/2, Cajon y Clave) y cuatro loops originales (4toFloor, Dusty hip hop, March y Tango). Los loops están grabados a **100 BPM**, duran cuatro compases y se adaptan al BPM del DAW o standalone conservando la afinación mediante WSOLA. El modo de pasos mantiene el swing editable; el modo LOOP conserva el groove grabado.
+Se conserva la librería original Omnichord Vol. 1: cinco instrumentos, seis golpes y cuatro loops a 100 BPM. Los loops se adaptan al BPM del DAW o standalone conservando afinación. Los 23 presets completos, temas, logo por contraste y el icono de app están incluidos en VST3, standalone y PKG.
 
-Los cinco instrumentos tienen notas raíz calibradas y aparecen en el selector de órgano y en la biblioteca de presets. Se incluyen 23 presets completos, con instrumentos y ritmos. La librería viaja dentro de ambos bundles y del PKG; los presets que la usan se pueden compartir entre Macs sin depender de la ruta de descarga del ZIP. Se conservan los audios originales aportados por el usuario.
+La FM usa las tablas de algoritmos de Google MSFA (Apache-2.0) con motor propio; no es una emulación exacta de DX7 ni admite SysEx.
 
-La síntesis utiliza las tablas de algoritmos de Google MSFA (Apache-2.0) con un motor propio; no es una emulación exacta de DX7 ni admite SysEx. Cambia el formato de presets y el estado de síntesis; los de 0.5 no se importan. La prueba de escucha y carga en Ableton requiere macOS.
-
-El PKG instala VST3 en `/Library/Audio/Plug-Ins/VST3/` y standalone en `/Applications/`. Los bundles usan firma ad hoc; el instalador no está notarizado.
+El PKG instala VST3 en `/Library/Audio/Plug-Ins/VST3/` y standalone en `/Applications/`. Los bundles usan firma ad hoc; el instalador no está notarizado. La escucha y la prueba de carga/rendimiento dentro de Ableton requieren un Mac.

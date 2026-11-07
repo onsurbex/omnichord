@@ -244,7 +244,7 @@ void ChordHarpProcessor::prepareToPlay(double rate,int blockSize) {
     tape.wowAmount=raw[TapeWow]->load();tape.flutterAmount=raw[TapeFlutter]->load();tape.driveAmount=raw[TapeDrive]->load();tape.prepare(rate);tapeMuted=false;
     heldChords.clear();guiChordKeys.reset();guiChordMidi.clear();guiChordMidi.ensureSize(16384);
     computerKeys.reset();computerMidi.clear();computerMidi.ensureSize(16384);liveNotes={};pedals={};lastSources={};
-    lastChordSustain=raw[ChordSustain]->load()>.5f;magicState.prepareToPlay(rate,blockSize);
+    lastChordSustain=raw[ChordSustain]->load()>.5f;presetReset.store(false);panic.store(false);fifo.reset();magicState.prepareToPlay(rate,blockSize);
 }
 bool ChordHarpProcessor::isBusesLayoutSupported(const BusesLayout& b) const {
     return b.getMainInputChannelSet().isDisabled() && (b.getMainOutputChannelSet()==juce::AudioChannelSet::stereo() || b.getMainOutputChannelSet()==juce::AudioChannelSet::mono());

@@ -18,7 +18,7 @@ int main(){
     mixer.channels[1]={true,true,1,0,0,0};for(int n=0;n<16000;++n)feed=mixer.feed(source);require(std::abs(feed.dry[0])<1e-6,"Soloing Organ must remove Harp from the dry mix and its sends");
     mixer.channels[1].solo=false;mixer.returns[0].solo=true;for(int n=0;n<16000;++n)feed=mixer.feed(source);
     require(std::abs(feed.dry[0])<1e-6 && feed.delay[0]>.14f,"Soloing an FX return must keep its send feed while muting dry sources");
-    mixer.width=0;Stereo sum{};for(int n=0;n<16000;++n)sum=mixer.sumReturns({.2f,.8f},{{{}, {}}});require(std::abs(sum[0]-sum[1])<1e-6,"Master Width must fold the complete mix to mono");
+    mixer.width=0;Stereo sum{};for(int n=0;n<16000;++n)sum=mixer.output(mixer.sumReturns({.2f,.8f},{{{}, {}}}));require(std::abs(sum[0]-sum[1])<1e-6,"Master Width must fold the complete mix to mono");
     mixer.masterEnabled=false;for(int n=0;n<1200;++n)mixer.output({.2f,-.2f});require(mixer.output({.8f,.9f})==Stereo{},"Master mute must silence audio after the Tape insert");
     require(chromaticFromComputerKey(U'A',3)==60 && chromaticFromComputerKey(U'W',3)==61 && chromaticFromComputerKey(U'S',3)==62 && chromaticFromComputerKey(U'1',3)==72,"Mac chromatic keys must play semitones and numbers the upper octave");
     for(double rate:{44100.,48000.,96000.}) {

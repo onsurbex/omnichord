@@ -351,7 +351,10 @@ static void checkV7Performance() {
     layered.computerNoteOn(67);layered.processBlock(audio,midi);layered.computerNoteOff(67);layered.processBlock(audio,midi);
     setActual(layered,"masterWidth",0);for(int b=0;b<40;++b)layered.processBlock(audio,midi);
     for(int i=0;i<512;++i)require(std::abs(audio.getSample(0,i)-audio.getSample(1,i))<.00001f,"Master Width must act on the complete processor output");
-    setActual(layered,"tapeEnabled",1);setActual(layered,"tapeNoise",1);setActual(layered,"masterEnabled",0);
+    setActual(layered,"tapeEnabled",1);setActual(layered,"tapeNoise",1);
+    for(int b=0;b<40;++b)layered.processBlock(audio,midi);
+    for(int i=0;i<512;++i)require(std::abs(audio.getSample(0,i)-audio.getSample(1,i))<.00001f,"Master Width must also include the stereo Tape insert");
+    setActual(layered,"masterEnabled",0);
     for(int b=0;b<10;++b)layered.processBlock(audio,midi);require(audio.getMagnitude(0,512)==0,"Master power must mute even Tape noise");
     layered.toggleMixerSolo(2);require(layered.state.getRawParameterValue("fmSolo")->load()==1,"Mixer solo must reach its parameter");layered.toggleMixerSolo(7);require(layered.state.getRawParameterValue("fmSolo")->load()==0,"Ctrl Master must clear all solos");
     // A genuine v0.6 document: no independent layer/mixer IDs yet.
@@ -710,7 +713,7 @@ int main() {
     require(upgradedShell.getChildWithProperty("id","chord-47").isValid() && static_cast<int>(upgradedShell.getChildWithProperty("id","gain").getProperty("pos-x"))==321,"Upgrading the synthesis panel preserves the user layout");
     require(upgradedShell.getChildWithProperty("id","chordSustain").hasType("OmniSwitch")
         && upgradedShell.getChildWithProperty("id","pad").getProperty("text").toString()=="CHORDS"
-        && upgradedShell.getChildWithProperty("id","sound-controls").getChildWithProperty("id","fx-controls").getChildWithProperty("id","tape-controls").isValid(),"Old layouts must gain Tape and physical sustain controls");
+        && upgradedShell.getChildWithProperty("id","sound-controls").getChildWithProperty("id","fx-controls").getChildWithProperty("id","fx-tabs").getChildWithProperty("id","tape-controls").isValid(),"Old layouts must gain Tape and physical sustain controls");
     require(std::abs(upgraded.state.getRawParameterValue("gain")->load()-0.23f)<0.001f,"Layout migration must preserve sound parameters");
     // Compare a muted source with and without effects: only the effects may keep sounding.
     const auto tailEnergy=[](bool effects) {

@@ -53,9 +53,10 @@ public:
             levels[5+i]=std::max(levels[5+i],std::max(std::abs(audio[0]),std::abs(audio[1])));
             dry[0]+=audio[0];dry[1]+=audio[1];
         }
-        smooth(masterWidth,width);return stereoWidth(dry,masterWidth);
+        return dry;
     }
     Stereo output(Stereo afterTape) {
+        smooth(masterWidth,width);afterTape=stereoWidth(afterTape,masterWidth);
         const float target=masterEnabled?master:0.f;
         if(target!=masterTarget){masterTarget=target;masterLeft=rampLength;masterStep=(target-masterGain)/static_cast<float>(masterLeft);}
         if(masterLeft>0){masterGain+=masterStep;if(--masterLeft==0)masterGain=masterTarget;}

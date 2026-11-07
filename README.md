@@ -1,22 +1,29 @@
-# Omnichord — BLINBLIN · versión 0.6
+# Omnichord — BLINBLIN · versión 0.7
 
 Prototipo de instrumento inspirado en el Omnichord para Ableton Live en macOS.
 Incluye 48 acordes (mayores, menores, séptimas y séptimas mayores), una franja de rasgueo de
 12 notas, órgano de acordes opcional y controles automatizables de volumen,
 timbre, sustain y vibrato. Guarda sus parámetros con el proyecto del DAW.
 
-La versión 0.6 conserva Clásico, Reed y Suave y añade síntesis FM original de
-seis operadores con los 32 algoritmos DX, unison de hasta siete voces y filtros
-por fuente. Incluye un sampler para los acordes y un secuenciador de batería
-sincronizado con el DAW o con el BPM de standalone.
+La versión **0.7** abre con un mixer de ocho canales: Harp, Organ, FM,
+Samples, Ritmos, Delay, Rev y MSTR. Organ, FM y Samples son capas independientes
+que se pueden tocar y mezclar simultáneamente. Cada fuente tiene panorama y dos
+envíos post-fader. Delay y Reverb son retornos paralelos con Width; Tape está
+insertado en Master, que también tiene Width. Ctrl+clic activa solo;
+Ctrl+clic en MSTR limpia todos los solos.
+
+Los LEDs de las pestañas encienden/apagan sus fuentes o efectos sin cambiar de
+página. **CHORDS** gobierna las tres capas de acordes. **CHORD** conserva el
+funcionamiento del instrumento; **CHROMATIC** permite tocar notas polifónicas
+normales por MIDI y teclado del Mac. La botonera gráfica conserva sus acordes.
 
 Incluye la librería **Omnichord Vol. 1** aportada por el usuario: cinco
 instrumentos sampleados (Axe, Bass, Church, Piano y Voice), seis golpes de batería
 y cuatro loops originales de cuatro compases a **100 BPM**. Los audios se
 incorporan a VST3, standalone y PKG y se cargan automáticamente.
 
-Los parámetros y los presets de síntesis cambian respecto a 0.5; los presets
-antiguos y el estado de sonido de sesiones anteriores no se importan.
+Los presets y proyectos de 0.6 se migran a las capas independientes y sus envíos.
+Los de 0.5 no se importan.
 La síntesis FM no reproduce el chip, las envolventes ni los bancos SysEx del DX7.
 
 ## Compilar en macOS
@@ -54,7 +61,7 @@ de edición de Foleys. Conservan el diseño de `Assets/magic.xml` y los temas.
 La firma es ad hoc, sin notarización de Apple; la carga en Ableton y la fidelidad
 respecto al instrumento real requieren una prueba manual en un Mac.
 
-El artefacto incluye **Omnichord-0.6.0.pkg**. Ábrelo con el instalador de macOS:
+El artefacto incluye **Omnichord-0.7.0.pkg**. Ábrelo con el instalador de macOS:
 instala el VST3 en `/Library/Audio/Plug-Ins/VST3/Omnichord.vst3` y la aplicación
 en `/Applications/Omnichord.app`. El asistente solicita permisos de administrador.
 Después vuelve a explorar los plugins en Ableton Live. La compilación automática
@@ -81,13 +88,13 @@ El empaquetado utiliza `pkgbuild`, `pkgutil` y Python 3.
 ## Tocar
 
 - Selecciona un acorde y arrastra por la franja para rasguear hacia ambos lados.
-- Activa ORGAN para escuchar el acorde sostenido; SILENCIO apaga el órgano
+- Activa CHORDS y Organ/FM/Samples para escuchar el acorde sostenido; SILENCIO apaga las voces
   y corta las colas.
 - Las notas MIDI C0–B3 seleccionan acordes por posición. C4 en adelante toca
   las notas del acorde como la franja; desactiva FOLLOW CHORDS para tocar
   alturas cromáticas libres. La velocidad MIDI controla la intensidad del arpa.
-  Note Off libera el arpa FM y el órgano si SUSTAIN está apagado;
-  el pedal MIDI de sustain no está implementado.
+  Note Off libera el arpa FM y las capas de acordes si SUSTAIN está apagado;
+  En CHROMATIC el pedal MIDI CC64 mantiene las notas hasta soltarlo.
 - El acorde seleccionado queda memorizado y puede automatizarse en Live.
 - El rasgueo con ratón produce audio, pero no genera notas MIDI para grabar.
 
@@ -169,7 +176,7 @@ Se emplea la numeración de Ableton Live: C3 = MIDI 60.
 Las doce teclas consecutivas de cada octava corresponden, de izquierda a derecha,
 a **Db, Ab, Eb, Bb, F, C, G, D, A, E, B, F#**. Por ejemplo, C0 selecciona Db mayor,
 C#0 selecciona Ab mayor y B3 selecciona F#Maj7. Estas cuatro filas seleccionan
-el acorde; activa ORGAN para escuchar el acompañamiento sostenido.
+el acorde; activa CHORDS y un canal de acordes para escuchar el acompañamiento sostenido.
 Maj7 usa los intervalos 0, 4, 7, 11; la séptima dominante usa 0, 4, 7, 10.
 
 C4–B4 (MIDI 72–83) recorre las 12 notas de la franja del arpa en el acorde
@@ -202,13 +209,14 @@ para enviar las notas de las cuatro filas. Standalone recibe las teclas directam
 
 ## Sonido y efectos
 
-En Organo se conservan **Clásico, Reed y Suave**. Los demás registros se
-sustituyen por **FM Piano, Bell, Brass, Pad, Bass, Pluck, Glass y Strings**.
-Harp conserva Clásico y ofrece los mismos ocho puntos de partida FM. Elegir un
-sonido carga los valores reales de los operadores; al editarlos aparece
-**FM personalizado**. Sus valores forman parte del estado completo del plugin.
+La pestaña **Organo** contiene diez registros subtractivos: Clásico, Reed,
+Suave, Principal, Pleno, Flauta, Tonewheel, Saw Organ, Square Organ y Triangle
+Organ. **FM** es una capa separada con seis operadores y ocho sonidos iniciales:
+Piano, Bell, Brass, Pad, Bass, Pluck, Glass y Strings. **Samples** es otra capa
+independiente. Harp conserva Clásico y sus ocho puntos de partida FM. Elegir un
+sonido en una capa no apaga las demás.
 
-La pestaña **FM** permite elegir HARP/ORGAN, algoritmo 1–32 y operador 1–6.
+La pestaña **FM** permite elegir HARP/FM, algoritmo 1–32 y operador 1–6.
 Cada operador tiene ratio de frecuencia, fine en cents, nivel, ataque, decay,
 sustain, release y sensibilidad a la velocidad. Hay feedback 0–7, anchura estéreo
 y deriva lenta independiente. Se indican las portadoras del algoritmo y el papel
@@ -218,22 +226,23 @@ Los cambios de algoritmo hacen una transición corta para evitar discontinuidade
 Las notas MIDI FM responden a Note Off; el rasgueo tiene una puerta automática.
 
 **VOCES** elige 1–7 copias por nota, con detune no lineal, panorama y deriva por
-copia. DETUNE se mide en cents. Una voz queda centrada; WIDTH abre el estéreo.
+copia. DETUNE se mide en cents y necesita al menos dos voces para crear separación.
+El selector VOCES muestra las siete opciones. WIDTH abre el estéreo.
 El arpa admite hasta 32 notas y limita las copias simultáneas a 112 (16 notas con
-7 voces), con retirada suave de voces al reducir la polifonía. El órgano mantiene
-las tres o cuatro notas del acorde. Siete voces incrementan el consumo de CPU.
+7 voces), con retirada suave de voces al reducir la polifonía. Organ y FM admiten hasta 24 notas normales, con un presupuesto de 84 copias
+(12 notas con siete voces), además de poder interpretar las notas del acorde. Siete voces incrementan el consumo de CPU.
 
 Cada fuente tiene **FILTER** con cutoff de 20 Hz–20 kHz, resonancia y tipos
 LP/BP/HP. El filtro sustituye Apertura y el unison sustituye Coro. El motor usa
 2× de muestreo interno a 44.1/48 kHz y trabaja a la frecuencia nativa desde
 88.2 kHz, con filtrado de salida y latencia comunicada al host.
 
-Delay añade tiempo libre de 40 a 1200 ms o divisiones sincronizadas, feedback
-hasta 85 % y mezcla. Reverb ofrece mezcla, tamaño, amortiguación, predelay,
-EQ y primeras reflexiones. Ambos efectos son estéreo, están después de la
-mezcla de órgano y arpa y comienzan con mezcla cero. Sus colas siguen sonando al
-bajar el volumen de una fuente; SILENCIO limpia también esas colas.
-Todos los ajustes se automatizan y se guardan con la sesión del DAW.
+Delay ofrece tiempo libre o divisiones sincronizadas y feedback hasta 85 %.
+Reverb ofrece tamaño, amortiguación, predelay, EQ y primeras reflexiones.
+Los envíos del mixer alimentan ambos efectos por separado: sus faders ajustan el
+nivel de retorno y sus potes Width la anchura estéreo. Los LEDs de FX, Delay y
+Reverb activan o desactivan los retornos y conservan los ajustes. Las colas siguen
+sonando al bajar el volumen de una fuente; SILENCIO las limpia.
 
 ## Samples y ritmos
 
@@ -251,7 +260,7 @@ sesiones guardan la referencia a esa copia. Los presets que usan la librería de
 fábrica se recuperan automáticamente en otro Mac con Omnichord instalado.
 Las librerías importadas requieren copiar también su ZIP al trasladar el preset.
 
-Selecciona un sample, su **nota raíz MIDI** y activa SAMPLES y ORGAN. En modo de
+Selecciona un sample, su **nota raíz MIDI** y activa Samples y CHORDS. En modo de
 nota aislada se transponen tres/cuatro voces para construir las cuatro filas de
 acordes. **ACORDE GRABADO** reproduce una grabación de un acorde completo,
 transponiendo su raíz y conservando sus intervalos originales; cambiar de fila
@@ -278,7 +287,7 @@ Al alejarse mucho de 100 BPM puede cambiar la textura de los ataques.
 
 Haz clic en un paso para crear un patrón Custom a partir del elegido. Sus
 80 pasos, el patrón, asignaciones, volumen, swing y envío a efectos se guardan
-con presets y proyectos. VOL controla la batería; FX envía parte de su señal al
+con presets y proyectos. VOL controla la batería; los sends del mixer envían su señal al
 delay/reverb. Tape y GENERAL procesan toda la mezcla. SILENCIO detiene también
 los samples y la batería; desactiva y reactiva PLAY para reanudar el ritmo.
 
@@ -312,7 +321,7 @@ Los botones **DELAY** y **REVERB**, junto a SILENCIO, activan cada efecto con un
 
 La reverb añade **Predelay** de 0–250 ms, **Early Reflections** y EQ de tres bandas
 (250 Hz, 1 kHz y 5 kHz; ±12 dB). La EQ y las primeras reflexiones afectan al
-componente reverberado; MEZCLA controla su nivel frente a la señal directa.
+componente reverberado; el fader Rev controla su retorno en la mezcla.
 
 En Delay, **SYNC** sustituye el tiempo en ms por divisiones de nota. `t` indica
 tresillo y `dot` puntillo; por ejemplo 1/8t es un tresillo de corcheas y 1/8dot una
@@ -329,8 +338,8 @@ sombras y textura. El fondo exterior no cambia con el tema.
 
 ## Tape y sustain de los acordes
 
-La pestaña **Tape** añade una simulación propia de cinta después del delay y la
-reverb y antes del volumen GENERAL. **TAPE** activa el efecto. **Drive** añade
+**FX → Tape** añade una simulación propia de cinta en el bus Master, después de
+sumar los retornos y antes del volumen GENERAL. **TAPE** activa el efecto. **Drive** añade
 saturación suave, con compensación de ganancia y filtrado; **Noise** controla el
 hiss estéreo (cero elimina el ruido), **Wow** la variación lenta de velocidad y
 **Flutter** la rápida. Los controles van de 0 a 100 %, se suavizan al moverlos y
@@ -339,7 +348,7 @@ centrado en 4 ms para la variación de afinación. Es una implementación origin
 TAPE comienza apagado y deja la señal intacta cuando está desactivado. SILENCIO
 y los mensajes MIDI de pánico borran sus colas y cortan el ruido hasta volver a tocar.
 
-**ORGAN** activa el órgano y **FOLLOW CHORDS** hace que el arpa siga las notas
+**CHORDS** activa Organ, FM y Samples y **FOLLOW CHORDS** hace que el arpa siga las notas
 del acorde. Ambos son botones amarillos. **SUSTAIN**, en el color del tema,
 mantiene el acorde al soltar las teclas; empieza activado para conservar el
 comportamiento de las sesiones anteriores. Si lo apagas, el órgano suena mientras
@@ -389,7 +398,7 @@ tempo del host y efectos:
 
 ```sh
 cmake -S . -B build -DJUCE_PATH="$HOME/Developer/JUCE" -DCHORDHARP_PLUGIN_TESTS=ON -DCHORDHARP_GUI_EDITOR=OFF
-cmake --build build --config Release --target engine_tests synthesis_tests processor_tests ambience_tests
+cmake --build build --config Release --target engine_tests synthesis_tests mixer_tests processor_tests ambience_tests
 ctest --test-dir build -C Release --output-on-failure
 ```
 
@@ -401,3 +410,14 @@ en el extremo del búfer que se corrige en la 0.5.1.
 tamaños de unison, los filtros, el sampler y la sincronía y swing del ritmo.
 Con `CHORDHARP_PLUGIN_TESTS=ON` también ejecuta ASan/UBSan. Las pruebas no
 sustituyen la escucha ni una prueba de carga y rendimiento dentro de Ableton.
+
+En **CHROMATIC**, el teclado del Mac sigue el piano `A W S E D F T G Y H U J K O L P Ñ`.
+`Z` baja una octava y `X` la sube; los números tocan la octava superior. El control
+Octava Mac está en Extra. Todas las notas MIDI son alturas normales; Note Off
+y CC64 se siguen por canal. FOLLOW CHORDS y SUSTAIN conservan su función sobre
+la botonera en CHORD y la franja sigue rasgueando el acorde memorizado en ambos modos.
+
+`mixer_tests` comprueba con ASan/UBSan los envíos, panorama, Width, solos,
+mute del Master después de Tape, los diez registros, polifonía y el efecto
+audible de Detune. Las pruebas JUCE comprueban las siete opciones de Voices,
+los LEDs, el mixer, CHROMATIC, CC64 y la migración desde 0.6.
