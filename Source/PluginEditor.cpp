@@ -5,6 +5,8 @@
 #include "Themes.h"
 #include "PresetBar.h"
 #include "DelayTimeControl.h"
+#include "FMEditor.h"
+#include "SampleRhythmEditor.h"
 
 namespace {
 const juce::Colour ink(0xff263e38), cream(0xffeee6cf), accent(0xffb66b44);
@@ -413,6 +415,10 @@ std::unique_ptr<foleys::MagicGUIBuilder> createBuilder(ChordHarpProcessor& proce
     builder->registerFactory("InstrumentShadow",&InstrumentItem<InstrumentShadow>::factory);
     builder->registerFactory("DelayTimeControl",&InstrumentItem<DelayTimeControl>::factory);
     builder->registerFactory("PresetBar",&InstrumentItem<PresetBar>::factory);
+    builder->registerFactory("SynthSelector",&InstrumentItem<SynthSelector>::factory);
+    builder->registerFactory("FMPanel",&InstrumentItem<FMPanel>::factory);
+    builder->registerFactory("SamplePanel",&InstrumentItem<SamplePanel>::factory);
+    builder->registerFactory("RhythmPanel",&InstrumentItem<RhythmPanel>::factory);
     builder->registerFactory("ThemeSelector",&InstrumentItem<ThemeSelector>::factory);
     return builder;
 }

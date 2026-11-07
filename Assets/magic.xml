@@ -1,4 +1,3 @@
-<?xml version='1.0' encoding='UTF-8'?>
 <magic>
   <Styles>
     <Style name="BLINBLIN">
@@ -22,13 +21,17 @@
         <OmniToggle margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
         <ThemeSelector margin="0" padding="0" border="0" background-color="00000000" combo-background="ffddd3b8" combo-text="ff263e38" combo-outline="ffb66b44" lookAndFeel="BLINBLIN" />
         <OmniSwitch margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
+        <SynthSelector margin="0" padding="0" border="0" background-color="00000000" combo-background="ffddd3b8" combo-text="ff263e38" combo-outline="ffb66b44" lookAndFeel="BLINBLIN" />
+        <FMPanel margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
+        <SamplePanel margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
+        <RhythmPanel margin="0" padding="0" border="0" background-color="00000000" label-text="ff263e38" button-color="ffdad3bc" button-off-text="ff263e38" toggle-text="ff263e38" lookAndFeel="BLINBLIN" />
       </Types>
       <Palettes>
         <default />
       </Palettes>
     </Style>
   </Styles>
-  <View id="root" width="1060" height="805" resizable="0" resize-corner="0" display="contents" background-color="ff292a2d" margin="0" padding="0" border="0" lookAndFeel="BLINBLIN" layout-version="6">
+  <View id="root" width="1060" height="805" resizable="0" resize-corner="0" display="contents" background-color="ff292a2d" margin="0" padding="0" border="0" lookAndFeel="BLINBLIN" layout-version="8">
     <InstrumentShadow id="body-shadow" pos-x="3" pos-y="63" pos-width="1054" pos-height="739" background-color="00000000" />
     <View id="shell" pos-x="15" pos-y="75" pos-width="1030" pos-height="715" display="contents" background-color="ffeee6cf" radius="55">
       <InstrumentBody id="instrument-body" pos-x="0" pos-y="0" pos-width="1030" pos-height="715" background-color="00000000" />
@@ -88,38 +91,58 @@
         <Label id="strum-instructions" pos-x="25" pos-y="470" pos-width="300" pos-height="20" text="DESLIZA ARRIBA O ABAJO" font-size="11" justification="centred" />
       </View>
       <BlinblinLogo id="logo" pos-x="670" pos-y="34" pos-width="280" pos-height="86" />
-      <Label id="footer" pos-x="670" pos-y="123" pos-width="280" pos-height="16" text="BLINBLIN / OMNICHORD 05" font-size="10" />
+      <Label id="footer" pos-x="670" pos-y="123" pos-width="280" pos-height="16" text="BLINBLIN / OMNICHORD 06" font-size="10" />
       <View id="sound-controls" pos-x="65" pos-y="465" pos-width="545" pos-height="218" display="tabbed" tab-height="26" tab-selected="0" background-color="ffeee6cf" padding="4" border="1" border-color="40263e38" radius="14">
         <View id="harp-controls" tab-caption="Harp" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
           <Slider id="harpGain" pos-x="5" pos-y="0" pos-width="88" pos-height="100" parameter="harpGain" class="knob" />
           <Label id="harpGain-label" pos-x="5" pos-y="100" pos-width="88" pos-height="18" text="VOLUMEN" font-size="11" justification="centred" />
           <Slider id="tone" pos-x="105" pos-y="0" pos-width="88" pos-height="100" parameter="tone" class="knob" />
-          <Label id="tone-label" pos-x="105" pos-y="100" pos-width="88" pos-height="18" text="TIMBRE" font-size="11" justification="centred" />
+          <Label id="tone-label" pos-x="105" pos-y="100" pos-width="88" pos-height="18" text="COLOR / FM" font-size="11" justification="centred" />
           <Slider id="sustain" pos-x="205" pos-y="0" pos-width="88" pos-height="100" parameter="sustain" class="knob" />
-          <Label id="sustain-label" pos-x="205" pos-y="100" pos-width="88" pos-height="18" text="SUSTAIN" font-size="11" justification="centred" />
+          <Label id="sustain-label" pos-x="205" pos-y="100" pos-width="88" pos-height="18" text="DECAY" font-size="11" justification="centred" />
           <Slider id="harpAttack" pos-x="305" pos-y="0" pos-width="88" pos-height="100" parameter="harpAttack" class="knob" />
           <Label id="harpAttack-label" pos-x="305" pos-y="100" pos-width="88" pos-height="18" text="ATAQUE (ms)" font-size="11" justification="centred" />
           <Slider id="vibrato" pos-x="405" pos-y="0" pos-width="88" pos-height="100" parameter="vibrato" class="knob" />
           <Label id="vibrato-label" pos-x="405" pos-y="100" pos-width="88" pos-height="18" text="VIBRATO" font-size="11" justification="centred" />
-          <ComboBox id="harpSound" pos-x="10" pos-y="123" pos-width="200" pos-height="24" parameter="harpSound" />
+          <SynthSelector id="harpSound" pos-x="10" pos-y="123" pos-width="200" pos-height="24" target="harp" />
+          <Label id="harpUnison-label" pos-x="222" pos-y="124" pos-width="45" pos-height="22" text="VOCES" font-size="10" />
+          <ComboBox id="harpUnison" pos-x="270" pos-y="124" pos-width="55" pos-height="23" parameter="harpUnison" />
+          <Label id="harpDetune-label" pos-x="340" pos-y="124" pos-width="55" pos-height="22" text="DETUNE" font-size="10" />
+          <Slider id="harpDetune" pos-x="400" pos-y="124" pos-width="125" pos-height="23" parameter="harpDetune" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" class="knob" />
+          <Label id="harpCutoff-label" pos-x="10" pos-y="156" pos-width="65" pos-height="22" text="FILTER Hz" font-size="10" />
+          <Slider id="harpCutoff" pos-x="80" pos-y="156" pos-width="170" pos-height="23" parameter="harpCutoff" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" class="knob" />
+          <Label id="harpResonance-label" pos-x="280" pos-y="156" pos-width="45" pos-height="22" text="RES" font-size="10" />
+          <Slider id="harpResonance" pos-x="330" pos-y="156" pos-width="85" pos-height="23" parameter="harpResonance" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" class="knob" />
+          <ComboBox id="harpFilterType" pos-x="435" pos-y="156" pos-width="90" pos-height="23" parameter="harpFilterType" />
         </View>
         <View id="organ-controls" tab-caption="Organo" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
           <Slider id="organGain" pos-x="15" pos-y="0" pos-width="90" pos-height="100" parameter="organGain" class="knob" />
           <Label id="organGain-label" pos-x="15" pos-y="100" pos-width="90" pos-height="18" text="VOLUMEN" font-size="11" justification="centred" />
           <Slider id="organTone" pos-x="130" pos-y="0" pos-width="90" pos-height="100" parameter="organTone" class="knob" />
-          <Label id="organTone-label" pos-x="130" pos-y="100" pos-width="90" pos-height="18" text="TIMBRE" font-size="11" justification="centred" />
-          <Label id="organSound-label" pos-x="245" pos-y="8" pos-width="230" pos-height="18" text="REGISTRO DEL ORGANO" font-size="11" />
-          <ComboBox id="organSound" pos-x="245" pos-y="28" pos-width="230" pos-height="25" parameter="organModel" />
+          <Label id="organTone-label" pos-x="130" pos-y="100" pos-width="90" pos-height="18" text="COLOR / FM" font-size="11" justification="centred" />
+          <Label id="organSound-label" pos-x="245" pos-y="8" pos-width="230" pos-height="18" text="SONIDO / PATCH" font-size="11" />
+          <SynthSelector id="organSound" pos-x="245" pos-y="28" pos-width="230" pos-height="25" target="organ" />
           <Label id="organOctave-label" pos-x="245" pos-y="76" pos-width="230" pos-height="18" text="OCTAVA" font-size="11" />
           <ComboBox id="organOctave" pos-x="245" pos-y="96" pos-width="230" pos-height="25" parameter="organOctave" />
-          <Label id="organSpread-label" pos-x="10" pos-y="124" pos-width="73" pos-height="23" text="APERTURA" font-size="10" />
-          <Slider id="organSpread" parameter="organSpread" pos-x="85" pos-y="124" pos-width="170" pos-height="23" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" class="knob" />
-          <Label id="organChorus-label" pos-x="280" pos-y="124" pos-width="73" pos-height="23" text="CORO" font-size="10" />
-          <Slider id="organChorus" parameter="organChorus" pos-x="355" pos-y="124" pos-width="170" pos-height="23" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" class="knob" tooltip="Coro de voces; efecto rotary en los registros tonewheel." />
-          <Label id="organRotary-label" text="ROTARY" pos-x="10" pos-y="158" pos-width="75" pos-height="23" font-size="10" />
-          <Slider id="organRotary" parameter="organRotary" pos-x="85" pos-y="158" pos-width="170" pos-height="23" class="knob" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" />
-          <Label id="organPercussion-label" text="PERCUSION" pos-x="280" pos-y="158" pos-width="75" pos-height="23" font-size="10" />
-          <Slider id="organPercussion" parameter="organPercussion" pos-x="355" pos-y="158" pos-width="170" pos-height="23" class="knob" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" />
+          <Label id="organCutoff-label" pos-x="10" pos-y="124" pos-width="65" pos-height="22" text="FILTER Hz" font-size="10" />
+          <Slider id="organCutoff" pos-x="80" pos-y="124" pos-width="170" pos-height="23" parameter="organCutoff" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" class="knob" />
+          <Label id="organResonance-label" pos-x="280" pos-y="124" pos-width="45" pos-height="22" text="RES" font-size="10" />
+          <Slider id="organResonance" pos-x="330" pos-y="124" pos-width="85" pos-height="23" parameter="organResonance" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" class="knob" />
+          <ComboBox id="organFilterType" pos-x="435" pos-y="124" pos-width="90" pos-height="23" parameter="organFilterType" />
+          <Label id="organUnison-label" pos-x="10" pos-y="156" pos-width="60" pos-height="22" text="VOCES" font-size="10" />
+          <ComboBox id="organUnison" pos-x="75" pos-y="156" pos-width="55" pos-height="23" parameter="organUnison" />
+          <Label id="organDetune-label" pos-x="145" pos-y="156" pos-width="60" pos-height="22" text="DETUNE" font-size="10" />
+          <Slider id="organDetune" pos-x="205" pos-y="156" pos-width="135" pos-height="23" parameter="organDetune" slider-type="linear-horizontal" slider-textbox="textbox-right" slider-track="ffb66b44" class="knob" />
+          <Label id="organUnison-help" pos-x="350" pos-y="156" pos-width="175" pos-height="22" text="WIDTH / DRIFT en FM" font-size="10" />
+        </View>
+        <View id="fm-controls" tab-caption="FM" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
+          <FMPanel id="fm-editor" pos-x="5" pos-y="0" pos-width="527" pos-height="184" />
+        </View>
+        <View id="sample-controls" tab-caption="Samples" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
+          <SamplePanel id="samplepanel" pos-x="5" pos-y="0" pos-width="527" pos-height="184" />
+        </View>
+        <View id="rhythm-controls" tab-caption="Ritmos" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
+          <RhythmPanel id="rhythmpanel" pos-x="5" pos-y="0" pos-width="527" pos-height="184" />
         </View>
         <View id="delay-controls" tab-caption="Delay" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
           <Slider id="delayMix" pos-x="30" pos-y="0" pos-width="90" pos-height="100" parameter="delayMix" class="knob" />

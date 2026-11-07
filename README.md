@@ -1,17 +1,24 @@
-# Omnichord — BLINBLIN · versión 5
+# Omnichord — BLINBLIN · versión 0.6
 
 Prototipo de instrumento inspirado en el Omnichord para Ableton Live en macOS.
 Incluye 48 acordes (mayores, menores, séptimas y séptimas mayores), una franja de rasgueo de
 12 notas, órgano de acordes opcional y controles automatizables de volumen,
 timbre, sustain y vibrato. Guarda sus parámetros con el proyecto del DAW.
 
-El motor usa síntesis original: todavía no es una emulación calibrada de un
-modelo concreto de Omnichord. No incluye muestras del instrumento ni ritmos.
+La versión 0.6 conserva Clásico, Reed y Suave y añade síntesis FM original de
+seis operadores con los 32 algoritmos DX, unison de hasta siete voces y filtros
+por fuente. Incluye un sampler para los acordes y un secuenciador de batería
+sincronizado con el DAW o con el BPM de standalone.
 
-La versión 5 incorpora una carcasa con volumen sobre un fondo gris opaco, registros
-de órgano de iglesia y tonewheel, presets completos con un estado de inicio
-seleccionable, predelay/EQ/primeras reflexiones en la reverb y sincronía musical
-del delay. Conserva los parámetros anteriores y sus sesiones.
+Esta rama está en desarrollo: el ZIP de samples actualmente subido a `main`
+contiene solo 2 bytes y no incluye audio. La carga de una librería válida es
+necesaria para escuchar el sampler y los ritmos. Al añadir el ZIP real en esa
+ruta, CMake lo incrusta en VST3 y standalone y la app lo carga automáticamente. No se distribuyen samples
+inventados como si fueran grabaciones del Omnichord.
+
+Los parámetros y los presets de síntesis cambian respecto a 0.5; los presets
+antiguos y el estado de sonido de sesiones anteriores no se importan.
+La síntesis FM no reproduce el chip, las envolventes ni los bancos SysEx del DX7.
 
 ## Compilar en macOS
 
@@ -48,7 +55,7 @@ de edición de Foleys. Conservan el diseño de `Assets/magic.xml` y los temas.
 La firma es ad hoc, sin notarización de Apple; la carga en Ableton y la fidelidad
 respecto al instrumento real requieren una prueba manual en un Mac.
 
-El artefacto incluye **Omnichord-0.5.2.pkg**. Ábrelo con el instalador de macOS:
+El artefacto incluye **Omnichord-0.6.0.pkg**. Ábrelo con el instalador de macOS:
 instala el VST3 en `/Library/Audio/Plug-Ins/VST3/Omnichord.vst3` y la aplicación
 en `/Applications/Omnichord.app`. El asistente solicita permisos de administrador.
 Después vuelve a explorar los plugins en Ableton Live. La compilación automática
@@ -80,7 +87,7 @@ El empaquetado utiliza `pkgbuild`, `pkgutil` y Python 3.
 - Las notas MIDI C0–B3 seleccionan acordes por posición. C4 en adelante toca
   las notas del acorde como la franja; desactiva FOLLOW CHORDS para tocar
   alturas cromáticas libres. La velocidad MIDI controla la intensidad del arpa.
-  Note Off deja decaer el arpa y libera el órgano si SUSTAIN está apagado;
+  Note Off libera el arpa FM y el órgano si SUSTAIN está apagado;
   el pedal MIDI de sustain no está implementado.
 - El acorde seleccionado queda memorizado y puede automatizarse en Live.
 - El rasgueo con ratón produce audio, pero no genera notas MIDI para grabar.
@@ -196,15 +203,31 @@ para enviar las notas de las cuatro filas. Standalone recibe las teclas directam
 
 ## Sonido y efectos
 
-El registro predeterminado del órgano está una octava por encima de la versión
-anterior. La pestaña Organo permite elegir Clasico, Reed, Suave o Brillante,
-ajustar timbre, volumen y transposición de octava (-1, 0, +1). Apertura añade
-un registro agudo al acorde y Coro mezcla voces ligeramente desafinadas en
-estéreo. Coro a cero deja el órgano en mono.
+En Organo se conservan **Clásico, Reed y Suave**. Los demás registros se
+sustituyen por **FM Piano, Bell, Brass, Pad, Bass, Pluck, Glass y Strings**.
+Harp conserva Clásico y ofrece los mismos ocho puntos de partida FM. Elegir un
+sonido carga los valores reales de los operadores; al editarlos aparece
+**FM personalizado**. Sus valores forman parte del estado completo del plugin.
 
-Harp ofrece Clasico, Campana, Seno y Cuerdas, junto con ataque de 1 a 80 ms, sustain, timbre,
-vibrato, volumen propio y el modo de notas del acorde/cromático. GENERAL controla
-la salida de ambas fuentes después de los efectos.
+La pestaña **FM** permite elegir HARP/ORGAN, algoritmo 1–32 y operador 1–6.
+Cada operador tiene ratio de frecuencia, fine en cents, nivel, ataque, decay,
+sustain, release y sensibilidad a la velocidad. Hay feedback 0–7, anchura estéreo
+y deriva lenta independiente. Se indican las portadoras del algoritmo y el papel
+del operador seleccionado. COLOR/FM controla la profundidad de modulación;
+DECAY del arpa escala sus tiempos de decay/release y ATAQUE fija un mínimo.
+Los cambios de algoritmo hacen una transición corta para evitar discontinuidades.
+Las notas MIDI FM responden a Note Off; el rasgueo tiene una puerta automática.
+
+**VOCES** elige 1–7 copias por nota, con detune no lineal, panorama y deriva por
+copia. DETUNE se mide en cents. Una voz queda centrada; WIDTH abre el estéreo.
+El arpa admite hasta 32 notas y limita las copias simultáneas a 112 (16 notas con
+7 voces), con retirada suave de voces al reducir la polifonía. El órgano mantiene
+las tres o cuatro notas del acorde. Siete voces incrementan el consumo de CPU.
+
+Cada fuente tiene **FILTER** con cutoff de 20 Hz–20 kHz, resonancia y tipos
+LP/BP/HP. El filtro sustituye Apertura y el unison sustituye Coro. El motor usa
+2× de muestreo interno a 44.1/48 kHz y trabaja a la frecuencia nativa desde
+88.2 kHz, con filtrado de salida y latencia comunicada al host.
 
 Delay añade tiempo libre de 40 a 1200 ms o divisiones sincronizadas, feedback
 hasta 85 % y mezcla. Reverb ofrece mezcla, tamaño, amortiguación, predelay,
@@ -213,11 +236,41 @@ mezcla de órgano y arpa y comienzan con mezcla cero. Sus colas siguen sonando a
 bajar el volumen de una fuente; SILENCIO limpia también esas colas.
 Todos los ajustes se automatizan y se guardan con la sesión del DAW.
 
+## Samples y ritmos
+
+En **Samples → CARGAR ZIP**, abre una librería con 1–128 archivos WAV, AIFF o
+FLAC. Se decodifican fuera del hilo de audio y se conserva una copia del ZIP en
+`~/Library/Application Support/BLINBLIN/Omnichord/Samples/`. Los presets y las
+sesiones guardan la referencia a esa copia; al moverlos a otro Mac hay que copiar
+también ese ZIP a la misma ubicación.
+
+Selecciona un sample, su **nota raíz MIDI** y activa SAMPLES y ORGAN. En modo de
+nota aislada se transponen tres/cuatro voces para construir las cuatro filas de
+acordes. **ACORDE GRABADO** reproduce una grabación de un acorde completo,
+transponiendo su raíz y conservando sus intervalos originales; cambiar de fila
+no convierte un acorde grabado en mayor/menor/séptima. **LOOP** usa la parte
+central con crossfade automático y **RELEASE** fija la caída al soltar el acorde.
+El filtro, volumen y octava del órgano se aplican también al sampler.
+
+**Ritmos** ofrece Omni Pop, Disco, Bossa, Half-time, Shuffle y Waltz. PLAY activa
+la sección; DAW sigue la posición, play/stop y tempo del host. Sin posición del
+host, se utiliza el reloj interno y el BPM actual. Waltz tiene doce pasos;
+los demás patrones tienen dieciséis. SWING retrasa las semicorcheas alternas.
+Cada pista permite elegir un sample; Auto busca nombres de bombo, caja,
+charles cerrado/abierto y percusión. Si no encuentra uno, asigna el archivo
+manualmente en su desplegable. El charles cerrado corta el abierto.
+
+Haz clic en un paso para crear un patrón Custom a partir del elegido. Sus
+80 pasos, el patrón, asignaciones, volumen, swing y envío a efectos se guardan
+con presets y proyectos. VOL controla la batería; FX envía parte de su señal al
+delay/reverb. Tape y GENERAL procesan toda la mezcla. SILENCIO detiene también
+los samples y la batería; desactiva y reactiva PLAY para reanudar el ritmo.
+
 ## Biblioteca de presets y estado de inicio
 
 La barra superior permite elegir presets de fábrica y tu biblioteca, **Cargar**
 un archivo y **Guardar** el estado completo en un `.omnipreset`. Se incluyen
-TODOS los 44 parámetros: órgano, arpa, acordes, sustain, volúmenes, Tape, delay,
+TODOS los parámetros, incluidos los seis operadores de cada banco y los pasos de ritmo: órgano, arpa, acordes, sustain, volúmenes, Tape, delay,
 reverb, EQ, tempo, divisiones de nota, controles del teclado y selección de tema.
 Los archivos se validan antes de cambiar el sonido. La posición y el diseño XML
 de los controles se conservan independientemente del preset.
@@ -232,20 +285,11 @@ solo la preferencia de inicio, conservando tus presets.
 El standalone arranca con ese estado de inicio y conserva su configuración de
 Audio/MIDI. Las nuevas instancias VST3 utilizan también ese inicio, pero al abrir
 un proyecto de Ableton prevalece el estado que el proyecto guardó para cada
-instancia. La biblioteca incluye Inicio, Iglesia Principal, Catedral ambiental,
-Tonewheel Jazz/Gospel/Rock y Omnichord clásico.
+instancia. La biblioteca incluye Inicio, los ocho patches FM y Clásico, Reed y Suave.
 
-Los botones **DELAY** y **REVERB**, junto a SILENCIO, activan cada efecto con una transición suave y conservan su mezcla y demás ajustes. Sus estados se guardan en presets y en el proyecto. Las sesiones anteriores mantienen los efectos activos para respetar su sonido.
+Los botones **DELAY** y **REVERB**, junto a SILENCIO, activan cada efecto con una transición suave y conservan su mezcla y demás ajustes. Sus estados se guardan en presets y en el proyecto.
 
 ## Órgano, reverb y sincronía
-
-El selector de órgano ofrece once registros: los cuatro clásicos, Principal,
-Pleno, Catedral, Flauta litúrgica y tres tonewheel. Los registros de iglesia
-combinan armónicos y registros de tubos; los tonewheel usan los nueve tiradores
-habituales, suboctava de 16 pies, foldback en agudos y percusión. **Rotary** añade
-modulación estéreo en los tonewheel; **Percusión** regula su ataque. Son modelos
-sintetizados originales. Los proyectos anteriores siguen en el modo clásico para
-mantener su timbre.
 
 La reverb añade **Predelay** de 0–250 ms, **Early Reflections** y EQ de tres bandas
 (250 Hz, 1 kHz y 5 kHz; ±12 dB). La EQ y las primeras reflexiones afectan al
@@ -283,8 +327,7 @@ comportamiento de las sesiones anteriores. Si lo apagas, el órgano suena mientr
 mantienes una tecla MIDI, una tecla de acorde del Mac o un botón de acorde y se
 libera suavemente al soltar la última pulsación. Si mantienes varias, tiene
 prioridad la más reciente; al soltarla vuelve a la anterior. Los canales MIDI,
-el ratón y el teclado del Mac se siguen por separado. El arpa mantiene su
-propio decaimiento, independiente de este botón.
+el ratón y el teclado del Mac se siguen por separado. El arpa tiene su propia envolvente, independiente de este botón.
 
 ## Temas de color
 
@@ -310,11 +353,11 @@ cmake --build build-tests
 ctest --test-dir build-tests --output-on-failure
 ```
 
-También puede probarse directamente con C++17:
+También puede probarse directamente con C++20:
 
 ```sh
 mkdir -p work
-c++ -std=c++17 -Wall -Wextra -Wpedantic -O2 -ISource tests/engine_tests.cpp -o work/engine_tests
+c++ -std=c++20 -Wall -Wextra -Wpedantic -O2 -ISource tests/engine_tests.cpp -o work/engine_tests
 ./work/engine_tests
 ```
 
@@ -327,10 +370,15 @@ tempo del host y efectos:
 
 ```sh
 cmake -S . -B build -DJUCE_PATH="$HOME/Developer/JUCE" -DCHORDHARP_PLUGIN_TESTS=ON -DCHORDHARP_GUI_EDITOR=OFF
-cmake --build build --config Release --target engine_tests processor_tests ambience_tests
+cmake --build build --config Release --target engine_tests synthesis_tests processor_tests ambience_tests
 ctest --test-dir build -C Release --output-on-failure
 ```
 
 `ambience_tests` usa AddressSanitizer y UndefinedBehaviorSanitizer con Clang/GCC
 para verificar las lecturas de reverb, delay y Tape. Incluye el caso de redondeo
 en el extremo del búfer que se corrige en la 0.5.1.
+
+`synthesis_tests` verifica los seis operadores, los 32 algoritmos, los siete
+tamaños de unison, los filtros, el sampler y la sincronía y swing del ritmo.
+Con `CHORDHARP_PLUGIN_TESTS=ON` también ejecuta ASan/UBSan. Las pruebas no
+sustituyen la escucha ni una prueba de carga y rendimiento dentro de Ableton.
