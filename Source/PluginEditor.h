@@ -22,9 +22,14 @@ private:
 
 class InstrumentLook final : public juce::LookAndFeel_V4 {
 public:
+    explicit InstrumentLook(ChordHarpProcessor* p=nullptr):processor(p) {}
+    void drawTabButton(juce::TabBarButton&,juce::Graphics&,bool,bool) override;
+    int getTabButtonBestWidth(juce::TabBarButton&,int) override;
     void drawButtonBackground(juce::Graphics&,juce::Button&,const juce::Colour&,bool,bool) override;
     void drawButtonText(juce::Graphics&,juce::TextButton&,bool,bool) override;
     void drawRotarySlider(juce::Graphics&,int,int,int,int,float,float,float,juce::Slider&) override;
+private:
+    ChordHarpProcessor* processor=nullptr;
 };
 
 class ChordHarpEditor final : public foleys::MagicPluginEditor,private juce::Timer {
@@ -42,5 +47,7 @@ private:
     juce::ValueTree themedLayout;
     ChordHarpProcessor& processor;
     std::map<int,int> heldKeys;
+    std::vector<std::unique_ptr<juce::Component>> tabLeds;
+    bool lastMode=false;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChordHarpEditor)
 };

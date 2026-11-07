@@ -11,6 +11,8 @@
 #include "Rhythm.h"
 #include "SampleLibrary.h"
 #include "SampleChords.h"
+#include "ChordSynth.h"
+#include "MixerDSP.h"
 #include <atomic>
 
 class ChordHarpProcessor final : public juce::AudioProcessor {
@@ -42,6 +44,14 @@ public:
     void pressChord(int value,bool computer=false);
     void releaseChord(int value,bool computer=false);
     bool computerKeyboardEnabled() const;
+    bool chromaticMode() const;
+    int computerOctave() const;
+    void shiftComputerOctave(int amount);
+    void computerNoteOn(int note,float velocity=.8f);
+    void computerNoteOff(int note);
+    static juce::String mixerParameter(int channel,const juce::String& role);
+    void toggleMixerSolo(int channel);
+    float mixerLevel(int channel) const {return meters[static_cast<size_t>(juce::jlimit(0,7,channel))].load();}
     void setChordFromMidi(int value);
     juce::AudioProcessorValueTreeState state;
     foleys::MagicProcessorState magicState{*this};
@@ -87,12 +97,32 @@ private:
     void loadStartupPreset();
     bool restoreSampleLibrary(const juce::String&,juce::String&);
     void readSynthParameters();
+    void readMixerParameters();
+    juce::ValueTree migrateV6(juce::ValueTree);
     struct SynthReferences {
         std::array<std::atomic<float>*,9> common{};
         std::array<std::array<std::atomic<float>*,8>,6> op{};
     };
     std::array<SynthReferences,2> synthRefs{};
     std::array<std::atomic<bool>,2> synthUpdating{};
+    struct SourceReferences {std::array<std::atomic<float>*,6> value{};};
+    std::array<SourceReferences,5> mixerSources{};
+    std::array<std::array<std::atomic<float>*,4>,2> mixerReturns{};
+    std::array<std::atomic<float>*,9> mixerRaw{};
+    std::array<std::atomic<float>*,7> organRefs{};
+    std::array<std::atomic<float>*,3> sampleFilterRefs{};
+    std::array<std::atomic<float>,8> meters{};
+    chordharp::MixerDSP mixer;
+    chordharp::ChordSynth organLayer,fmLayer;
+    struct LiveNote {float velocity=0;bool down=false,sustained=false;};
+    std::array<LiveNote,2176> liveNotes{};
+    std::array<bool,17> pedals{};
+    std::array<bool,4> lastSources{};
+    bool lastChromatic=false,guiChordLatched=false;
+    void liveNoteOn(int note,int source,float velocity);
+    void liveNoteOff(int source);
+    void releaseLiveNotes();
+    void restoreHeldLayer(int layer);
 private:
     enum Param { Gain,Tone,Sustain,Vibrato,Chord,Pad,HarpGain,OrganGain,
         OrganTone,OrganOctave,HarpSound,HarpAttack,HarpQuantize,DelayTime,DelayFeedback,
@@ -120,11 +150,12 @@ private:
     chordharp::ChordGate heldChords;
     juce::MidiKeyboardState guiChordKeys;
     juce::MidiBuffer guiChordMidi;
+    juce::MidiKeyboardState computerKeys;
+    juce::MidiBuffer computerMidi;
     bool tapeMuted=false,lastChordSustain=true;
     chordharp::Ambience reverb;
     std::atomic<double> currentTempo{120};
     std::atomic<bool> hostTempo{false};
-    juce::SmoothedValue<float> masterGain;
     bool organSilenced=false,lastPad=false;
     int lastChord=0;
     static juce::AudioProcessorValueTreeState::ParameterLayout parameters();

@@ -13,7 +13,7 @@ inline int chordNote(int root,int quality,int index) {
 class Engine {
     struct Voice {
         FMVoice fm;std::array<float,7> phase{};float frequency=440,envelope=0,attack=0,velocity=0,activity=0;
-        int source=-1,autoGate=0,model=0;bool active=false,retiring=false;float retireGain=1;
+        int source=-1,autoGate=0,model=0;bool active=false,retiring=false,released=false;float retireGain=1;
     };
     std::array<Voice,32> harp{};std::array<FMVoice,4> organ{};
     std::array<std::array<float,7>,4> organPhase{};
@@ -21,7 +21,7 @@ class Engine {
     FMRuntime organFM,harpFM;Downsample2 downsample;
     DCBlocker harpDC,organDC;int voiceLimit=32;
     double rate=96000;float inverseRate=1.f/96000,lfo=0,padEnvelope=0,smoothedHarp=0,smoothedOrgan=0,smoothedGain=0;
-    float legacyDecay=.999f,attackCoefficient=.01f,padAttack=.001f,padRelease=.001f,gainCoefficient=.001f;
+    float legacyDecay=.999f,legacyRelease=.999f,attackCoefficient=.01f,padAttack=.001f,padRelease=.001f,gainCoefficient=.001f;
     int root=0,quality=0,controlTick=0,activeOrganModel=0,oversampling=2;
     float modelOrganGain=1;bool padOn=false;
     float coefficient(float time) const {return static_cast<float>(1-std::exp(-1/(rate*time)));}
@@ -40,7 +40,7 @@ class Engine {
     }
 public:
     float tone=.35f,sustain=1.6f,vibrato=.12f,gain=.65f,harpGain=1,organGain=1,organTone=.4f,attackSeconds=.002f;
-    int organModel=0,harpSound=0,organOctave=0;
+    int organModel=0,harpSound=0,organOctave=0;bool chromatic=false;
     FMPatch organPatch{},harpPatch{};
     Unison organUnison,harpUnison;
     SynthFilter organFilter,harpFilter;
@@ -49,6 +49,7 @@ public:
     void configure() {
         organFM.configure(organPatch,organTone);harpFM.configure(harpPatch,tone,std::clamp(sustain/.8f,.1f,8.f),attackSeconds);updateOrganFrequencies();
         legacyDecay=static_cast<float>(std::exp(-1/(rate*std::clamp(sustain,.15f,5.f))));
+        legacyRelease=static_cast<float>(std::exp(-1/(rate*.045f)));
         attackCoefficient=coefficient(std::clamp(attackSeconds,.001f,.08f));padAttack=coefficient(.04f);padRelease=coefficient(.12f);gainCoefficient=coefficient(.01f);
         voiceLimit=std::min(32,112/std::clamp(harpUnison.voices,1,7));
         for(size_t i=static_cast<size_t>(voiceLimit);i<harp.size();++i)harp[i].retiring=true;
@@ -80,7 +81,8 @@ public:
         voice->fm.trigger(voice->frequency,voice->velocity);
         for(size_t u=1;u<7;++u) voice->phase[u]=std::fmod(static_cast<float>(u)*.618034f,1.f);
     }
-    void releaseHarp(int source) {for(auto& v:harp) if(v.active && v.source==source) v.fm.gate=false;}
+    void releaseHarp(int source) {for(auto& v:harp) if(v.active && v.source==source){v.fm.gate=false;if(chromatic)v.released=true;}}
+    void releaseAllHarp(){for(auto& v:harp)if(v.active){v.fm.gate=false;v.released=true;}}
     float next() {
         for(int oversample=0;oversample<oversampling;++oversample) {
             if(++controlTick>=16) {controlTick=0;organFM.tick();harpFM.tick();organUnison.tick();harpUnison.tick();organFilter.tick();harpFilter.tick();}
@@ -102,7 +104,7 @@ public:
                         if(v.frequency*3<rate*.225)sample+=.12f*tone*sine(phase*3);
                         sample*=v.envelope*v.attack*v.velocity*v.retireGain*.18f;hl+=sample*harpUnison.left[u];hr+=sample*harpUnison.right[u];
                     }
-                    v.envelope*=legacyDecay;v.activity=v.envelope;if(v.envelope<1e-5f)v.active=false;
+                    v.envelope*=v.released?legacyRelease:legacyDecay;v.activity=v.envelope;if(v.envelope<1e-5f)v.active=false;
                 } else {
                     if(v.autoGate>0 && --v.autoGate==0)v.fm.gate=false;
                     const auto audio=v.fm.next(harpFM,harpUnison,inverseRate,pitch);

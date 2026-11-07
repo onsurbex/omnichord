@@ -9,7 +9,7 @@ namespace chordharp {
 class StereoDelay {
 public:
     float milliseconds=350,feedback=0.3f,mix=0;
-    bool synced=false;
+    bool synced=false,wetOnly=false;
     void prepare(double rate) {
         sampleRate=std::max(8000.0,rate);
         smoothing=1-std::exp(-1.0/(sampleRate*0.03));
@@ -32,7 +32,7 @@ public:
         wet+=static_cast<float>(smoothing)*(std::clamp(mix,0.0f,1.0f)-wet);
         buffer[0][write]=left+filteredRight*amount;
         buffer[1][write]=right+filteredLeft*amount;
-        left+=a*wet; right+=b*wet;
+        left=(wetOnly?0.f:left)+a*wet;right=(wetOnly?0.f:right)+b*wet;
         if(++write>=buffer[0].size()) write=0;
     }
 private:

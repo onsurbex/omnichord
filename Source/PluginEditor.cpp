@@ -7,10 +7,44 @@
 #include "DelayTimeControl.h"
 #include "FMEditor.h"
 #include "SampleRhythmEditor.h"
+#include "MixerPanel.h"
+#include "ModeLabels.h"
 
 namespace {
 const juce::Colour ink(0xff263e38), cream(0xffeee6cf), accent(0xffb66b44);
 const char* noteNames[]{"C","Db","D","Eb","E","F","F#","G","Ab","A","Bb","B"};
+juce::String tabParameter(const juce::String& name) {
+    if(name=="Harp")return "harpEnabled";if(name=="Organo" || name=="Organ")return "organEnabled";
+    if(name=="FM")return "fmEnabled";if(name=="Samples")return "samplesEnabled";if(name=="Ritmos")return "rhythmEnabled";
+    if(name=="FX")return "fxEnabled";if(name=="Delay")return "delayEnabled";if(name=="Reverb")return "reverbEnabled";if(name=="Tape")return "tapeEnabled";
+    return {};
+}
+class TabLed final : public juce::TextButton {
+    ChordHarpProcessor& processor;std::unique_ptr<juce::ButtonParameterAttachment> attachment;
+public:
+    TabLed(ChordHarpProcessor& p,const juce::String& id):processor(p) {
+        setComponentID("tab-led-"+id);setClickingTogglesState(true);setWantsKeyboardFocus(false);setMouseCursor(juce::MouseCursor::PointingHandCursor);setTooltip("Activar/desactivar sin cambiar de pestana");
+        attachment=std::make_unique<juce::ButtonParameterAttachment>(*p.state.getParameter(id),*this);
+    }
+    void paintButton(juce::Graphics& g,bool hover,bool) override {
+        const auto colour=sampleui::palette(processor,"color-ffb66b44"),ink=sampleui::palette(processor,"color-ff263e38");
+        auto r=juce::Rectangle<float>(7,7).withCentre(getLocalBounds().toFloat().getCentre());
+        g.setColour(ink.withAlpha(.45f));g.fillEllipse(r.expanded(1));
+        g.setColour(getToggleState()?colour.brighter(hover?.3f:.1f):ink.withAlpha(.18f));g.fillEllipse(r);
+        g.setColour(juce::Colours::white.withAlpha(getToggleState()?.65f:.25f));g.fillEllipse(r.getX()+1.3f,r.getY()+1,2,1.5f);
+    }
+};
+void installTabLeds(juce::Component& parent,ChordHarpProcessor& p,std::vector<std::unique_ptr<juce::Component>>& owned) {
+    if(auto* button=dynamic_cast<juce::TabBarButton*>(&parent)) {
+        const auto id=tabParameter(button->getButtonText());
+        if(id.isNotEmpty()) {
+            juce::Component* led=nullptr;for(int i=0;i<button->getNumChildComponents();++i)if(button->getChildComponent(i)->getComponentID()=="tab-led-"+id)led=button->getChildComponent(i);
+            if(!led){auto created=std::make_unique<TabLed>(p,id);led=created.get();button->addAndMakeVisible(*created);owned.push_back(std::move(created));}
+            led->setBounds(button->getWidth()-17,2,15,juce::jmax(8,button->getHeight()-4));
+        }
+    }
+    for(int i=0;i<parent.getNumChildComponents();++i)installTabLeds(*parent.getChildComponent(i),p,owned);
+}
 juce::Image embeddedLogo() {
     return juce::ImageCache::getFromMemory(BinaryData::BlinblinLogo_png,BinaryData::BlinblinLogo_pngSize);
 }
@@ -23,6 +57,18 @@ void preserveBackgroundPainting(juce::Component& component) {
 }
 }
 
+int InstrumentLook::getTabButtonBestWidth(juce::TabBarButton& b,int) {
+    return juce::jmax(38,b.getTabbedButtonBar().getWidth()/juce::jmax(1,b.getTabbedButtonBar().getNumTabs())-1);
+}
+void InstrumentLook::drawTabButton(juce::TabBarButton& b,juce::Graphics& g,bool hover,bool) {
+    if(!processor){LookAndFeel_V4::drawTabButton(b,g,hover,false);return;}
+    const auto panel=sampleui::palette(*processor,"color-ffeee6cf"),ink=sampleui::palette(*processor,"color-ff263e38"),accent=sampleui::palette(*processor,"color-ffb66b44");
+    const auto r=b.getLocalBounds().toFloat().reduced(.5f);g.setColour(b.isFrontTab()?panel.brighter(.035f):panel.darker(hover?.03f:.08f));g.fillRoundedRectangle(r,4);
+    g.setColour(ink.withAlpha(.25f));g.drawRoundedRectangle(r,4,.7f);if(b.isFrontTab()){g.setColour(accent);g.fillRect(2,0,b.getWidth()-4,2);}
+    g.setColour(ink);g.setFont(juce::FontOptions(11.f,b.isFrontTab()?juce::Font::bold:juce::Font::plain));
+    auto text=b.getLocalBounds().reduced(4,1);if(tabParameter(b.getButtonText()).isNotEmpty())text.removeFromRight(13);
+    g.drawFittedText(b.getButtonText(),text,juce::Justification::centred,1);
+}
 void InstrumentLook::drawButtonBackground(juce::Graphics& g,juce::Button& button,
                                          const juce::Colour& colour,bool hover,bool down) {
     auto area=button.getLocalBounds().toFloat().reduced(1.5f);
@@ -53,7 +99,7 @@ void InstrumentLook::drawButtonText(juce::Graphics& g,juce::TextButton& button,b
         LookAndFeel_V4::drawButtonText(g,button,hover,down); return;
     }
     g.setColour(button.findColour(button.getToggleState()?juce::TextButton::textColourOnId:juce::TextButton::textColourOffId));
-    g.setFont(juce::FontOptions(12.0f,juce::Font::bold));
+    g.setFont(juce::FontOptions(static_cast<bool>(button.getProperties().getWithDefault("compact-switch",false))?10.f:12.f,juce::Font::bold));
     auto text=button.getLocalBounds().reduced(5,2).withTrimmedLeft(13).translated(0,button.getToggleState() || down?1:0);
     g.drawFittedText(button.getButtonText(),text,juce::Justification::centred,1);
 }
@@ -396,7 +442,7 @@ std::unique_ptr<foleys::MagicGUIBuilder> createBuilder(ChordHarpProcessor& proce
     auto builder=std::make_unique<foleys::MagicGUIBuilder>(processor.magicState);
     builder->registerJUCEFactories();
     builder->registerJUCELookAndFeels();
-    auto look=std::make_unique<InstrumentLook>();
+    auto look=std::make_unique<InstrumentLook>(&processor);
     look->setColour(juce::TextButton::buttonColourId,juce::Colour(0xffdad3bc));
     look->setColour(juce::TextButton::buttonOnColourId,accent);
     look->setColour(juce::Slider::thumbColourId,ink);
@@ -419,6 +465,8 @@ std::unique_ptr<foleys::MagicGUIBuilder> createBuilder(ChordHarpProcessor& proce
     builder->registerFactory("FMPanel",&InstrumentItem<FMPanel>::factory);
     builder->registerFactory("SamplePanel",&InstrumentItem<SamplePanel>::factory);
     builder->registerFactory("RhythmPanel",&InstrumentItem<RhythmPanel>::factory);
+    builder->registerFactory("MixerPanel",&InstrumentItem<MixerPanel>::factory);
+    builder->registerFactory("ModeLabels",&InstrumentItem<ModeLabels>::factory);
     builder->registerFactory("ThemeSelector",&InstrumentItem<ThemeSelector>::factory);
     return builder;
 }
@@ -446,12 +494,15 @@ void ChordHarpEditor::timerCallback() {
         repaint();
     }
     preserveBackgroundPainting(*this);
-    if(!processor.computerKeyboardEnabled() && !heldKeys.empty()) releaseComputerKeys();
+    if((!processor.computerKeyboardEnabled() || processor.chromaticMode()!=lastMode) && !heldKeys.empty())releaseComputerKeys();
+    lastMode=processor.chromaticMode();
+    std::erase_if(tabLeds,[](const auto& led){return led->getParentComponent()==nullptr;});
+    installTabLeds(*this,processor,tabLeds);
 }
 void ChordHarpEditor::releaseComputerKeys() {
     for(const auto& held:heldKeys) {
-        if(held.second>=0) processor.magicState.getKeyboardState().noteOff(1,held.second,0);
-        else processor.releaseChord(-held.second-2,true);
+        if(held.second>=0) processor.computerNoteOff(held.second);
+        else if(held.second<=-2)processor.releaseChord(-held.second-2,true);
     }
     heldKeys.clear();
 }
@@ -463,8 +514,8 @@ bool ChordHarpEditor::keyStateChanged(bool) {
         const bool released=it->first>=0x10000?(native.isUp && native.physical==it->first-0x10000)
             :!juce::KeyPress::isKeyCurrentlyDown(it->first);
         if(released) {
-            if(it->second>=0) processor.magicState.getKeyboardState().noteOff(1,it->second,0);
-            else processor.releaseChord(-it->second-2,true);
+            if(it->second>=0) processor.computerNoteOff(it->second);
+            else if(it->second<=-2)processor.releaseChord(-it->second-2,true);
             it=heldKeys.erase(it); handled=true;
         } else ++it;
     }
@@ -479,13 +530,23 @@ bool ChordHarpEditor::keyPressed(const juce::KeyPress& key) {
     const auto native=chordharp::currentMacKeyboardEvent();
     const bool physical=native.physical>=0 && !native.isUp;
     const auto character=physical?native.character:static_cast<char32_t>(key.getKeyCode());
+    const int token=physical?0x10000+native.physical:key.getKeyCode();
+    if(processor.chromaticMode()) {
+        const auto upper=chordharp::upperKey(character);
+        if(upper==U'Z' || upper==U'X') {
+            if(heldKeys.find(token)==heldKeys.end()){releaseComputerKeys();processor.shiftComputerOctave(upper==U'Z'?-1:1);heldKeys.emplace(token,-1);}return true;
+        }
+        const int note=physical && native.harp>=0?12*(processor.computerOctave()+2)+12+native.harp:chordharp::chromaticFromComputerKey(character,processor.computerOctave());
+        if(note<0)return false;
+        if(heldKeys.find(token)==heldKeys.end()){heldKeys.emplace(token,note);processor.computerNoteOn(note);}
+        return true;
+    }
     const int chord=chordharp::chordFromComputerKey(character,key.getModifiers().isCtrlDown(),key.getModifiers().isShiftDown());
     const int harp=physical?native.harp:chordharp::harpFromComputerKey(character);
     if(chord<0 && harp<0) return false;
-    const int token=physical?0x10000+native.physical:key.getKeyCode();
     if(heldKeys.find(token)==heldKeys.end()) {
         if(chord>=0) { processor.pressChord(chord,true); heldKeys.emplace(token,-chord-2); }
-        else { heldKeys.emplace(token,72+harp); processor.magicState.getKeyboardState().noteOn(1,72+harp,0.8f); }
+        else { heldKeys.emplace(token,72+harp); processor.computerNoteOn(72+harp); }
     }
     return true;
 }

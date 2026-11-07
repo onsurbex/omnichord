@@ -27,9 +27,10 @@ inline void colours(ChordHarpProcessor& p,juce::Component& owner) {
 }
 class SamplePanel final : public juce::Component,private juce::Timer {
     ChordHarpProcessor& processor;juce::TextButton load{"CARGAR ZIP"},activate{"SAMPLES"},loop{"LOOP"},whole{"ACORDE GRABADO"};
-    juce::ComboBox sound;juce::Slider root,release;juce::Label status,rootLabel,releaseLabel,help;
+    juce::ComboBox sound,octave,type;juce::Slider root,release,cutoff,resonance;juce::Label cutoffLabel,resonanceLabel;juce::Label status,rootLabel,releaseLabel,help;
     std::unique_ptr<juce::FileChooser> chooser;
-    std::unique_ptr<juce::SliderParameterAttachment> rootAttachment,releaseAttachment;
+    std::unique_ptr<juce::SliderParameterAttachment> rootAttachment,releaseAttachment,cutoffAttachment,resonanceAttachment;
+    std::unique_ptr<juce::ComboBoxParameterAttachment> octaveAttachment,typeAttachment;
     std::unique_ptr<juce::ButtonParameterAttachment> loopAttachment,wholeAttachment;
     unsigned revision=~0u;
 public:
@@ -37,7 +38,7 @@ public:
         for(auto* c:std::array<juce::Component*,12>{{&load,&activate,&loop,&whole,&sound,&root,&release,&status,&rootLabel,&releaseLabel,&help,nullptr}})if(c)addAndMakeVisible(c);
         for(auto* b:{&activate,&loop,&whole}){b->setClickingTogglesState(true);b->getProperties().set("physical-switch",true);}
         load.onClick=[this]{sampleui::import(processor,*this,chooser);};
-        activate.onClick=[this]{auto* p=processor.state.getParameter("organModel");p->setValueNotifyingHost(p->convertTo0to1(activate.getToggleState()?4.f:0.f));};
+        activate.onClick=[this]{auto* p=processor.state.getParameter("samplesEnabled");p->setValueNotifyingHost(activate.getToggleState()?1.f:0.f);};
         sound.setComponentID("sample-sound");sound.onChange=[this]{if(sound.getSelectedId()>0)processor.selectSampleSound(sound.getSelectedId()-1);};
         sampleui::slider(root);sampleui::slider(release);root.setComponentID("sample-root");release.setComponentID("sample-release");
         rootAttachment=std::make_unique<juce::SliderParameterAttachment>(*p.state.getParameter("sampleRoot"),root);
@@ -45,15 +46,22 @@ public:
         loopAttachment=std::make_unique<juce::ButtonParameterAttachment>(*p.state.getParameter("sampleLoop"),loop);
         wholeAttachment=std::make_unique<juce::ButtonParameterAttachment>(*p.state.getParameter("sampleChord"),whole);
         rootLabel.setText("NOTA RAIZ MIDI",juce::dontSendNotification);releaseLabel.setText("RELEASE ms",juce::dontSendNotification);
-        help.setFont(juce::FontOptions(10.f));help.setText("Nota aislada: crea Maj, min, 7 y Maj7. Acorde grabado: conserva sus intervalos.\nEl volumen, la octava y el filtro se ajustan en Organo. Activa ORGAN para tocar.",juce::dontSendNotification);
+        help.setFont(juce::FontOptions(10.f));help.setText("Nota aislada: crea Maj, min, 7 y Maj7. Acorde grabado: conserva sus intervalos.\nVolumen en Mixer. La octava y el filtro se ajustan aqui. Activa CHORDS para tocar.",juce::dontSendNotification);
         whole.setTooltip("Para una grabacion de un acorde completo: solo se transpone la raiz. Su calidad grabada no cambia al seleccionar otra fila.");
         loop.setTooltip("Loop automatico con crossfade en la parte central. Puede no servir para todas las grabaciones.");
+        for(auto* c:std::array<juce::Component*,6>{{&octave,&type,&cutoff,&resonance,&cutoffLabel,&resonanceLabel}})addAndMakeVisible(c);
+        octave.addItemList({"-1","0","+1"},1);type.addItemList({"LP","BP","HP"},1);sampleui::slider(cutoff);sampleui::slider(resonance);
+        cutoffLabel.setText("FILTER Hz",juce::dontSendNotification);resonanceLabel.setText("RES",juce::dontSendNotification);
+        cutoffAttachment=std::make_unique<juce::SliderParameterAttachment>(*p.state.getParameter("sampleCutoff"),cutoff);
+        resonanceAttachment=std::make_unique<juce::SliderParameterAttachment>(*p.state.getParameter("sampleResonance"),resonance);
+        octaveAttachment=std::make_unique<juce::ComboBoxParameterAttachment>(*p.state.getParameter("sampleOctave"),octave);
+        typeAttachment=std::make_unique<juce::ComboBoxParameterAttachment>(*p.state.getParameter("sampleFilterType"),type);
         timerCallback();startTimerHz(10);
     }
     void resized() override {
         load.setBounds(0,2,135,24);status.setBounds(145,2,380,24);sound.setBounds(0,40,395,24);activate.setBounds(405,40,120,26);
         rootLabel.setBounds(0,78,105,24);root.setBounds(110,78,145,24);releaseLabel.setBounds(275,78,85,24);release.setBounds(365,78,160,24);
-        loop.setBounds(0,115,120,26);whole.setBounds(135,115,205,26);help.setBounds(0,150,525,32);
+        loop.setBounds(0,115,120,26);whole.setBounds(135,115,205,26);help.setBounds(0,150,525,32);octave.setBounds(350,115,175,26);cutoffLabel.setBounds(0,195,75,22);cutoff.setBounds(80,195,180,22);resonanceLabel.setBounds(275,195,35,22);resonance.setBounds(310,195,110,22);type.setBounds(435,195,90,22);
     }
     void configure(foleys::GuiItem&) {}
     static std::vector<std::pair<juce::String,int>> colours(){return {};}
@@ -66,7 +74,7 @@ private:
             status.setText(choices.empty()?"Carga un ZIP con tus instrumentos":juce::String(static_cast<int>(choices.size()))+" instrumentos disponibles",juce::dontSendNotification);
         }
         sound.setSelectedId(static_cast<int>(processor.state.getRawParameterValue("organSample")->load())+1,juce::dontSendNotification);
-        activate.setToggleState(processor.state.getRawParameterValue("organModel")->load()==4,juce::dontSendNotification);sampleui::colours(processor,*this);
+        activate.setToggleState(processor.state.getRawParameterValue("samplesEnabled")->load()>.5f,juce::dontSendNotification);sampleui::colours(processor,*this);
     }
 };
 class RhythmPanel final : public juce::Component,private juce::Timer {
@@ -86,9 +94,9 @@ public:
         modeAttachment=std::make_unique<juce::ButtonParameterAttachment>(*p.state.getParameter("rhythmUseLoop"),loopMode);
         loopMode.setComponentID("rhythm-loop-mode");loopNotice.setFont(juce::FontOptions(12.f));loopNotice.setJustificationType(juce::Justification::centred);
         loopMode.setTooltip("Activa los loops grabados; desactivado utiliza los golpes y pasos editables. Los loops se adaptan al BPM conservando su afinacion.");
-        const char* ids[]{"delayTempo","rhythmSwing","rhythmVolume","rhythmSend"};juce::Slider* controls[]{&tempo,&swing,&volume,&send};
+        const char* ids[]{"delayTempo","rhythmSwing","rhythmVolume","rhythmReverbSend"};juce::Slider* controls[]{&tempo,&swing,&volume,&send};
         for(size_t i=0;i<4;++i){sampleui::slider(*controls[i]);sliders.push_back(std::make_unique<juce::SliderParameterAttachment>(*p.state.getParameter(ids[i]),*controls[i]));}
-        bpmLabel.setText("BPM",juce::dontSendNotification);swingLabel.setText("SWING",juce::dontSendNotification);volumeLabel.setText("VOL",juce::dontSendNotification);sendLabel.setText("FX",juce::dontSendNotification);
+        bpmLabel.setText("BPM",juce::dontSendNotification);swingLabel.setText("SWING",juce::dontSendNotification);volumeLabel.setText("VOL",juce::dontSendNotification);sendLabel.setText("REV",juce::dontSendNotification);
         load.onClick=[this]{sampleui::import(processor,*this,chooser);};
         for(size_t t=0;t<5;++t) {
             addAndMakeVisible(samples[t]);samples[t].setComponentID("rhythm-sample-"+juce::String(static_cast<int>(t)));

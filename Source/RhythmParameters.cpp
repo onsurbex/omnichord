@@ -50,7 +50,7 @@ void ChordHarpProcessor::selectSampleSound(int index,bool activate) {
     const auto set=[&](const char* id,float value){auto* p=state.getParameter(id);p->beginChangeGesture();p->setValueNotifyingHost(p->convertTo0to1(value));p->endChangeGesture();};
     set("organSample",static_cast<float>(index));set("sampleRoot",static_cast<float>(root));
     set("sampleChord",0);set("sampleLoop",loop?1.f:0.f);set("sampleRelease",loop?800.f:250.f);
-    if(activate)set("organModel",4);
+    if(activate)set("samplesEnabled",1);
 }
 bool ChordHarpProcessor::loadSampleLibrary(const juce::File& file,juce::String& error) {
     auto decoded=SampleLibrary::readZip(file,error);if(!decoded)return false;
@@ -92,7 +92,7 @@ void ChordHarpProcessor::readRhythmParameters(bool hasPpq,double ppq,bool playin
         if(index>=0 && index<static_cast<int>(sampleLibrary->entries.size()) && sampleLibrary->entries[static_cast<size_t>(index)].audio.beats>0)
             rhythm.loopSound=&sampleLibrary->entries[static_cast<size_t>(index)].audio;
     }
-    rhythm.pattern=static_cast<int>(rhythmRaw[2]->load());rhythm.swing=rhythmRaw[3]->load();rhythm.volume=rhythmRaw[4]->load();rhythm.bpm=currentTempo.load();
+    rhythm.pattern=static_cast<int>(rhythmRaw[2]->load());rhythm.swing=rhythmRaw[3]->load();rhythm.volume=1;rhythm.bpm=currentTempo.load();
     for(size_t t=0;t<5;++t) {
         rhythm.custom[t]=0;for(size_t s=0;s<16;++s)if(stepRaw[t][s]->load()>.5f)rhythm.custom[t]|=static_cast<std::uint16_t>(1u<<s);
         rhythm.samples[t]=nullptr;
@@ -112,7 +112,7 @@ void ChordHarpProcessor::readRhythmParameters(bool hasPpq,double ppq,bool playin
     }
     sampleChords.rootNote=static_cast<int>(rhythmRaw[7]->load());sampleChords.release=rhythmRaw[8]->load()*.001f;
     sampleChords.wholeChord=sampleRaw[0]->load()>.5f;sampleChords.loop=sampleRaw[1]->load()>.5f;
-    sampleChords.gain=raw[OrganGain]->load()*(sampleChords.sound?sampleChords.sound->gain:1.f);
-    sampleFilter.cutoff=sampleRaw[2]->load();sampleFilter.resonance=sampleRaw[3]->load();sampleFilter.mode=static_cast<int>(sampleRaw[4]->load());
+    sampleChords.gain=sampleChords.sound?sampleChords.sound->gain:1.f;
+    sampleFilter.cutoff=sampleFilterRefs[0]->load();sampleFilter.resonance=sampleFilterRefs[1]->load();sampleFilter.mode=static_cast<int>(sampleFilterRefs[2]->load());
     rhythm.beginBlock(hasPpq,ppq,playing);
 }
