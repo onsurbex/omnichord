@@ -40,12 +40,17 @@ static void checkLogoThemes(ChordHarpProcessor& processor,ChordHarpEditor& edito
             if(c.getAlpha()>220) { brightness+=c.getBrightness(); ++pixels; }
         }
         require(pixels>100,"The chosen logo must contain visible artwork");
+        if(!(white?brightness/pixels>0.8:brightness/pixels<0.2))std::cerr<<"Logo expected white="<<white<<" mean="<<brightness/pixels<<" theme="<<processor.state.getRawParameterValue("theme")->load()<<" background="<<omnichord::logoBackground(processor.magicState.getGuiTree(),static_cast<int>(processor.state.getRawParameterValue("theme")->load())).toString()<<'\n';
         require(white?brightness/pixels>0.8:brightness/pixels<0.2,"Rendered logo must match the contrast of the panel");
     };
     auto* parameter=processor.state.getParameter("theme");
     for(int theme=0;theme<6;++theme) {
         parameter->setValueNotifyingHost(parameter->convertTo0to1(static_cast<float>(theme)));
-        juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+        for(int attempt=0;attempt<20;++attempt) {
+            juce::MessageManager::getInstance()->runDispatchLoopUntil(50);
+            if(omnichord::logoBackground(processor.magicState.getGuiTree(),theme)==juce::Colour(omnichord::themes[static_cast<size_t>(theme)].panel))break;
+        }
+        require(omnichord::logoBackground(processor.magicState.getGuiTree(),theme)==juce::Colour(omnichord::themes[static_cast<size_t>(theme)].panel),"Each selected theme must reach the actual panel palette");
         assertLogo(theme==2);
         const auto full=editor.createComponentSnapshot(editor.getLocalBounds());
         if(full.getPixelAt(0,0)!=juce::Colour(0xff292a2d) || full.getPixelAt(full.getWidth()-1,full.getHeight()-1)!=juce::Colour(0xff292a2d)) {
@@ -454,6 +459,11 @@ int main() {
     juce::MessageManager::callAsync([&guiReady] { guiReady=true; });
     juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
     require(guiReady,"GUI callbacks must finish before inspecting the Foleys toolbox");
+    {
+        auto* panel=dynamic_cast<ChordHarpEditor*>(editor.get())->getGUIBuilder().findGuiItemWithId("sound-controls");
+        auto stream=juce::File::getCurrentWorkingDirectory().getChildFile("Omnichord-mixer-panel-preview.png").createOutputStream();
+        require(stream && png.writeImageToStream(panel->createComponentSnapshot(panel->getLocalBounds()),*stream),"The initial mixer screenshot must render");
+    }
     const auto preview=editor->createComponentSnapshot(editor->getLocalBounds());
     float darkest=1.0f, lightest=0.0f;
     auto* logoWidget=dynamic_cast<ChordHarpEditor*>(editor.get())->getGUIBuilder().findGuiItemWithId("logo")->getWrappedComponent();
