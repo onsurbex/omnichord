@@ -40,6 +40,8 @@ int main(){
     Rhythm rhythm;rhythm.enabled=true;rhythm.prepare(48000);for(auto& s:rhythm.samples)s=&impulse;
     for(int block=0;block<750;++block){rhythm.beginBlock(false,0,false);for(int i=0;i<512;++i){auto a=rhythm.next();require(std::isfinite(a[0]),"Drum output must remain finite");}}
     require(rhythm.hits[0]==8&&rhythm.hits[1]==8&&rhythm.hits[2]==32,"Standalone rhythm must stay on the 120 BPM grid over four bars");
+    rhythm.reset();rhythm.beginBlock(false,0,false,true);for(int i=0;i<512;++i)rhythm.next();require(rhythm.hits[0]==0 && !rhythm.running(),"A host without PPQ must still obey Stop");
+    rhythm.beginBlock(false,0,true,true);rhythm.next();require(rhythm.hits[0]==1 && rhythm.running(),"A host without PPQ must start the armed rhythm on Play");
     rhythm.reset();rhythm.custom={0,2,0,0,0};rhythm.pattern=6;rhythm.swing=.4f;rhythm.beginBlock(true,.27,true);int hit=-1;
     for(int i=0;i<3000;++i){rhythm.next();if(rhythm.hits[1]>0&&hit<0)hit=i;}
     require(std::abs(hit-1920)<=1,"Host sync must include a delayed swung step when starting between straight-grid positions");

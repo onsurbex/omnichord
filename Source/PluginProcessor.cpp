@@ -1,4 +1,5 @@
 #include "PluginProcessor.h"
+#include "LevelDisplay.h"
 #include "PluginEditor.h"
 #include "BinaryData.h"
 #include "KeyboardMapping.h"
@@ -58,7 +59,7 @@ juce::ValueTree upgradeLayout(juce::ValueTree layout) {
 
 juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::parameters() {
     juce::AudioProcessorValueTreeState::ParameterLayout p;
-    p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"gain",1},"Volume",0.0f,1.0f,0.65f));
+    p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"gain",1},"Volume",juce::NormalisableRange<float>(0,1),0.65f,omnichord::gainAttributes()));
     p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"tone",1},"Tone",0.0f,1.0f,0.35f));
     p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"sustain",1},"Sustain",juce::NormalisableRange<float>(0.15f,5.0f,0.01f,0.5f),1.6f));
     p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"vibrato",1},"Vibrato",0.0f,1.0f,0.12f));
@@ -67,8 +68,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     const auto addFloat=[&](const char* id,const char* name,float low,float high,float value) {
         p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{id,1},name,low,high,value));
     };
-    addFloat("harpGain","Harp Volume",0,1,1);
-    addFloat("organGain","Organ Volume",0,1,1);
+    const auto addGain=[&](const char* id,const char* name,float initial) {
+        p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{id,1},name,juce::NormalisableRange<float>(0,1),initial,omnichord::gainAttributes()));
+    };
+    addGain("harpGain","Harp Volume",1);
+    addGain("organGain","Organ Volume",1);
     addFloat("organTone","Organ Harmonics",0,1,0.4f);
     p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"organOctave",1},"Organ Octave",juce::StringArray{"-1","0","+1"},1));
     p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"harpSound",1},"Harp Sound",juce::StringArray{"Clasico","FM"},0));
@@ -76,10 +80,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"harpQuantize",1},"Harp Chord Notes",true));
     addFloat("delayTime","Delay Time (ms)",40,1200,350);
     addFloat("delayFeedback","Delay Feedback",0,0.85f,0.3f);
-    addFloat("delayMix","Delay Return",0,1,1);
+    addGain("delayMix","Delay Return",1);
     addFloat("reverbSize","Reverb Size",0,1,0.5f);
     addFloat("reverbDamping","Reverb Damping",0,1,0.5f);
-    addFloat("reverbMix","Reverb Return",0,1,1);
+    addGain("reverbMix","Reverb Return",1);
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"computerKeys",1},"Mac Keyboard",true));
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"major7",1},"Major Seventh",false));
     p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"theme",1},"Colour Theme",omnichord::themeNames(),0));
@@ -131,7 +135,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"rhythmUseLoop",1},"Rhythm Use Recorded Loop",false));
     p.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"rhythmLoop",1},"Rhythm Loop",0,127,0));
     p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"rhythmPattern",1},"Rhythm Pattern",juce::StringArray{"Omni Pop","Disco","Bossa","Half-time","Shuffle","Waltz","Custom"},0));
-    addFloat("rhythmSwing","Rhythm Swing",0,.6f,0);addFloat("rhythmVolume","Rhythm Volume",0,1,.7f);addFloat("rhythmSend","Rhythm FX Send",0,1,0);
+    addFloat("rhythmSwing","Rhythm Swing",0,.6f,0);addGain("rhythmVolume","Rhythm Volume",.7f);addGain("rhythmSend","Rhythm FX Send",0);
     p.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"organSample",1},"Organ Sample",0,127,0));
     p.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"sampleRoot",1},"Sample Root MIDI Note",0,127,60));
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"sampleChord",1},"Sample Is Whole Chord",false));
@@ -145,9 +149,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
         if(channel<4)p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{mixerParameter(channel,"Enabled"),1},juce::String("Layer ")+mixerParameter(channel,"Enabled"),channel==0));
         for(const auto* field:{"Solo"})p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{mixerParameter(channel,field),1},mixerParameter(channel,field),false));
         p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{mixerParameter(channel,"Pan"),1},mixerParameter(channel,"Pan"),-1.f,1.f,0.f));
-        for(const auto* field:{"DelaySend","ReverbSend"})p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{mixerParameter(channel,field),1},mixerParameter(channel,field),0.f,1.f,0.f));
+        for(const auto* field:{"DelaySend","ReverbSend"})p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{mixerParameter(channel,field),1},mixerParameter(channel,field),juce::NormalisableRange<float>(0,1),0.f,omnichord::gainAttributes()));
     }
-    addFloat("fmGain","FM Volume",0,1,1);addFloat("sampleGain","Sample Volume",0,1,1);
+    addGain("fmGain","FM Volume",1);addGain("sampleGain","Sample Volume",1);
     addFloat("fmTone","FM Modulation",0,1,.4f);
     for(const auto* prefix:{"fm","sample"})p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{juce::String(prefix)+"Octave",1},juce::String(prefix)+" Octave",juce::StringArray{"-1","0","+1"},1));
     p.add(std::make_unique<DiscreteIntParameter>(juce::ParameterID{"organUnison",1},"Organ Unison Voices",1,7,1));
@@ -225,8 +229,9 @@ ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(Bus
         }
     }
 #endif
+    registerSoloCleanup();
     factoryPreset=capturePreset("Inicio");
-    loadStartupPreset();
+    loadStartupPreset();clearDisabledMixerSolos();
     magicState.addTrigger("silence",[this] {
         auto* parameter=state.getParameter("pad");
         parameter->beginChangeGesture(); parameter->setValueNotifyingHost(0); parameter->endChangeGesture();
@@ -239,7 +244,7 @@ void ChordHarpProcessor::prepareToPlay(double rate,int blockSize) {
     readSynthParameters();readMixerParameters();engine.prepare(rate);organLayer.prepare(rate);fmLayer.prepare(rate);mixer.prepare(rate);
     setLatencySamples(engine.latencySamples());
     rhythm.prepare(rate,engine.latencySamples());sampleChords.prepare(rate,engine.latencySamples());sampleFilter.prepare(rate);sampleDC.prepare(rate);
-    rhythmMuted=false;lastRhythmEnabled=false;
+    rhythmMuted=false;lastRhythmEnabled=false;lastRhythmHostPlay=false;
     delay.milliseconds=raw[DelayTime]->load();delay.mix=1;delay.wetOnly=true;delay.prepare(rate);
     reverb.mix=1;reverb.predelayMs=raw[ReverbPredelay]->load();reverb.early=raw[ReverbEarly]->load();
     reverb.gainDb={raw[ReverbLow]->load(),raw[ReverbMid]->load(),raw[ReverbHigh]->load()};reverb.prepare(rate);
@@ -288,13 +293,13 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
     computerMidi.clear();computerKeys.processNextMidiBuffer(computerMidi,0,buffer.getNumSamples(),true);
     const auto value=[this](Param p){return raw[p]->load();};
     readSynthParameters();readMixerParameters();mixer.beginBlock();
-    double bpm=value(DelayTempo);bool fromHost=false,hasPpq=false,hostPlaying=false;double ppq=0;
+    double bpm=value(DelayTempo);bool fromHost=false,hasPpq=false,hostPlaying=false,hasTransport=false;double ppq=0;
     if(auto* playhead=getPlayHead())if(const auto position=playhead->getPosition()) {
         if(const auto hostBpm=position->getBpm())if(std::isfinite(*hostBpm) && *hostBpm>0){bpm=*hostBpm;fromHost=true;}
         if(const auto beat=position->getPpqPosition())if(std::isfinite(*beat) && std::abs(*beat)<1e9){hasPpq=true;ppq=*beat;}
-        hostPlaying=position->getIsPlaying();
+        hostPlaying=position->getIsPlaying();hasTransport=true;
     }
-    bpm=juce::jlimit(20.,400.,bpm);currentTempo.store(bpm);hostTempo.store(fromHost);readRhythmParameters(hasPpq,ppq,hostPlaying);
+    bpm=juce::jlimit(20.,400.,bpm);currentTempo.store(bpm);hostTempo.store(fromHost);readRhythmParameters(hasPpq,ppq,hostPlaying,hasTransport);
     delay.synced=value(DelaySync)>.5f;delay.milliseconds=delay.synced?static_cast<float>(chordharp::syncedDelayMs(bpm,static_cast<int>(value(DelayDivision)))):value(DelayTime);
     delay.feedback=value(DelayFeedback);delay.mix=1;delay.wetOnly=true;
     reverb.roomSize=value(ReverbSize);reverb.damping=value(ReverbDamping);reverb.mix=1;reverb.predelayMs=value(ReverbPredelay);reverb.early=value(ReverbEarly);
@@ -322,15 +327,16 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
         fmLayer.chord(activeChord%12,activeChord/12,gate && mixer.channels[2].enabled);
         sampleChords.chord(activeChord%12,activeChord/12,gate && mixer.channels[3].enabled,static_cast<int>(mixerRaw[8]->load())-1);
     };
-    const auto silence=[&] {
+    const auto silence=[&](bool keepHostRhythm=false) {
         engine.reset();organLayer.reset();fmLayer.reset();sampleChords.reset();sampleFilter.reset();sampleDC.reset();
-        delay.reset();reverb.reset();tape.reset();heldChords.clear();held=-1;liveNotes={};pedals={};guiChordLatched=false;
-        organSilenced=true;tapeMuted=true;rhythmMuted=true;rhythm.enabled=false;rhythm.reset();
+        if(!keepHostRhythm){delay.reset();reverb.reset();tape.reset();}
+        heldChords.clear();held=-1;liveNotes={};pedals={};guiChordLatched=false;
+        organSilenced=true;tapeMuted=!keepHostRhythm;if(!keepHostRhythm){rhythmMuted=true;rhythm.enabled=false;rhythm.reset();}
     };
     const bool stop=panic.exchange(false),presetChanged=presetReset.exchange(false);
     if(stop || presetChanged) {
         silence();guiChordMidi.clear();computerMidi.clear();
-        if(presetChanged && !stop){organSilenced=false;rhythmMuted=false;tapeMuted=false;lastRhythmEnabled=false;readRhythmParameters(hasPpq,ppq,hostPlaying);}
+        if(presetChanged && !stop){organSilenced=false;rhythmMuted=false;tapeMuted=false;lastRhythmEnabled=false;readRhythmParameters(hasPpq,ppq,hostPlaying,hasTransport);}
     }
     refresh();int a,n,b,m;fifo.prepareToRead(fifo.getNumReady(),a,n,b,m);
     if(!stop && !presetChanged && mixer.channels[0].enabled) {
@@ -373,7 +379,7 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
         auto end=event;while(end!=midi.cend() && (*end).samplePosition<=sample)++end;auto playable=event;
         for(auto it=event;it!=end;++it) {
             const auto message=(*it).getMessage();if(message.isNoteOn() || message.isNoteOff())selector(message,false);
-            if(message.isAllSoundOff() || message.isAllNotesOff()){silence();playable=it;++playable;}
+            if(message.isAllSoundOff() || message.isAllNotesOff()){silence(message.isAllNotesOff() && hasTransport && rhythm.followHost);playable=it;++playable;}
         }
         refresh();for(auto it=playable;it!=end;++it)performance((*it).getMessage(),false);event=end;
         auto computerEnd=computerEvent;while(computerEnd!=computerMidi.cend() && (*computerEnd).samplePosition<=sample)++computerEnd;
@@ -387,7 +393,7 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
         else {buffer.setSample(0,sample,out[0]);buffer.setSample(1,sample,out[1]);}
     }
     for(size_t i=0;i<8;++i)meters[i].store(std::max(mixer.levels[i],meters[i].load()*.8f));
-    playingStep.store(rhythm.enabled?rhythm.lastStep:-1);lastChord=activeChord;lastPad=chords;lastChordSustain=sustain;lastChromatic=chromatic;midi.clear();
+    dawPlaying.store(hasTransport && hostPlaying);rhythmRunning.store(rhythm.running());rhythmHostSync.store(hasTransport && rhythm.followHost);playingStep.store(rhythm.running()?rhythm.lastStep:-1);lastChord=activeChord;lastPad=chords;lastChordSustain=sustain;lastChromatic=chromatic;midi.clear();
 }
 double ChordHarpProcessor::getTailLengthSeconds() const {
     if(!raw[DelayFeedback]) return 120;
@@ -415,7 +421,7 @@ void ChordHarpProcessor::setStateInformation(const void* data,int size) {
         const auto layout=juce::ValueTree::fromXml(restored.getProperty("guiLayout").toString());
         if(layout.hasType("magic") && layout.getChildWithName("View").isValid())
             magicState.setGuiValueTree(upgradeLayout(layout));
-        state.replaceState(restored);presetReset.store(true);
+        state.replaceState(restored);clearDisabledMixerSolos();presetReset.store(true);
         updatePresetName(restored.getProperty("presetName","Proyecto").toString());
     }
 }

@@ -15,9 +15,10 @@
 #include "MixerDSP.h"
 #include <atomic>
 
-class ChordHarpProcessor final : public juce::AudioProcessor {
+class ChordHarpProcessor final : public juce::AudioProcessor,private juce::AudioProcessorValueTreeState::Listener {
 public:
     explicit ChordHarpProcessor(juce::File presetRoot={});
+    ~ChordHarpProcessor() override;
     void prepareToPlay(double, int) override;
     void releaseResources() override {}
     bool isBusesLayoutSupported(const BusesLayout&) const override;
@@ -79,6 +80,9 @@ public:
     juce::String sampleLibraryPath() const;
     juce::String sampleLibraryReference() const;
     unsigned getSampleRevision() const {return sampleRevision.load();}
+    bool dawIsPlaying() const {return dawPlaying.load();}
+    bool rhythmIsRunning() const {return rhythmRunning.load();}
+    bool rhythmFollowsTransport() const {return rhythmHostSync.load();}
     int rhythmStep() const {return playingStep.load();}
     static juce::String rhythmStepID(int track,int step);
     void editRhythmStep(int track,int step,bool on);
@@ -98,6 +102,12 @@ private:
     bool restoreSampleLibrary(const juce::String&,juce::String&);
     void readSynthParameters();
     void readMixerParameters();
+    void registerSoloCleanup();
+    void clearMixerSolo(int channel);
+    void clearDisabledMixerSolos();
+    void parameterChanged(const juce::String&,float) override;
+    std::array<juce::String,7> mixerEnableIDs{};
+    std::array<juce::RangedAudioParameter*,7> soloParameters{},enableParameters{};
     juce::ValueTree migrateV6(juce::ValueTree);
     struct SynthReferences {
         std::array<std::atomic<float>*,9> common{};
@@ -138,13 +148,14 @@ private:
     std::unique_ptr<SampleLibrary> sampleLibrary;
     juce::String factoryLibraryPath;
     std::atomic<unsigned> sampleRevision{0};
+    std::atomic<bool> rhythmRunning{false},rhythmHostSync{false},dawPlaying{false};
     std::atomic<int> playingStep{-1};
     mutable juce::CriticalSection libraryLock;
-    bool rhythmMuted=false,lastRhythmEnabled=false;
+    bool rhythmMuted=false,lastRhythmEnabled=false,lastRhythmHostPlay=false;
     std::array<std::atomic<float>*,11> rhythmRaw{};
     std::array<std::array<std::atomic<float>*,16>,5> stepRaw{};
     std::array<std::atomic<float>*,5> trackRaw{},sampleRaw{};
-    void readRhythmParameters(bool,double,bool);
+    void readRhythmParameters(bool,double,bool,bool);
     chordharp::StereoDelay delay;
     chordharp::Tape tape;
     chordharp::ChordGate heldChords;

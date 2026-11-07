@@ -1,14 +1,20 @@
-Omnichord 0.7.0 para macOS 11 o posterior, Apple Silicon e Intel.
+Omnichord 0.7.2 para macOS 11 o posterior, Apple Silicon e Intel.
 
-- Mixer como primera pestaña: Harp, Organ, FM, Samples, Ritmos, Delay, Rev y MSTR. Cada fuente tiene volumen, panorama y envíos post-fader independientes a Delay/Reverb. Retornos paralelos, con Width en Delay, Rev y Master. Tape insertado en Master.
-- Capas simultáneas de órgano subtractivo, FM de seis operadores y samples. Diez registros de órgano, incluidos Principal, Pleno, Flauta y Tonewheel. El botón amarillo CHORDS gobierna las tres capas de acordes.
-- Botones físicos de canal y LEDs pulsables en las pestañas. Ctrl+clic activa solo; Ctrl+clic en MSTR elimina los solos. Medidores por canal.
-- Etiquetas negras CHORD/CHROMATIC. CHORD conserva el funcionamiento del Omnichord. CHROMATIC interpreta todo el MIDI como notas normales y polifónicas, con Note Off y pedal CC64 por canal. El teclado del Mac usa una distribución de piano y cambia de octava con Z/X. La botonera gráfica conserva sus acordes en ambos modos.
-- Corregido el selector Voices vacío: los parámetros enteros anuncian sus siete opciones a Foleys. Detune actúa sobre 2–7 voces, con controles independientes para Harp, Organ y FM y ayuda en la interfaz.
-- Presets completos y proyectos incluyen todas las capas, envíos, solos, Width y modos. Migración de presets/proyectos de 0.6 a la nueva mezcla. Los de 0.5 no se importan.
+Novedades de 0.7.2:
 
-Se conserva la librería original Omnichord Vol. 1: cinco instrumentos, seis golpes y cuatro loops a 100 BPM. Los loops se adaptan al BPM del DAW o standalone conservando afinación. Los 23 presets completos, temas, logo por contraste y el icono de app están incluidos en VST3, standalone y PKG.
+- El LED de cada pestaña parpadea en amarillo mientras su canal está en solo. El aviso permanece visible al cambiar de página. FX también parpadea si Delay o Reverb están en solo.
+- Apagar un canal elimina automáticamente su solo desde mixer, pestañas o automatización. CHORDS y FX limpian los solos de sus grupos. Al reactivarlos no vuelve el solo anterior.
+- Presets y proyectos descartan solos guardados en canales apagados. Ctrl+clic en MSTR conserva la función de limpiar todos los solos.
 
-La FM usa las tablas de algoritmos de Google MSFA (Apache-2.0) con motor propio; no es una emulación exacta de DX7 ni admite SysEx.
+Incluye las mejoras de 0.7.1:
 
-El PKG instala VST3 en `/Library/Audio/Plug-Ins/VST3/` y standalone en `/Applications/`. Los bundles usan firma ad hoc; el instalador no está notarizado. La escucha y la prueba de carga/rendimiento dentro de Ableton requieren un Mac.
+- Ritmos sincronizados con Play/Stop, tempo y posición del DAW, incluidos rebobinado y loops. Con el canal Ritmos armado y DAW activado, la reproducción arranca al pulsar Play en el host. All Notes Off del DAW conserva el ritmo sincronizado; Stop lo detiene. También respeta el transporte cuando no hay posición PPQ. Standalone mantiene su reloj interno.
+- Estado de transporte visible y botón ARM cuando se sigue al DAW. SILENCIO y All Sound Off siguen funcionando como parada completa.
+- Niveles compensados: Organ +9 dB, FM +7.5 dB y ajustes individuales en los cinco samples de fábrica. Se mantienen los audios originales y su dinámica. El balance de los presets anteriores cambia con esta revisión; los valores de sus parámetros se conservan.
+- Volúmenes, retornos y envíos en dB, con lectura permanente y editable debajo de los faders. 0 dB equivale a ganancia unitaria y -inf dB a silencio. Las escalas internas de los parámetros y el formato de presets se conservan.
+- Pan dibujado desde el centro y Width con indicadores y puntos que se abren de forma simétrica.
+- FM abre en modo sencillo con preset, voces, octava y seis potes esenciales. AVANZADO muestra los seis operadores, algoritmos y envolventes; cambiar de vista conserva el sonido editado.
+
+Conserva mixer, capas simultáneas, CHORD/CHROMATIC, Tape en Master, efectos por envío, librería Omnichord Vol. 1 y presets completos de la 0.7.
+
+El PKG instala VST3 en `/Library/Audio/Plug-Ins/VST3/` y standalone en `/Applications/`. Los bundles usan firma ad hoc; el instalador no está notarizado. La carga y la escucha dentro de Ableton requieren un Mac.

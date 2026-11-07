@@ -9,6 +9,7 @@
 #include <foleys_gui_magic/Editor/foleys_ToolBox.h>
 #endif
 #include <cstdlib>
+#include <set>
 #include <iostream>
 
 static void require(bool condition, const char* message) {
@@ -394,8 +395,104 @@ static void checkV7Performance() {
         && layered.state.getRawParameterValue("delayMix")->load()==1,"Migration must preserve FM, unison and old effect sends");
 }
 
+class TransportPlayhead final : public juce::AudioPlayHead {
+public:
+    double ppq=0,bpm=120;bool playing=false,positionAvailable=true;
+    juce::Optional<PositionInfo> getPosition() const override {PositionInfo p;p.setBpm(bpm);p.setIsPlaying(playing);if(positionAvailable)p.setPpqPosition(ppq);return p;}
+};
+static void checkTransportAndLevels() {
+    for(bool loop:{false,true})for(bool position:{false,true}) {
+        auto owner=std::make_unique<ChordHarpProcessor>();auto& synth=*owner;TransportPlayhead host;host.positionAvailable=position;
+        setActual(synth,"rhythmEnabled",1);setActual(synth,"rhythmHost",1);setActual(synth,"rhythmUseLoop",loop?1.f:0.f);setActual(synth,"harpEnabled",0);
+        synth.prepareToPlay(48000,512);synth.setPlayHead(&host);juce::AudioBuffer<float> audio(2,512);juce::MidiBuffer midi;
+        const auto render=[&]{synth.processBlock(audio,midi);if(host.playing)host.ppq+=512*host.bpm/(60*48000.);};
+        for(int b=0;b<10;++b)render();require(audio.getMagnitude(0,512)==0 && !synth.rhythmIsRunning(),"Armed rhythm must stay silent while the host is stopped, including hosts without PPQ");
+        host.playing=true;double energy=0;for(int b=0;b<25;++b){render();energy+=audio.getMagnitude(0,512);}require(energy>.01 && synth.rhythmIsRunning(),"DAW Play must start both step rhythms and recorded loops automatically");
+        host.bpm=137;render();require(synth.getCurrentTempo()==137,"Rhythm tempo must follow a running DAW tempo change");
+        if(position){host.ppq=2;render();require(synth.rhythmStep()==8,"A DAW seek must move the plugin to the matching sixteenth note");host.ppq=0;render();require(synth.rhythmStep()==0,"A DAW loop wrap must restart the downbeat");}
+        midi.addEvent(juce::MidiMessage::allNotesOff(1),0);render();require(synth.rhythmIsRunning(),"DAW All Notes Off at a loop boundary must not latch the synced rhythm off");
+        host.playing=false;midi.addEvent(juce::MidiMessage::allNotesOff(1),0);for(int b=0;b<15;++b)render();require(audio.getMagnitude(0,512)<1e-7 && !synth.rhythmIsRunning() && synth.rhythmStep()==-1,"DAW Stop must release drums and stop the displayed playhead");
+        host.ppq=0;host.playing=true;energy=0;for(int b=0;b<10;++b){render();energy+=audio.getMagnitude(0,512);}require(energy>.001,"DAW Play after Stop must restart the armed rhythm");
+        setActual(synth,"rhythmEnabled",0);for(int b=0;b<15;++b)render();require(!synth.rhythmIsRunning() && synth.dawIsPlaying() && audio.getMagnitude(0,512)<1e-7,"Turning the rhythm channel off must preserve the real DAW transport display");
+        synth.setPlayHead(nullptr);
+    }
+    {
+        auto a=std::make_unique<ChordHarpProcessor>(),b=std::make_unique<ChordHarpProcessor>();TransportPlayhead host;host.playing=true;
+        for(auto* synth:{a.get(),b.get()}){setActual(*synth,"harpEnabled",0);setActual(*synth,"rhythmEnabled",1);setActual(*synth,"rhythmDelaySend",.4f);setActual(*synth,"rhythmReverbSend",.3f);setActual(*synth,"tapeEnabled",1);synth->prepareToPlay(48000,512);synth->setPlayHead(&host);}
+        juce::AudioBuffer<float> audio(2,512),control(2,512);juce::MidiBuffer events,none;
+        for(int block=0;block<60;++block){if(block==30)events.addEvent(juce::MidiMessage::allNotesOff(1),0);a->processBlock(audio,events);b->processBlock(control,none);host.ppq+=512*host.bpm/(60*48000.);if(block>=30)for(int c=0;c<2;++c)for(int i=0;i<512;++i)require(audio.getSample(c,i)==control.getSample(c,i),"DAW All Notes Off must preserve the continuous rhythm, effect tails and Tape history");}
+        a->setPlayHead(nullptr);b->setPlayHead(nullptr);
+    }
+    auto owner=std::make_unique<ChordHarpProcessor>();auto& synth=*owner;
+    for(const char* id:{"gain","harpGain","organGain","fmGain","sampleGain","rhythmVolume","delayMix","reverbMix","harpDelaySend"}) {
+        auto* parameter=synth.state.getParameter(id);require(parameter->getText(parameter->convertTo0to1(1),0)=="0.0 dB","Unity gain must display zero dB");
+        require(parameter->getText(parameter->convertTo0to1(0),0)=="-inf dB","Zero gain must display minus infinity");
+        require(std::abs(parameter->convertFrom0to1(parameter->getValueForText("-6 dB"))-.501187f)<1e-5,"Entering dB must map to the corresponding linear audio gain");
+    }
+    const auto energy=[&](int layer,int sample=-1) {
+        for(int c=0;c<4;++c)setActual(synth,synth.mixerParameter(c,"Enabled").toRawUTF8(),c==layer?1.f:0.f);
+        setActual(synth,"playMode",1);if(sample>=0)synth.selectSampleSound(sample,true);
+        synth.prepareToPlay(48000,512);juce::AudioBuffer<float> audio(2,512);juce::MidiBuffer midi;for(int note:{60,64,67})midi.addEvent(juce::MidiMessage::noteOn(1,note,.8f),0);
+        double power=0;for(int b=0;b<70;++b){synth.processBlock(audio,midi);for(int i=0;i<512;++i){const auto x=audio.getSample(0,i);require(std::isfinite(x) && std::abs(x)<1,"Calibrated layers must remain finite and bounded");power+=x*x;}}
+        return power;
+    };
+    const double harp=energy(0),organ=energy(1),fm=energy(2);
+    require(organ>harp*.35 && organ<harp*2.5 && fm>harp*.1,"Organ and FM must have useful levels alongside Harp at unity faders");
+    for(const auto& sample:synth.sampleChoices()) {
+        const double power=energy(3,sample.first);if(!(power<harp*6 && power>harp*.03))std::cerr<<"Sample balance "<<sample.second<<" ratio="<<power/harp<<'\n';
+        require(power<harp*6 && power>harp*.03,"Factory chord samples must remain in a comparable level range without flattening their dynamics");
+    }
+}
+
+static void checkSoloCleanup() {
+    auto owner=std::make_unique<ChordHarpProcessor>();auto& synth=*owner;
+    for(int c=0;c<7;++c) {
+        synth.toggleMixerSolo(c);const auto solo=synth.mixerParameter(c,"Solo"),power=synth.mixerParameter(c,"Enabled");
+        require(synth.state.getRawParameterValue(solo)->load()==1 && synth.state.getRawParameterValue(power)->load()==1,"Solo must activate its channel");
+        setActual(synth,power.toRawUTF8(),0);
+        require(synth.state.getRawParameterValue(solo)->load()==0,"Power off must clear solo immediately without an editor or audio callback");
+        setActual(synth,power.toRawUTF8(),1);require(synth.state.getRawParameterValue(solo)->load()==0,"Power on must not resurrect the previous solo");
+    }
+    synth.toggleMixerSolo(0);for(int c=1;c<=3;++c)synth.toggleMixerSolo(c);
+    setActual(synth,"pad",0);for(const auto* id:{"organSolo","fmSolo","sampleSolo"})require(synth.state.getRawParameterValue(id)->load()==0,"CHORDS off must clear every chord-layer solo");
+    require(synth.state.getRawParameterValue("harpSolo")->load()==1,"Disabling CHORDS must preserve an unrelated Harp solo");setActual(synth,"harpEnabled",0);
+    for(int c=5;c<7;++c)synth.toggleMixerSolo(c);setActual(synth,"fxEnabled",0);
+    require(synth.state.getRawParameterValue("delaySolo")->load()==0 && synth.state.getRawParameterValue("reverbSolo")->load()==0,"FX off must clear both return solos");
+    synth.toggleMixerSolo(1);synth.toggleMixerSolo(2);synth.toggleMixerSolo(3);setActual(synth,"organEnabled",0);setActual(synth,"fmEnabled",0);
+    require(synth.state.getRawParameterValue("organSolo")->load()==0 && synth.state.getRawParameterValue("fmSolo")->load()==0 && synth.state.getRawParameterValue("sampleSolo")->load()==1,"Turning off several soloed layers must preserve only the remaining active solos");
+    synth.toggleMixerSolo(7);
+    // Old or externally edited states may contain a disabled, soloed channel.
+    setActual(synth,"organEnabled",0);setActual(synth,"organSolo",1);
+    juce::MemoryBlock state;synth.getStateInformation(state);auto restored=std::make_unique<ChordHarpProcessor>();restored->setStateInformation(state.getData(),static_cast<int>(state.getSize()));
+    require(restored->state.getRawParameterValue("organSolo")->load()==0,"Recalling a project must discard a stale solo on a disabled channel");
+    const auto file=juce::File::getSpecialLocation(juce::File::tempDirectory).getNonexistentChildFile("solo-cleanup",".omnipreset",false);juce::String error;
+    require(synth.savePreset(file,error) && restored->loadPreset(file,error),"A complete solo-state preset must save and load");file.deleteFile();
+    require(restored->state.getRawParameterValue("organSolo")->load()==0,"Recalling a preset must discard a stale solo on a disabled channel");
+}
+static void checkSoloLeds(ChordHarpProcessor& processor,juce::Component& editor,juce::TabbedButtonBar& tabs,juce::Component& mixer) {
+    const auto colours=[&](juce::Component& led,int frames) {
+        std::set<juce::uint32> seen;
+        for(int n=0;n<frames;++n){juce::MessageManager::getInstance()->runDispatchLoopUntil(60);const auto image=led.createComponentSnapshot(led.getLocalBounds());seen.insert(image.getPixelAt(image.getWidth()/2,image.getHeight()/2).getARGB());}
+        return seen.size();
+    };
+    processor.toggleMixerSolo(7);tabs.setCurrentTabIndex(1);juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+    auto* organ=dynamic_cast<juce::TextButton*>(findComponent(editor,"tab-led-organEnabled"));auto* fx=dynamic_cast<juce::TextButton*>(findComponent(editor,"tab-led-fxEnabled"));
+    require(organ && fx,"The persistent main tabs must expose Organ and FX LEDs");
+    processor.toggleMixerSolo(1);require(colours(*organ,14)>1,"A soloed channel LED must visibly blink while another tab is open");
+    require(processor.state.getRawParameterValue("organEnabled")->load()==1 && processor.state.getRawParameterValue("organSolo")->load()==1 && tabs.getCurrentTabIndex()==1,"LED blinking must neither switch the layer off nor navigate away");
+    organ->setToggleState(false,juce::sendNotificationSync);require(processor.state.getRawParameterValue("organSolo")->load()==0,"Switching a soloed tab LED off must clear solo");
+    organ->setToggleState(true,juce::sendNotificationSync);require(colours(*organ,7)==1,"The LED must become steady after solo is cleared");
+    processor.toggleMixerSolo(1);auto* button=dynamic_cast<juce::TextButton*>(findComponent(mixer,"mixer-power-1"));button->setToggleState(false,juce::sendNotificationSync);
+    require(processor.state.getRawParameterValue("organSolo")->load()==0,"The mixer power button must clear solo too");button->setToggleState(true,juce::sendNotificationSync);
+    processor.toggleMixerSolo(5);require(colours(*fx,14)>1,"The main FX tab must blink for a soloed return even when its nested tab is hidden");
+    setActual(processor,"delayEnabled",0);require(processor.state.getRawParameterValue("delaySolo")->load()==0 && colours(*fx,7)==1,"Disabling the last soloed return must stop the main FX warning");
+    setActual(processor,"delayEnabled",1);processor.toggleMixerSolo(7);
+}
+
 int main() {
     juce::ScopedJuceInitialiser_GUI gui;
+    checkSoloCleanup();
+    checkTransportAndLevels();
     checkV7Performance();
     checkFactorySamples();
     checkFMPerformance();
@@ -595,10 +692,27 @@ int main() {
     auto* algorithm=dynamic_cast<juce::ComboBox*>(findComponent(*fm,"fm-algorithm"));
     auto* ratio=dynamic_cast<juce::Slider*>(findComponent(*fm,"fm-ratio"));
     require(target && op && algorithm && ratio,"Operator selection, algorithm and ratio must be editable");
+    auto* advanced=dynamic_cast<juce::TextButton*>(findComponent(*fm,"fm-advanced"));auto* simple=findComponent(*fm,"fm-simple");
+    require(advanced && simple && simple->isVisible() && !ratio->isVisible(),"FM must open in its simplified knob view");
+    auto* simpleCutoff=dynamic_cast<juce::Slider*>(findComponent(*fm,"fm-simple-filter"));simpleCutoff->setValue(3500,juce::sendNotificationSync);
+    require(restored.state.getRawParameterValue("fmCutoff")->load()==3500,"The simplified Filter knob must control the same engine parameter as Advanced");
+    const auto review=[&](const char* name) {
+        auto* tabs=findTabBar(*builder.findGuiItemWithId("sound-controls"));tabs->setCurrentTabIndex(3);juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+        auto* panel=builder.findGuiItemWithId("sound-controls");juce::PNGImageFormat format;
+        auto stream=juce::File::getCurrentWorkingDirectory().getChildFile(name).createOutputStream();require(stream!=nullptr,"The FM review image must open");stream->setPosition(0);stream->truncate();
+        require(format.writeImageToStream(panel->createComponentSnapshot(panel->getLocalBounds()),*stream),"Both FM views must render for review");
+    };
+    review("Omnichord-fm-simple-panel-preview.png");
+    advanced->triggerClick();juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+    require(!simple->isVisible() && ratio->isVisible(),"AVANZADO must reveal the six-operator editor");review("Omnichord-fm-advanced-panel-preview.png");
+
     target->setSelectedId(2,juce::sendNotificationSync);op->setSelectedId(6,juce::sendNotificationSync);
     ratio->setValue(3.5,juce::sendNotificationSync);algorithm->setSelectedId(32,juce::sendNotificationSync);
     require(std::abs(restored.state.getRawParameterValue("organOp6Ratio")->load()-3.5f)<.001f
         && restored.state.getRawParameterValue("organAlgorithm")->load()==32,"The FM editor must bind the selected bank and operator");
+    const float ratioBefore=restored.state.getRawParameterValue("organOp6Ratio")->load();
+    advanced->triggerClick();juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+    require(simple->isVisible() && !ratio->isVisible() && restored.state.getRawParameterValue("organOp6Ratio")->load()==ratioBefore,"Closing Advanced must preserve the edited patch");
     restored.selectSynthSound(true,4);
     require(restored.getSynthChoice(true)==4 && restored.state.getRawParameterValue("fmEnabled")->load()==1,"Selecting an FM sound must load its operators and activate FM");
     restored.state.getParameter("organModel")->setValueNotifyingHost(0);
@@ -617,6 +731,10 @@ int main() {
     }
     // Layer LEDs share mixer power without selecting their tab.
     auto* mixer=builder.findGuiItemWithId("mixer")->getWrappedComponent();
+    auto* readout=dynamic_cast<juce::Label*>(findComponent(*mixer,"mixer-db-0"));require(readout!=nullptr,"Mixer must show persistent dB readouts");
+    readout->setText("-6 dB",juce::sendNotificationSync);require(std::abs(restored.state.getRawParameterValue("harpGain")->load()-.501187f)<1e-5,"The editable dB readout must set actual channel volume");
+    require(static_cast<bool>(findComponent(*mixer,"harpPan")->getProperties()["centre-fill"]),"Pan must use a centre-origin colour fill");
+    require(static_cast<bool>(findComponent(*mixer,"masterWidth")->getProperties()["width-spread"]),"Width must use symmetric expanding dots");
     require(mixer && findComponent(*mixer,"delayWidth") && findComponent(*mixer,"reverbWidth") && findComponent(*mixer,"masterWidth"),"Mixer must expose Width for both returns and Master");
     for(int channel=0;channel<8;++channel) {
         auto* button=dynamic_cast<juce::TextButton*>(findComponent(*mixer,"mixer-power-"+juce::String(channel)));
@@ -633,6 +751,7 @@ int main() {
         led->setToggleState(true,juce::sendNotificationSync);require(restored.state.getRawParameterValue(id)->load()==1,"LED must switch its layer on");
         require(tabs->getCurrentTabIndex()==selected,"Using the LED must leave the current tab selected");
     }
+    checkSoloLeds(restored,*editor,*tabs,*mixer);
     for(const auto* id:{"harpUnison","organUnison"}) {
         auto* voices=dynamic_cast<juce::ComboBox*>(builder.findGuiItemWithId(id)->getWrappedComponent());
         require(voices && voices->getNumItems()==7,"Foleys Voices selector must contain all seven choices");
@@ -649,7 +768,8 @@ int main() {
     {
         const auto snapshot=panelItem->createComponentSnapshot(panelItem->getLocalBounds());
         auto stream=juce::File::getCurrentWorkingDirectory().getChildFile("Omnichord-mixer-panel-preview.png").createOutputStream();
-        require(stream && png.writeImageToStream(snapshot,*stream),"The mixer panel must render for visual review");
+        require(stream!=nullptr,"Mixer review image must open");stream->setPosition(0);stream->truncate();
+        require(png.writeImageToStream(snapshot,*stream),"The mixer panel must render for visual review");
     }
     tabs->setCurrentTabIndex(6);
     auto* fxTabs=findTabBar(*builder.findGuiItemWithId("fx-controls"));require(fxTabs && fxTabs->getNumTabs()==3,"FX must contain Delay, Reverb and Tape");fxTabs->setCurrentTabIndex(0);
