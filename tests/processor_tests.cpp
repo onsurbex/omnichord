@@ -208,6 +208,8 @@ static void checkSamplesAndRhythm() {
     const auto invalid=root.getChildFile("empty.zip");invalid.replaceWithText("\r\n");
     require(!synth.loadSampleLibrary(invalid,error),"A two-byte placeholder must be rejected as a sample library");
     require(synth.loadSampleLibrary(file,error) && synth.sampleNames().size()==6,"A valid ZIP must decode all samples");
+    require(synth.state.getRawParameterValue("organSample")->load()==5 && synth.state.getRawParameterValue("sampleRoot")->load()==60,
+        "Replacing the larger factory pack must select the new instrument and its root instead of keeping an invalid index");
     require(juce::File(synth.sampleLibraryPath()).existsAsFile() && synth.sampleLibraryPath()!=file.getFullPathName(),"Imported samples must be cached for session recall");
     const auto set=[&](const char* id,float value){auto* p=synth.state.getParameter(id);p->setValueNotifyingHost(p->convertTo0to1(value));};
     set("organModel",4);set("pad",1);set("chordSustain",0);set("sampleLoop",1);

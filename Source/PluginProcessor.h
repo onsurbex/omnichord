@@ -65,7 +65,7 @@ public:
     juce::StringArray sampleNames() const;
     std::vector<std::pair<int,juce::String>> sampleChoices(bool loops=false) const;
     std::vector<std::pair<int,juce::String>> drumChoices() const;
-    void selectSampleSound(int index);
+    void selectSampleSound(int index,bool activate=true);
     juce::String sampleLibraryPath() const;
     juce::String sampleLibraryReference() const;
     unsigned getSampleRevision() const {return sampleRevision.load();}

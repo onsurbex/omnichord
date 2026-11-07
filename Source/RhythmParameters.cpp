@@ -40,7 +40,7 @@ std::vector<std::pair<int,juce::String>> ChordHarpProcessor::drumChoices() const
     }
     return result;
 }
-void ChordHarpProcessor::selectSampleSound(int index) {
+void ChordHarpProcessor::selectSampleSound(int index,bool activate) {
     int root=60;bool loop=false;
     {
         const juce::ScopedLock lock(libraryLock);
@@ -49,7 +49,8 @@ void ChordHarpProcessor::selectSampleSound(int index) {
     }
     const auto set=[&](const char* id,float value){auto* p=state.getParameter(id);p->beginChangeGesture();p->setValueNotifyingHost(p->convertTo0to1(value));p->endChangeGesture();};
     set("organSample",static_cast<float>(index));set("sampleRoot",static_cast<float>(root));
-    set("sampleChord",0);set("sampleLoop",loop?1.f:0.f);set("sampleRelease",loop?800.f:250.f);set("organModel",4);
+    set("sampleChord",0);set("sampleLoop",loop?1.f:0.f);set("sampleRelease",loop?800.f:250.f);
+    if(activate)set("organModel",4);
 }
 bool ChordHarpProcessor::loadSampleLibrary(const juce::File& file,juce::String& error) {
     auto decoded=SampleLibrary::readZip(file,error);if(!decoded)return false;
@@ -72,6 +73,13 @@ bool ChordHarpProcessor::loadSampleLibrary(const juce::File& file,juce::String& 
         rhythm.samples={};rhythm.loopSound=nullptr;sampleChords.sound=nullptr;
         sampleLibrary.swap(decoded);++sampleRevision;
     }
+    // Indices from the previous ZIP have no meaning in the new library.
+    // A preset/session restores its saved assignments after loading the ZIP.
+    const auto set=[&](const juce::String& id,float value) {auto* p=state.getParameter(id);p->setValueNotifyingHost(p->convertTo0to1(value));};
+    if(!sampleLibrary->instruments.empty())selectSampleSound(sampleLibrary->instruments[0],false);
+    else set("organSample",0);
+    set("rhythmLoop",sampleLibrary->loops.empty()?0.f:static_cast<float>(sampleLibrary->loops[0]));
+    for(int track=0;track<5;++track)set("rhythmSample"+juce::String(track),0);
     error.clear();return true;
 }
 void ChordHarpProcessor::readRhythmParameters(bool hasPpq,double ppq,bool playing) {
@@ -97,7 +105,10 @@ void ChordHarpProcessor::readRhythmParameters(bool hasPpq,double ppq,bool playin
     sampleChords.sound=nullptr;
     if(sampleLibrary) {
         const int index=static_cast<int>(rhythmRaw[6]->load());
-        if(index>=0 && index<static_cast<int>(sampleLibrary->entries.size()))sampleChords.sound=&sampleLibrary->entries[static_cast<size_t>(index)].audio;
+        if(index>=0 && index<static_cast<int>(sampleLibrary->entries.size())) {
+            const auto& audio=sampleLibrary->entries[static_cast<size_t>(index)].audio;
+            if(!audio.drum && audio.beats==0)sampleChords.sound=&audio;
+        }
     }
     sampleChords.rootNote=static_cast<int>(rhythmRaw[7]->load());sampleChords.release=rhythmRaw[8]->load()*.001f;
     sampleChords.wholeChord=sampleRaw[0]->load()>.5f;sampleChords.loop=sampleRaw[1]->load()>.5f;
