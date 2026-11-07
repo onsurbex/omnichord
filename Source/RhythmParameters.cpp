@@ -82,9 +82,11 @@ bool ChordHarpProcessor::loadSampleLibrary(const juce::File& file,juce::String& 
     for(int track=0;track<5;++track)set("rhythmSample"+juce::String(track),0);
     error.clear();return true;
 }
-void ChordHarpProcessor::readRhythmParameters(bool hasPpq,double ppq,bool playing) {
+void ChordHarpProcessor::readRhythmParameters(bool hasPpq,double ppq,bool playing,bool hasTransport) {
     const bool play=rhythmRaw[0]->load()>.5f;
-    if(play && !lastRhythmEnabled){rhythmMuted=false;tapeMuted=false;}
+    const bool hostRun=hasTransport && playing && rhythmRaw[1]->load()>.5f;
+    if(play && (!lastRhythmEnabled || (hostRun && !lastRhythmHostPlay))){rhythmMuted=false;tapeMuted=false;}
+    lastRhythmHostPlay=hostRun;
     lastRhythmEnabled=play;rhythm.enabled=play && !rhythmMuted;rhythm.followHost=rhythmRaw[1]->load()>.5f;
     rhythm.useLoop=rhythmRaw[9]->load()>.5f;rhythm.loopSound=nullptr;
     if(sampleLibrary) {
@@ -114,5 +116,5 @@ void ChordHarpProcessor::readRhythmParameters(bool hasPpq,double ppq,bool playin
     sampleChords.wholeChord=sampleRaw[0]->load()>.5f;sampleChords.loop=sampleRaw[1]->load()>.5f;
     sampleChords.gain=sampleChords.sound?sampleChords.sound->gain:1.f;
     sampleFilter.cutoff=sampleFilterRefs[0]->load();sampleFilter.resonance=sampleFilterRefs[1]->load();sampleFilter.mode=static_cast<int>(sampleFilterRefs[2]->load());
-    rhythm.beginBlock(hasPpq,ppq,playing);
+    rhythm.beginBlock(hasPpq,ppq,playing,hasTransport);
 }

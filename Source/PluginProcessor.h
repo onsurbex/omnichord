@@ -79,6 +79,8 @@ public:
     juce::String sampleLibraryPath() const;
     juce::String sampleLibraryReference() const;
     unsigned getSampleRevision() const {return sampleRevision.load();}
+    bool rhythmIsRunning() const {return rhythmRunning.load();}
+    bool rhythmFollowsTransport() const {return rhythmHostSync.load();}
     int rhythmStep() const {return playingStep.load();}
     static juce::String rhythmStepID(int track,int step);
     void editRhythmStep(int track,int step,bool on);
@@ -138,13 +140,14 @@ private:
     std::unique_ptr<SampleLibrary> sampleLibrary;
     juce::String factoryLibraryPath;
     std::atomic<unsigned> sampleRevision{0};
+    std::atomic<bool> rhythmRunning{false},rhythmHostSync{false};
     std::atomic<int> playingStep{-1};
     mutable juce::CriticalSection libraryLock;
-    bool rhythmMuted=false,lastRhythmEnabled=false;
+    bool rhythmMuted=false,lastRhythmEnabled=false,lastRhythmHostPlay=false;
     std::array<std::atomic<float>*,11> rhythmRaw{};
     std::array<std::array<std::atomic<float>*,16>,5> stepRaw{};
     std::array<std::atomic<float>*,5> trackRaw{},sampleRaw{};
-    void readRhythmParameters(bool,double,bool);
+    void readRhythmParameters(bool,double,bool,bool);
     chordharp::StereoDelay delay;
     chordharp::Tape tape;
     chordharp::ChordGate heldChords;

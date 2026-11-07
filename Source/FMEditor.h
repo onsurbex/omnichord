@@ -55,14 +55,54 @@ private:
     void timerCallback() override {const int selected=processor.getSynthChoice(fm);sound.setSelectedId(selected<0?999:selected+1,juce::dontSendNotification);sampleui::colours(processor,*this);}
 };
 
+class FMSimpleControls final : public juce::Component,private juce::Timer {
+    ChordHarpProcessor& processor;bool fm=true;juce::ComboBox sound,voices,octave;
+    juce::Label voicesLabel,octaveLabel,help;std::array<juce::Slider,6> knobs;std::array<juce::Label,6> labels;
+    std::vector<std::unique_ptr<juce::SliderParameterAttachment>> attachments;
+    std::vector<std::unique_ptr<juce::ComboBoxParameterAttachment>> combos;
+public:
+    explicit FMSimpleControls(ChordHarpProcessor& p):processor(p) {
+        setComponentID("fm-simple");sound.setComponentID("fm-simple-sound");voices.setComponentID("fm-simple-voices");
+        for(auto* c:{&sound,&voices,&octave})addAndMakeVisible(c);
+        voicesLabel.setText("VOCES",juce::dontSendNotification);octaveLabel.setText("OCTAVA",juce::dontSendNotification);
+        help.setText("AVANZADO: algoritmos, seis operadores y envolventes.",juce::dontSendNotification);
+        for(auto* l:{&voicesLabel,&octaveLabel,&help}){l->setFont(juce::FontOptions(10.f));addAndMakeVisible(l);}
+        for(int v=1;v<=7;++v)voices.addItem(juce::String(v),v);octave.addItemList({"-1","0","+1"},1);
+        const char* titles[]{"COLOR","FILTER Hz","RESONANCIA","DETUNE","WIDTH","DRIFT"};
+        const char* ids[]{"fm-simple-color","fm-simple-filter","fm-simple-resonance","fm-simple-detune","fm-simple-width","fm-simple-drift"};
+        for(size_t i=0;i<6;++i) {
+            auto& k=knobs[i];k.setComponentID(ids[i]);k.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);k.setTextBoxStyle(juce::Slider::TextBoxBelow,false,78,19);addAndMakeVisible(k);
+            labels[i].setText(titles[i],juce::dontSendNotification);labels[i].setFont(juce::FontOptions(10.f));labels[i].setJustificationType(juce::Justification::centred);addAndMakeVisible(labels[i]);
+        }
+        knobs[4].getProperties().set("width-spread",true);knobs[3].setTooltip("Separacion en cents entre voces; selecciona 2-7 voces.");
+        sound.onChange=[this]{if(sound.getSelectedId()>0 && sound.getSelectedId()<999)processor.selectSynthSound(fm,sound.getSelectedId()-1);};setBank(true);startTimerHz(10);
+    }
+    void setBank(bool isFM) {
+        fm=isFM;attachments.clear();combos.clear();const juce::String prefix=fm?"fm":"harp";
+        sound.clear(juce::dontSendNotification);sound.addItemList(processor.synthSoundNames(fm),1);sound.addItem("Personalizado",999);
+        const juce::String ids[]{fm?juce::String("fmTone"):juce::String("tone"),prefix+"Cutoff",prefix+"Resonance",prefix+"Detune",prefix+"Width",prefix+"Drift"};
+        for(size_t i=0;i<6;++i)attachments.push_back(std::make_unique<juce::SliderParameterAttachment>(*processor.state.getParameter(ids[i]),knobs[i]));
+        combos.push_back(std::make_unique<juce::ComboBoxParameterAttachment>(*processor.state.getParameter(prefix+"Unison"),voices));
+        octave.setEnabled(fm);if(fm)combos.push_back(std::make_unique<juce::ComboBoxParameterAttachment>(*processor.state.getParameter("fmOctave"),octave));else octave.setText("--",juce::dontSendNotification);
+        timerCallback();
+    }
+    void resized() override {
+        sound.setBounds(0,0,245,24);voicesLabel.setBounds(255,0,43,24);voices.setBounds(300,0,48,24);octaveLabel.setBounds(360,0,48,24);octave.setBounds(412,0,113,24);
+        for(int i=0;i<6;++i){const int x=i*88;knobs[static_cast<size_t>(i)].setBounds(x,34,80,96);labels[static_cast<size_t>(i)].setBounds(x,132,80,18);}
+        help.setBounds(0,165,525,20);
+    }
+private:
+    void timerCallback() override {const int selected=processor.getSynthChoice(fm);sound.setSelectedId(selected<0?999:selected+1,juce::dontSendNotification);sampleui::colours(processor,*this);}
+};
+
 class FMPanel final : public juce::Component,private juce::Timer {
     ChordHarpProcessor& processor;juce::ComboBox target,op,algorithm;juce::TextButton enabled{"FM"};juce::Label description;
     std::array<juce::Slider,11> sliders;std::array<juce::Label,11> labels;
     std::vector<std::unique_ptr<juce::SliderParameterAttachment>> attachments;
     std::unique_ptr<juce::ComboBoxParameterAttachment> algorithmAttachment;
-    bool organ=true;FMCommonControls common;
+    bool organ=true;FMCommonControls common;FMSimpleControls simple;juce::TextButton advanced{"AVANZADO"};
 public:
-    explicit FMPanel(ChordHarpProcessor& p):processor(p),common(p) {
+    explicit FMPanel(ChordHarpProcessor& p):processor(p),common(p),simple(p) {
         target.addItem("HARP",1);target.addItem("FM",2);target.setSelectedId(2,juce::dontSendNotification);
         for(int i=1;i<=6;++i)op.addItem("OP "+juce::String(i),i);op.setSelectedId(1,juce::dontSendNotification);
         for(int i=0;i<32;++i)algorithm.addItem(juce::String(i+1)+"  ("+juce::String(chordharp::fmCarriers(i))+" portadoras)",i+1);
@@ -79,11 +119,13 @@ public:
         sliders[0].setTooltip("Relacion de frecuencia del operador respecto a la nota; admite ratios fraccionarios.");
         sliders[1].setTooltip("Afinacion fina de este operador, en cents.");sliders[3].setTooltip("Sensibilidad de este operador a la velocidad MIDI.");
         sliders[10].setTooltip("Deriva lenta e independiente de las voces del unison.");
-        addAndMakeVisible(common);description.setFont(juce::FontOptions(10.f));bind();startTimerHz(10);
+        advanced.setComponentID("fm-advanced");advanced.setClickingTogglesState(true);advanced.setWantsKeyboardFocus(false);advanced.getProperties().set("physical-switch",true);advanced.getProperties().set("compact-switch",true);
+        advanced.onClick=[this]{updateView();};addAndMakeVisible(advanced);addAndMakeVisible(simple);
+        addAndMakeVisible(common);description.setFont(juce::FontOptions(10.f));bind();updateView();startTimerHz(10);
     }
     void resized() override {
-        target.setBounds(0,2,85,22);enabled.setBounds(92,2,38,22);algorithm.setBounds(138,2,155,22);
-        labels[8].setBounds(300,2,54,22);sliders[8].setBounds(355,2,170,22);
+        target.setBounds(0,2,70,22);enabled.setBounds(76,2,38,22);algorithm.setBounds(122,2,160,22);
+        labels[8].setBounds(286,2,43,22);sliders[8].setBounds(329,2,81,22);advanced.setBounds(420,0,105,26);simple.setBounds(0,34,525,191);
         op.setBounds(0,34,65,22);
         labels[0].setBounds(72,34,37,22);sliders[0].setBounds(109,34,103,22);
         labels[1].setBounds(220,34,32,22);sliders[1].setBounds(252,34,104,22);
@@ -101,8 +143,13 @@ public:
     static std::vector<std::pair<juce::String,int>> colours() {return {};}
     static std::vector<foleys::SettableProperty> properties(const juce::ValueTree&) {return {};}
 private:
+    void updateView() {
+        const bool full=advanced.getToggleState();simple.setVisible(!full);common.setVisible(full);op.setVisible(full);algorithm.setVisible(full);description.setVisible(full);
+        for(auto& slider:sliders)slider.setVisible(full);for(auto& label:labels)label.setVisible(full);
+        advanced.setButtonText(full?"SENCILLO":"AVANZADO");
+    }
     void bind() {
-        common.setBank(organ);algorithmAttachment.reset();attachments.clear();const juce::String prefix=organ?"fm":"harp";
+        simple.setBank(organ);common.setBank(organ);algorithmAttachment.reset();attachments.clear();const juce::String prefix=organ?"fm":"harp";
         constexpr const char* field[]{"Ratio","Fine","Level","Velocity","Attack","Decay","Sustain","Release"};
         for(size_t i=0;i<8;++i)attachments.push_back(std::make_unique<juce::SliderParameterAttachment>(*processor.state.getParameter(ChordHarpProcessor::fmOperatorID(organ,op.getSelectedId()-1,field[i])),sliders[i]));
         const char* common[]{"Feedback","Width","Drift"};
@@ -116,6 +163,7 @@ private:
         for(auto& slider:sliders) {slider.setColour(juce::Slider::thumbColourId,accent);slider.setColour(juce::Slider::trackColourId,accent);slider.setColour(juce::Slider::textBoxTextColourId,ink);slider.setColour(juce::Slider::textBoxBackgroundColourId,juce::Colours::transparentBlack);slider.setColour(juce::Slider::textBoxOutlineColourId,juce::Colours::transparentBlack);}
         for(auto& label:labels)label.setColour(juce::Label::textColourId,ink);description.setColour(juce::Label::textColourId,ink);
         for(auto* combo:{&target,&op,&algorithm}) {combo->setColour(juce::ComboBox::backgroundColourId,button);combo->setColour(juce::ComboBox::textColourId,ink);}
+        advanced.setColour(juce::TextButton::buttonColourId,button);advanced.setColour(juce::TextButton::buttonOnColourId,accent);advanced.setColour(juce::TextButton::textColourOffId,ink);advanced.setColour(juce::TextButton::textColourOnId,ink.contrasting());
         const bool fm=processor.state.getRawParameterValue(organ?"fmEnabled":"harpSound")->load()>.5f;enabled.setToggleState(fm,juce::dontSendNotification);
         enabled.setColour(juce::TextButton::buttonColourId,button);enabled.setColour(juce::TextButton::buttonOnColourId,accent);
         const int a=static_cast<int>(processor.state.getRawParameterValue((organ?"organ":"harp")+juce::String("Algorithm"))->load())-1;

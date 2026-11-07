@@ -103,6 +103,16 @@ void InstrumentLook::drawButtonText(juce::Graphics& g,juce::TextButton& button,b
     auto text=button.getLocalBounds().reduced(5,2).withTrimmedLeft(13).translated(0,button.getToggleState() || down?1:0);
     g.drawFittedText(button.getButtonText(),text,juce::Justification::centred,1);
 }
+void InstrumentLook::drawLinearSlider(juce::Graphics& g,int x,int y,int width,int height,float position,float minimum,float maximum,juce::Slider::SliderStyle style,juce::Slider& slider) {
+    if(!static_cast<bool>(slider.getProperties()["centre-fill"]) || style!=juce::Slider::LinearHorizontal) {
+        LookAndFeel_V4::drawLinearSlider(g,x,y,width,height,position,minimum,maximum,style,slider);return;
+    }
+    const float centre=x+width*.5f,cy=y+height*.5f;
+    g.setColour(slider.findColour(juce::Slider::backgroundColourId));g.fillRoundedRectangle(static_cast<float>(x),cy-2,static_cast<float>(width),4,2);
+    g.setColour(slider.findColour(juce::Slider::trackColourId));g.fillRoundedRectangle(std::min(centre,position),cy-2,std::max(.1f,std::abs(position-centre)),4,2);
+    g.setColour(slider.findColour(juce::Slider::thumbColourId).withAlpha(.45f));g.drawLine(centre,cy-4,centre,cy+4,1);
+    g.setColour(slider.findColour(juce::Slider::thumbColourId));g.fillEllipse(position-3.5f,cy-3.5f,7,7);
+}
 void InstrumentLook::drawRotarySlider(juce::Graphics& g,int x,int y,int width,int height,
                                      float position,float start,float end,juce::Slider& slider) {
     auto area=juce::Rectangle<float>(static_cast<float>(x),static_cast<float>(y),
@@ -111,18 +121,22 @@ void InstrumentLook::drawRotarySlider(juce::Graphics& g,int x,int y,int width,in
     const auto centre=area.getCentre();
     const auto body=slider.findColour(juce::Slider::thumbColourId);
     const auto indicator=slider.findColour(juce::Slider::rotarySliderFillColourId);
+    const bool spread=static_cast<bool>(slider.getProperties()["width-spread"]);
     for(int i=0;i<11;++i) {
         const float angle=start+(end-start)*static_cast<float>(i)/10;
-        g.setColour(body.withAlpha(i<=position*10?0.8f:0.25f));
-        g.drawLine({centre.getPointOnCircumference(radius+4,angle),centre.getPointOnCircumference(radius+7,angle)},1.2f);
+        const bool active=spread?std::abs(i-5)<=position*5+.01f:i<=position*10;
+        g.setColour((active?indicator:body).withAlpha(active?.9f:.22f));
+        if(spread){const auto dot=centre.getPointOnCircumference(radius+5,angle);g.fillEllipse(dot.x-1.2f,dot.y-1.2f,2.4f,2.4f);}
+        else g.drawLine({centre.getPointOnCircumference(radius+4,angle),centre.getPointOnCircumference(radius+7,angle)},1.2f);
     }
     const auto knob=juce::Rectangle<float>(radius*2,radius*2).withCentre(centre);
     g.setColour(juce::Colours::black.withAlpha(0.15f)); g.fillEllipse(knob.translated(0,3));
     g.setGradientFill(juce::ColourGradient(body.brighter(0.15f),knob.getTopLeft(),body.darker(0.2f),knob.getBottomRight(),false));
     g.fillEllipse(knob); g.setColour(cream.withAlpha(0.35f)); g.drawEllipse(knob.reduced(2),1);
-    const float angle=start+position*(end-start);
     g.setColour(indicator);
-    g.drawLine({centre.getPointOnCircumference(radius*0.56f,angle),centre.getPointOnCircumference(radius*0.86f,angle)},2.5f);
+    const auto needle=[&](float angle){g.drawLine({centre.getPointOnCircumference(radius*.46f,angle),centre.getPointOnCircumference(radius*.86f,angle)},2.f);};
+    if(spread){const float mid=(start+end)*.5f,open=position*(end-start)*.5f;needle(mid-open);needle(mid+open);}
+    else needle(start+position*(end-start));
 }
 
 StrumStrip::StrumStrip(ChordHarpProcessor& p):processor(p) {

@@ -79,7 +79,7 @@ private:
 };
 class RhythmPanel final : public juce::Component,private juce::Timer {
     ChordHarpProcessor& processor;juce::TextButton play{"PLAY"},follow{"DAW"},load{"ZIP"},loopMode{"LOOP"};juce::ComboBox pattern;
-    juce::Slider tempo,swing,volume,send;juce::Label bpmLabel,swingLabel,volumeLabel,sendLabel,loopNotice;
+    juce::Slider tempo,swing,volume,send;juce::Label bpmLabel,swingLabel,volumeLabel,sendLabel,loopNotice,transport;
     std::array<juce::ComboBox,5> samples;std::array<std::array<juce::TextButton,16>,5> steps;
     std::vector<std::unique_ptr<juce::SliderParameterAttachment>> sliders;
     std::unique_ptr<juce::ButtonParameterAttachment> playAttachment,followAttachment,modeAttachment;
@@ -88,6 +88,7 @@ class RhythmPanel final : public juce::Component,private juce::Timer {
 public:
     explicit RhythmPanel(ChordHarpProcessor& p):processor(p) {
         for(auto* c:std::array<juce::Component*,14>{{&play,&follow,&load,&loopMode,&pattern,&tempo,&swing,&volume,&send,&bpmLabel,&swingLabel,&volumeLabel,&sendLabel,&loopNotice}})addAndMakeVisible(c);
+        transport.setComponentID("rhythm-transport");transport.setFont(juce::FontOptions(10.f));addAndMakeVisible(transport);
         play.setComponentID("rhythm-play");follow.setComponentID("rhythm-follow");pattern.setComponentID("rhythm-pattern");
         for(auto* button:{&play,&follow,&loopMode}){button->setClickingTogglesState(true);button->getProperties().set("physical-switch",true);}
         playAttachment=std::make_unique<juce::ButtonParameterAttachment>(*p.state.getParameter("rhythmEnabled"),play);followAttachment=std::make_unique<juce::ButtonParameterAttachment>(*p.state.getParameter("rhythmHost"),follow);
@@ -114,7 +115,7 @@ public:
         bpmLabel.setBounds(250,2,30,24);tempo.setBounds(280,2,100,24);swingLabel.setBounds(390,2,45,24);swing.setBounds(435,2,90,24);
         load.setBounds(0,31,50,23);loopMode.setBounds(57,31,58,23);volumeLabel.setBounds(120,31,30,23);volume.setBounds(155,31,150,23);sendLabel.setBounds(330,31,25,23);send.setBounds(360,31,165,23);
         for(int t=0;t<5;++t){const int y=60+t*24;samples[static_cast<size_t>(t)].setBounds(0,y,110,22);for(int s=0;s<16;++s)steps[static_cast<size_t>(t)][static_cast<size_t>(s)].setBounds(117+s*25,y,22,22);}
-        loopNotice.setBounds(0,60,525,118);
+        loopNotice.setBounds(0,60,525,118);transport.setBounds(0,192,525,26);
     }
     void configure(foleys::GuiItem&) {}
     static std::vector<std::pair<juce::String,int>> colours(){return {};}
@@ -122,6 +123,9 @@ public:
 private:
     void timerCallback() override {
         const bool looping=processor.state.getRawParameterValue("rhythmUseLoop")->load()>.5f;
+        const bool host=processor.rhythmFollowsTransport(),running=processor.rhythmIsRunning();
+        play.setButtonText(host?"ARM":"PLAY");play.setTooltip(host?"Armar el ritmo: arranca y se detiene con Play/Stop del DAW.":"Reproducir o parar el ritmo.");
+        transport.setText(juce::String(host?"DAW":"INTERNO")+(running?"  > PLAY":"  [] STOP")+"  |  "+juce::String(processor.getCurrentTempo(),1)+" BPM",juce::dontSendNotification);
         if(revision!=processor.getSampleRevision() || shownLoop!=looping) {
             revision=processor.getSampleRevision();shownLoop=looping;const auto names=processor.sampleNames();const char* tracks[]{"KICK","SNARE","HAT","AUX","PERC"};
             const auto hits=processor.drumChoices();

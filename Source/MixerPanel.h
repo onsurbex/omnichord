@@ -25,6 +25,7 @@ class MixerPanel final : public juce::Component,private juce::Timer {
     std::vector<std::unique_ptr<juce::SliderParameterAttachment>> sliderAttachments;
     std::vector<std::unique_ptr<juce::ButtonParameterAttachment>> buttonAttachments;
     std::array<float,8> peak{};
+    std::array<juce::Label,8> levels;
     void attach(juce::Slider& slider,const juce::String& id) {
         slider.setComponentID(id);addAndMakeVisible(slider);
         sliderAttachments.push_back(std::make_unique<juce::SliderParameterAttachment>(*processor.state.getParameter(id),slider));
@@ -37,21 +38,23 @@ public:
         const char* names[]{"Harp","Organ","FM","Samples","Ritmos","Delay","Rev","MSTR"};
         for(int c=0;c<8;++c) {
             auto& f=faders[static_cast<size_t>(c)];f.setSliderStyle(juce::Slider::LinearVertical);f.setTextBoxStyle(juce::Slider::NoTextBox,false,0,0);f.setPopupDisplayEnabled(true,true,nullptr);
-            attach(f,p.mixerParameter(c,"Gain"));f.setTooltip(juce::String(names[c])+" - volumen");
+            attach(f,p.mixerParameter(c,"Gain"));f.setTooltip(juce::String(names[c])+" - volumen en dB");
+            auto& level=levels[static_cast<size_t>(c)];level.setComponentID("mixer-db-"+juce::String(c));level.setFont(juce::FontOptions(9.f));level.setJustificationType(juce::Justification::centred);level.setEditable(false,true,false);addAndMakeVisible(level);
+            level.onTextChange=[this,c]{auto& f=faders[static_cast<size_t>(c)];f.setValue(f.getValueFromText(levels[static_cast<size_t>(c)].getText()),juce::sendNotificationSync);};
             auto& b=buttons[static_cast<size_t>(c)];b=std::make_unique<MixerSwitch>(p,c,names[c]);b->setComponentID("mixer-power-"+juce::String(c));addAndMakeVisible(*b);
             buttonAttachments.push_back(std::make_unique<juce::ButtonParameterAttachment>(*p.state.getParameter(p.mixerParameter(c,"Enabled")),*b));
             if(c<5) {
-                auto& pan=pans[static_cast<size_t>(c)];pan.setSliderStyle(juce::Slider::LinearHorizontal);pan.setTextBoxStyle(juce::Slider::NoTextBox,false,0,0);pan.setPopupDisplayEnabled(true,true,nullptr);attach(pan,p.mixerParameter(c,"Pan"));
+                auto& pan=pans[static_cast<size_t>(c)];pan.setSliderStyle(juce::Slider::LinearHorizontal);pan.getProperties().set("centre-fill",true);pan.setTextBoxStyle(juce::Slider::NoTextBox,false,0,0);pan.setPopupDisplayEnabled(true,true,nullptr);attach(pan,p.mixerParameter(c,"Pan"));
                 knob(delaySends[static_cast<size_t>(c)]);attach(delaySends[static_cast<size_t>(c)],p.mixerParameter(c,"DelaySend"));delaySends[static_cast<size_t>(c)].setTooltip("Envio post-fader a Delay");
                 knob(reverbSends[static_cast<size_t>(c)]);attach(reverbSends[static_cast<size_t>(c)],p.mixerParameter(c,"ReverbSend"));reverbSends[static_cast<size_t>(c)].setTooltip("Envio post-fader a Reverb");
-            } else {knob(widths[static_cast<size_t>(c-5)]);attach(widths[static_cast<size_t>(c-5)],p.mixerParameter(c,"Width"));widths[static_cast<size_t>(c-5)].setTooltip("Width: 0 mono, 1 estereo original, 2 ampliado");}
+            } else {knob(widths[static_cast<size_t>(c-5)]);widths[static_cast<size_t>(c-5)].getProperties().set("width-spread",true);attach(widths[static_cast<size_t>(c-5)],p.mixerParameter(c,"Width"));widths[static_cast<size_t>(c-5)].setTooltip("Width: 0 mono, 1 estereo original, 2 ampliado");}
         }
         tape.setComponentID("mixer-tape");tape.setClickingTogglesState(true);tape.setWantsKeyboardFocus(false);tape.getProperties().set("physical-switch",true);tape.getProperties().set("compact-switch",true);tape.setTooltip("Tape insertado en Master");addAndMakeVisible(tape);
         buttonAttachments.push_back(std::make_unique<juce::ButtonParameterAttachment>(*p.state.getParameter("tapeEnabled"),tape));timerCallback();startTimerHz(25);
     }
     void resized() override {
         for(int c=0;c<8;++c) {
-            const int x=50+c*59;faders[static_cast<size_t>(c)].setBounds(x+7,86,33,108);buttons[static_cast<size_t>(c)]->setBounds(x,198,56,27);
+            const int x=50+c*59;faders[static_cast<size_t>(c)].setBounds(x+7,86,33,88);levels[static_cast<size_t>(c)].setBounds(x-1,177,58,18);buttons[static_cast<size_t>(c)]->setBounds(x,198,56,27);
             if(c<5){delaySends[static_cast<size_t>(c)].setBounds(x+8,0,38,32);reverbSends[static_cast<size_t>(c)].setBounds(x+8,33,38,32);pans[static_cast<size_t>(c)].setBounds(x+1,67,53,17);}
             else widths[static_cast<size_t>(c-5)].setBounds(x+8,33,38,32);
         }
@@ -81,6 +84,10 @@ private:
             if(auto* s=dynamic_cast<juce::Slider*>(getChildComponent(i))){s->setColour(juce::Slider::thumbColourId,ink);s->setColour(juce::Slider::trackColourId,accent);s->setColour(juce::Slider::backgroundColourId,ink.withAlpha(.18f));s->setColour(juce::Slider::rotarySliderFillColourId,accent);}
             if(auto* b=dynamic_cast<juce::TextButton*>(getChildComponent(i))){b->setColour(juce::TextButton::buttonColourId,body);b->setColour(juce::TextButton::buttonOnColourId,accent);b->setColour(juce::TextButton::textColourOffId,ink);b->setColour(juce::TextButton::textColourOnId,ink.contrasting());}
         }
-        for(size_t i=0;i<8;++i)peak[i]=processor.mixerLevel(static_cast<int>(i));repaint();
+        for(size_t i=0;i<8;++i) {
+            peak[i]=processor.mixerLevel(static_cast<int>(i));levels[i].setColour(juce::Label::textColourId,ink);
+            if(!levels[i].isBeingEdited())levels[i].setText(faders[i].getTextFromValue(faders[i].getValue()),juce::dontSendNotification);
+        }
+        repaint();
     }
 };

@@ -1,4 +1,4 @@
-# Omnichord — BLINBLIN · versión 0.7
+# Omnichord — BLINBLIN · versión 0.7.1
 
 Prototipo de instrumento inspirado en el Omnichord para Ableton Live en macOS.
 Incluye 48 acordes (mayores, menores, séptimas y séptimas mayores), una franja de rasgueo de
@@ -61,7 +61,7 @@ de edición de Foleys. Conservan el diseño de `Assets/magic.xml` y los temas.
 La firma es ad hoc, sin notarización de Apple; la carga en Ableton y la fidelidad
 respecto al instrumento real requieren una prueba manual en un Mac.
 
-El artefacto incluye **Omnichord-0.7.0.pkg**. Ábrelo con el instalador de macOS:
+El artefacto incluye **Omnichord-0.7.1.pkg**. Ábrelo con el instalador de macOS:
 instala el VST3 en `/Library/Audio/Plug-Ins/VST3/Omnichord.vst3` y la aplicación
 en `/Applications/Omnichord.app`. El asistente solicita permisos de administrador.
 Después vuelve a explorar los plugins en Ableton Live. La compilación automática
@@ -421,3 +421,28 @@ la botonera en CHORD y la franja sigue rasgueando el acorde memorizado en ambos 
 mute del Master después de Tape, los diez registros, polifonía y el efecto
 audible de Detune. Las pruebas JUCE comprueban las siete opciones de Voices,
 los LEDs, el mixer, CHROMATIC, CC64 y la migración desde 0.6.
+
+## Revisión 0.7.1
+
+Con **Ritmos activado** y **DAW activado**, el VST sigue Play/Stop, tempo,
+posición, rebobinado y repetición del host. El botón ARM prepara el canal y
+el indicador muestra el transporte real. All Notes Off del DAW no desarma
+el ritmo; SILENCIO y All Sound Off mantienen su función de parada completa.
+Sin posición PPQ también se respeta Play/Stop; en standalone PLAY controla
+el reloj interno.
+
+Organ sube unos 6 dB y FM 4.5 dB en la calibración de sus fuentes. Los cinco
+samples de fábrica tienen compensaciones individuales para acercarlos a Harp,
+sin compresión automática ni modificación de los audios. Este ajuste cambia
+el balance de los presets anteriores; sus parámetros y ajustes siguen cargando.
+
+Volúmenes, retornos y envíos muestran dB: 0 dB es ganancia unitaria y
+-inf dB es silencio. Los números debajo de los faders se pueden editar con
+doble clic. Se conservan las escalas internas de los parámetros para que los
+presets existentes carguen sus valores. Pan colorea desde el centro. Width
+muestra dos indicadores y puntos que se abren simétricamente hacia fuera.
+
+FM abre en una vista sencilla: preset, voces, octava y seis potes (Color,
+Filter, Resonancia, Detune, Width y Drift). AVANZADO abre los seis operadores,
+algoritmos y envolventes; SENCILLO vuelve a los potes sin cambiar el patch.
+Ambas vistas comparten los parámetros y sirven para las capas HARP y FM.
