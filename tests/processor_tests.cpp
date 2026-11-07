@@ -21,9 +21,13 @@ static void waitForGui(const std::function<bool()>& ready,const char* message) {
 }
 
 static juce::TabbedButtonBar* findTabBar(juce::Component& parent) {
-    if(auto* tabs=dynamic_cast<juce::TabbedButtonBar*>(&parent)) return tabs;
-    for(int i=0;i<parent.getNumChildComponents();++i)
-        if(auto* tabs=findTabBar(*parent.getChildComponent(i))) return tabs;
+    // The main bar is a sibling of its pages; a depth-first walk reaches the
+    // nested FX bar first. Search by depth to find the requested outer group.
+    std::vector<juce::Component*> pending{&parent};
+    for(size_t i=0;i<pending.size();++i) {
+        if(auto* tabs=dynamic_cast<juce::TabbedButtonBar*>(pending[i]))return tabs;
+        for(int n=0;n<pending[i]->getNumChildComponents();++n)pending.push_back(pending[i]->getChildComponent(n));
+    }
     return nullptr;
 }
 
@@ -392,6 +396,15 @@ static void checkV7Performance() {
 
 int main() {
     juce::ScopedJuceInitialiser_GUI gui;
+    checkV7Performance();
+    checkFactorySamples();
+    checkFMPerformance();
+    checkSamplesAndRhythm();
+    checkPresetLibrary();
+    checkTempoAndAmbience();
+    checkEffectBypass();
+    checkChordReleaseAndTape();
+
     const auto bundledLogo=juce::ImageFileFormat::loadFrom(BinaryData::BlinblinLogo_png,
                                                          BinaryData::BlinblinLogo_pngSize);
     require(bundledLogo.isValid() && bundledLogo.getWidth()==2172 && bundledLogo.getHeight()==724,
@@ -766,14 +779,6 @@ int main() {
     };
     const double dryTail=tailEnergy(false),wetTail=tailEnergy(true);
     require(wetTail>0.0001 && wetTail>dryTail*10,"Delay and reverb must produce audible tails after source mute");
-    checkV7Performance();
-    checkFactorySamples();
-    checkFMPerformance();
-    checkSamplesAndRhythm();
-    checkPresetLibrary();
-    checkTempoAndAmbience();
-    checkEffectBypass();
-    checkChordReleaseAndTape();
     require(backgroundPassed,"Every host and theme must render the same opaque neutral outer background");
     processor.releaseResources();
     std::cout << "Processor checks passed: MIDI, audio, logo, opaque themes, visual controls, layout state, complete presets, startup, host tempo and reverb\n";
