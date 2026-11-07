@@ -17,120 +17,19 @@ juce::ValueTree findNode(juce::ValueTree node,const juce::String& id) {
     for(auto child:node) { auto found=findNode(child,id); if(found.isValid()) return found; }
     return {};
 }
-void migrateButtonTypes(juce::ValueTree node) {
-    for(int i=0;i<node.getNumChildren();++i) {
-        auto child=node.getChild(i);
-        const bool chord=child.hasType("TextButton") && child.getProperty("parameter").toString()=="chord";
-        if(chord || child.hasType("ToggleButton")) {
-            juce::ValueTree replacement(chord?"OmniChord":"OmniToggle");
-            replacement.copyPropertiesAndChildrenFrom(child,nullptr);
-            node.removeChild(i,nullptr); node.addChild(replacement,i,nullptr); child=replacement;
-        }
-        migrateButtonTypes(child);
-    }
-}
 juce::ValueTree upgradeLayout(juce::ValueTree layout) {
     removeLegacyLogoPickers(layout);
-    auto root=layout.getChildWithName("View");
-    auto defaults=juce::ValueTree::fromXml(juce::String(BinaryData::magic_xml,static_cast<size_t>(BinaryData::magic_xmlSize)));
-    auto shell=findNode(root,"shell");
-    if(!shell.isValid()) return defaults;
-    if(!findNode(shell,"sound-controls").isValid())
-        shell.appendChild(findNode(defaults,"sound-controls").createCopy(),nullptr);
-    if(!findNode(shell,"chord-36").isValid()) {
-        for(int r=0;r<12;++r) {
-            auto original=findNode(shell,"chord-"+juce::String(24+r));
-            auto chord=original.isValid()?original.createCopy():findNode(defaults,"chord-"+juce::String(36+r)).createCopy();
-            chord.setProperty("id","chord-"+juce::String(36+r),nullptr);
-            chord.setProperty("button-radio-value",36+r,nullptr);
-            const char* names[]{"C","Db","D","Eb","E","F","F#","G","Ab","A","Bb","B"};
-            chord.setProperty("text",juce::String(names[r])+"M7",nullptr);
-            chord.setProperty("tooltip",juce::String(names[r])+"Maj7",nullptr);
-            if(original.isValid()) chord.setProperty("pos-y",static_cast<int>(original.getProperty("pos-y"))+45,nullptr);
-            shell.appendChild(chord,nullptr);
-        }
-        shell.appendChild(findNode(defaults,"quality-3").createCopy(),nullptr);
-        for(const auto* id:{"sound-controls","divider-439","silence","footer"}) {
-            auto n=findNode(shell,id);
-            if(n.isValid()) n.setProperty("pos-y",static_cast<int>(n.getProperty("pos-y"))+45,nullptr);
-        }
-        root.setProperty("height",static_cast<int>(root.getProperty("height",650))+45,nullptr);
-        shell.setProperty("pos-height",static_cast<int>(shell.getProperty("pos-height",620))+45,nullptr);
+    const auto defaults=juce::ValueTree::fromXml(juce::String(BinaryData::magic_xml,static_cast<size_t>(BinaryData::magic_xmlSize)));
+    auto root=layout.getChildWithName("View"),shell=findNode(root,"shell");
+    if(!shell.isValid() || static_cast<int>(root.getProperty("layout-version",0))<6)return upgradeLayout(defaults.createCopy());
+    if(static_cast<int>(root.getProperty("layout-version",0))<8) {
+        auto controls=findNode(root,"sound-controls");
+        controls.removeAllChildren(nullptr);
+        for(auto page:findNode(defaults,"sound-controls"))controls.appendChild(page.createCopy(),nullptr);
     }
-    for(const auto* id:{"organSpread","organSpread-label","organChorus","organChorus-label"})
-        if(!findNode(shell,id).isValid()) findNode(shell,"organ-controls").appendChild(findNode(defaults,id).createCopy(),nullptr);
-    if(!findNode(shell,"theme").isValid()) shell.appendChild(findNode(defaults,"theme").createCopy(),nullptr);
     auto types=layout.getChildWithName("Styles").getChild(0).getChildWithName("Types");
-    for(const auto* name:{"OmniChord","OmniToggle","OmniSwitch","ThemeSelector","ComboBox"})
-        if(!types.getChildWithName(name).isValid()) types.appendChild(defaults.getChildWithName("Styles").getChild(0).getChildWithName("Types").getChildWithName(name).createCopy(),nullptr);
-    if(static_cast<int>(root.getProperty("layout-version",0))<4) {
-        const auto switchNode=[&](const char* id,const char* text) {
-            auto node=findNode(root,id); const auto model=findNode(defaults,id);
-            if(!node.isValid()) { node=model.createCopy(); shell.appendChild(node,nullptr); return; }
-            juce::ValueTree replacement("OmniSwitch"); replacement.copyPropertiesAndChildrenFrom(node,nullptr);
-            for(const auto* property:{"pos-x","pos-y","pos-width","pos-height","switch-fixed-color","button-color","button-on-color","button-off-text","button-on-text"})
-                if(model.hasProperty(property)) replacement.setProperty(property,model.getProperty(property),nullptr);
-            replacement.setProperty("text",text,nullptr);
-            node.getParent().removeChild(node,nullptr); shell.appendChild(replacement,nullptr);
-        };
-        switchNode("pad","ORGAN"); switchNode("harpQuantize","FOLLOW CHORDS"); switchNode("chordSustain","SUSTAIN");
-        auto display=findNode(root,"chord-display");
-        display.setProperty("pos-height",60,nullptr); display.setProperty("display-font-size",24,nullptr);
-    }
-    auto tabs=findNode(root,"sound-controls");
-    if(!findNode(root,"tape-controls").isValid()) tabs.addChild(findNode(defaults,"tape-controls").createCopy(),juce::jmin(4,tabs.getNumChildren()),nullptr);
-    migrateButtonTypes(root);
-    if(static_cast<int>(root.getProperty("layout-version",0))<5) {
-        root.setProperty("height",static_cast<int>(root.getProperty("height",695))+110,nullptr);
-        shell.setProperty("pos-y",static_cast<int>(shell.getProperty("pos-y",15))+60,nullptr);
-        shell.setProperty("pos-height",static_cast<int>(shell.getProperty("pos-height",665))+50,nullptr);
-        for(const auto* id:{"harp-frame","strum"}) {
-            auto node=findNode(root,id); node.setProperty("pos-height",static_cast<int>(node.getProperty("pos-height"))+50,nullptr);
-        }
-        for(const auto* id:{"strum-instructions","silence","footer"}) {
-            auto node=findNode(root,id);node.setProperty("pos-y",static_cast<int>(node.getProperty("pos-y"))+50,nullptr);
-        }
-        tabs.setProperty("pos-height",225,nullptr);
-        for(const auto* id:{"reverb-controls","delay-controls"}) {
-            auto old=findNode(root,id); const int index=tabs.indexOf(old); tabs.removeChild(old,nullptr);
-            tabs.addChild(findNode(defaults,id).createCopy(),index,nullptr);
-        }
-        auto sound=findNode(root,"organSound");sound.setProperty("parameter","organModel",nullptr);
-        for(const auto* id:{"organRotary","organRotary-label","organPercussion","organPercussion-label"})
-            if(!findNode(root,id).isValid()) findNode(root,"organ-controls").appendChild(findNode(defaults,id).createCopy(),nullptr);
-    }
-    if(!findNode(root,"instrument-body").isValid()) {
-        auto body=findNode(defaults,"instrument-body").createCopy();
-        body.setProperty("pos-width",shell.getProperty("pos-width"),nullptr);body.setProperty("pos-height",shell.getProperty("pos-height"),nullptr);
-        shell.addChild(body,0,nullptr);
-    }
-    if(!findNode(root,"body-shadow").isValid()) {
-        auto shadow=findNode(defaults,"body-shadow").createCopy();
-        shadow.setProperty("pos-x",static_cast<int>(shell.getProperty("pos-x"))-12,nullptr);shadow.setProperty("pos-y",static_cast<int>(shell.getProperty("pos-y"))-12,nullptr);
-        shadow.setProperty("pos-width",static_cast<int>(shell.getProperty("pos-width"))+24,nullptr);shadow.setProperty("pos-height",static_cast<int>(shell.getProperty("pos-height"))+24,nullptr);
-        root.addChild(shadow,0,nullptr);
-    }
-    if(!findNode(root,"preset-bar").isValid()) root.appendChild(findNode(defaults,"preset-bar").createCopy(),nullptr);
-    if(static_cast<int>(root.getProperty("layout-version",0))<6) {
-        const auto copyBounds=[&](juce::ValueTree node,const juce::ValueTree& model) {
-            for(const auto* key:{"pos-x","pos-y","pos-width","pos-height"})
-                if(model.hasProperty(key)) node.setProperty(key,model.getProperty(key),nullptr);
-        };
-        copyBounds(tabs,findNode(defaults,"sound-controls"));
-        for(const auto* key:{"tab-height","padding","border","border-color","radius"})
-            tabs.setProperty(key,findNode(defaults,"sound-controls").getProperty(key),nullptr);
-        for(auto control:findNode(defaults,"reverb-controls")) copyBounds(findNode(root,control.getProperty("id").toString()),control);
-        for(const auto* id:{"organRotary","organRotary-label","organPercussion","organPercussion-label","delay-help","silence","footer","divider-439"})
-            copyBounds(findNode(root,id),findNode(defaults,id));
-        for(auto label:findNode(root,"keyboard-controls"))
-            if(static_cast<int>(label.getProperty("pos-width"))>525) label.setProperty("pos-width",525,nullptr);
-    }
-    for(const auto* id:{"delayEnabled","reverbEnabled"})
-        if(!findNode(root,id).isValid()) shell.appendChild(findNode(defaults,id).createCopy(),nullptr);
-    root.setProperty("layout-version",6,nullptr);
-    omnichord::prepareThemes(layout);
-    root.setProperty("background-color","ff292a2d",nullptr);
-    return layout;
+    for(const auto* type:{"SynthSelector","FMPanel","SamplePanel","RhythmPanel"})if(!types.getChildWithName(type).isValid())types.appendChild(defaults.getChildWithName("Styles").getChild(0).getChildWithName("Types").getChildWithName(type).createCopy(),nullptr);
+    root.setProperty("layout-version",8,nullptr);omnichord::prepareThemes(layout);root.setProperty("background-color","ff292a2d",nullptr);return layout;
 }
 }
 
@@ -147,10 +46,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     };
     addFloat("harpGain","Harp Volume",0,1,1);
     addFloat("organGain","Chord Volume",0,1,1);
-    p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"organSound",1},"Organ Sound",juce::StringArray{"Clasico","Reed","Suave","Brillante"},0));
     addFloat("organTone","Organ Tone",0,1,0.4f);
     p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"organOctave",1},"Organ Octave",juce::StringArray{"-1","0","+1"},1));
-    p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"harpSound",1},"Harp Sound",juce::StringArray{"Clasico","Campana","Seno","Cuerdas"},0));
+    p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"harpSound",1},"Harp Sound",juce::StringArray{"Clasico","FM"},0));
     addFloat("harpAttack","Harp Attack (ms)",1,80,2);
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"harpQuantize",1},"Harp Chord Notes",true));
     addFloat("delayTime","Delay Time (ms)",40,1200,350);
@@ -161,8 +59,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     addFloat("reverbMix","Reverb Mix",0,1,0);
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"computerKeys",1},"Mac Keyboard",true));
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"major7",1},"Major Seventh",false));
-    addFloat("organSpread","Organ Spread",0,1,0.55f);
-    addFloat("organChorus","Organ Chorus",0,1,0.35f);
     p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"theme",1},"Colour Theme",omnichord::themeNames(),0));
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"chordSustain",1},"Chord Sustain",true));
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"tapeEnabled",1},"Tape",false));
@@ -175,8 +71,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     addTape("tapeNoise","Tape Noise",0); addTape("tapeWow","Tape Wow",0.15f);
     addTape("tapeFlutter","Tape Flutter",0.1f); addTape("tapeDrive","Tape Drive",0.25f);
     p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"organModel",1},"Organ Model",
-        juce::StringArray{"Clasico (sesion)","Reed","Suave","Brillante","Iglesia Principal","Iglesia Pleno","Catedral","Flauta liturgica","Tonewheel Jazz","Tonewheel Gospel","Tonewheel Rock"},4));
-    addFloat("organRotary","Organ Rotary",0,1,.35f); addFloat("organPercussion","Organ Percussion",0,1,.5f);
+        juce::StringArray{"Clasico","Reed","Suave","FM","Samples"},0));
     addFloat("reverbPredelay","Reverb Predelay (ms)",0,250,0);
     addFloat("reverbLow","Reverb Low EQ (dB)",-12,12,0); addFloat("reverbMid","Reverb Mid EQ (dB)",-12,12,0); addFloat("reverbHigh","Reverb High EQ (dB)",-12,12,0);
     addFloat("reverbEarly","Reverb Early Reflections",0,1,0);
@@ -185,13 +80,65 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     addFloat("delayTempo","Standalone Tempo (BPM)",20,400,120);
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"delayEnabled",1},"Delay Enabled",true));
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"reverbEnabled",1},"Reverb Enabled",true));
+    for(const bool organ:{false,true}) {
+        const juce::String prefix=organ?"organ":"harp",name=organ?"Organ ":"Harp ";
+        p.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{prefix+"Unison",1},name+"Unison Voices",1,7,1));
+        p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{prefix+"Detune",1},name+"Detune (cents)",0.f,40.f,6.f));
+        p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{prefix+"Width",1},name+"Stereo Width",0.f,1.f,.7f));
+        p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{prefix+"Drift",1},name+"Unison Drift",0.f,1.f,.15f));
+        p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{prefix+"Cutoff",1},name+"Filter Cutoff (Hz)",juce::NormalisableRange<float>(20,20000,1,.25f),organ?4000.f:4100.f));
+        p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{prefix+"Resonance",1},name+"Filter Resonance",.5f,8.f,.707f));
+        p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{prefix+"FilterType",1},name+"Filter Type",juce::StringArray{"LP","BP","HP"},0));
+        const auto patch=chordharp::synthPatch(0,organ);
+        p.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{prefix+"Algorithm",1},name+"FM Algorithm",1,32,patch.algorithm+1));
+        p.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{prefix+"Feedback",1},name+"FM Feedback",0,7,patch.feedback));
+        for(int i=0;i<6;++i) {
+            const auto& o=patch.op[static_cast<size_t>(i)];const juce::String label=name+"OP"+juce::String(i+1)+" ";
+            const auto add=[&](const char* field,const char* title,float low,float high,float initial,float skew=1) {
+                p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{fmOperatorID(organ,i,field),1},label+title,juce::NormalisableRange<float>(low,high,0,skew),initial));
+            };
+            add("Ratio","Ratio",.125f,32,o.ratio,.4f);add("Fine","Fine (cents)",-50,50,0);
+            add("Level","Level",0,1,o.level);add("Attack","Attack (ms)",.5f,4000,o.attack*1000,.3f);
+            add("Decay","Decay (ms)",5,8000,o.decay*1000,.3f);add("Sustain","Sustain",0,1,o.sustain);
+            add("Release","Release (ms)",5,8000,o.release*1000,.3f);add("Velocity","Velocity Sensitivity",0,1,o.velocity);
+        }
+    }
+    p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"rhythmEnabled",1},"Rhythm Play",false));
+    p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"rhythmHost",1},"Rhythm Follow DAW",true));
+    p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"rhythmPattern",1},"Rhythm Pattern",juce::StringArray{"Omni Pop","Disco","Bossa","Half-time","Shuffle","Waltz","Custom"},0));
+    addFloat("rhythmSwing","Rhythm Swing",0,.6f,0);addFloat("rhythmVolume","Rhythm Volume",0,1,.7f);addFloat("rhythmSend","Rhythm FX Send",0,1,0);
+    p.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"organSample",1},"Organ Sample",0,127,0));
+    p.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"sampleRoot",1},"Sample Root MIDI Note",0,127,60));
+    p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"sampleChord",1},"Sample Is Whole Chord",false));
+    p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"sampleLoop",1},"Sample Loop",false));
+    addFloat("sampleRelease","Sample Release (ms)",10,4000,250);
+    for(int track=0;track<5;++track) {
+        p.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"rhythmSample"+juce::String(track),1},"Rhythm Track "+juce::String(track+1)+" Sample",0,128,0));
+        for(int step=0;step<16;++step)p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{rhythmStepID(track,step),1},"Rhythm "+juce::String(track+1)+" Step "+juce::String(step+1),false));
+    }
     return p;
 }
 ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(BusesProperties().withOutput("Output",juce::AudioChannelSet::stereo(),true)),state(*this,nullptr,"ChordHarp",parameters()),presetHome(presetRoot==juce::File{}?defaultPresetHome():presetRoot) {
     const char* ids[]{"gain","tone","sustain","vibrato","chord","pad","harpGain","organGain",
-        "organSound","organTone","organOctave","harpSound","harpAttack","harpQuantize",
-        "delayTime","delayFeedback","delayMix","reverbSize","reverbDamping","reverbMix","computerKeys","major7","organSpread","organChorus","theme","chordSustain","tapeEnabled","tapeNoise","tapeWow","tapeFlutter","tapeDrive","organModel","organRotary","organPercussion","reverbPredelay","reverbLow","reverbMid","reverbHigh","reverbEarly","delaySync","delayDivision","delayTempo","delayEnabled","reverbEnabled"};
+        "organTone","organOctave","harpSound","harpAttack","harpQuantize",
+        "delayTime","delayFeedback","delayMix","reverbSize","reverbDamping","reverbMix","computerKeys","major7","theme","chordSustain","tapeEnabled","tapeNoise","tapeWow","tapeFlutter","tapeDrive","organModel","reverbPredelay","reverbLow","reverbMid","reverbHigh","reverbEarly","delaySync","delayDivision","delayTempo","delayEnabled","reverbEnabled"};
     for(size_t i=0;i<raw.size();++i) raw[i]=state.getRawParameterValue(ids[i]);
+    static_assert(std::size(ids)==NumParams);
+    const char* common[]{"Unison","Detune","Width","Drift","Cutoff","Resonance","FilterType","Algorithm","Feedback"};
+    const char* fields[]{"Ratio","Fine","Level","Attack","Decay","Sustain","Release","Velocity"};
+    for(size_t bank=0;bank<2;++bank) {
+        const bool organ=bank==1;const juce::String prefix=organ?"organ":"harp";
+        for(size_t i=0;i<9;++i)synthRefs[bank].common[i]=state.getRawParameterValue(prefix+common[i]);
+        for(int op=0;op<6;++op)for(size_t i=0;i<8;++i)synthRefs[bank].op[static_cast<size_t>(op)][i]=state.getRawParameterValue(fmOperatorID(organ,op,fields[i]));
+    }
+    const char* rhythmIDs[]{"rhythmEnabled","rhythmHost","rhythmPattern","rhythmSwing","rhythmVolume","rhythmSend","organSample","sampleRoot","sampleRelease"};
+    for(size_t i=0;i<rhythmRaw.size();++i)rhythmRaw[i]=state.getRawParameterValue(rhythmIDs[i]);
+    const char* sampleIDs[]{"sampleChord","sampleLoop","organCutoff","organResonance","organFilterType"};
+    for(size_t i=0;i<sampleRaw.size();++i)sampleRaw[i]=state.getRawParameterValue(sampleIDs[i]);
+    for(int track=0;track<5;++track) {
+        trackRaw[static_cast<size_t>(track)]=state.getRawParameterValue("rhythmSample"+juce::String(track));
+        for(int step=0;step<16;++step)stepRaw[static_cast<size_t>(track)][static_cast<size_t>(step)]=state.getRawParameterValue(rhythmStepID(track,step));
+    }
     chordParameter=state.getParameter("chord");
     major7Parameter=state.getParameter("major7");
     magicState.updateParameterMap();
@@ -210,8 +157,11 @@ ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(Bus
     });
 }
 void ChordHarpProcessor::prepareToPlay(double rate,int blockSize) {
-    engine.organModel=static_cast<int>(raw[OrganModel]->load());
+    readSynthParameters();
     engine.prepare(rate);
+    setLatencySamples(engine.latencySamples());
+    rhythm.prepare(rate,engine.latencySamples());sampleChords.prepare(rate,engine.latencySamples());sampleFilter.prepare(rate);sampleDC.prepare(rate);
+    rhythmMuted=false;lastRhythmEnabled=false;
     delay.milliseconds=raw[DelayTime]->load();
     delay.mix=raw[DelayEnabled]->load()>.5f?raw[DelayMix]->load():0;
     delay.prepare(rate);
@@ -266,20 +216,17 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
     guiChordKeys.processNextMidiBuffer(guiChordMidi,0,buffer.getNumSamples(),true);
     const auto value=[this](Param p) { return raw[p]->load(); };
     engine.gain=1;
-    engine.tone=value(Tone); engine.sustain=value(Sustain); engine.vibrato=value(Vibrato);
-    engine.harpGain=value(HarpGain); engine.organGain=value(OrganGain);
-    engine.organModel=static_cast<int>(value(OrganModel));
-    engine.organSound=static_cast<int>(value(OrganSound)); engine.organTone=value(OrganTone);
-    engine.organOctave=static_cast<int>(value(OrganOctave))-1;
-    engine.organRotary=value(OrganRotary); engine.organPercussion=value(OrganPercussion);
-    engine.organSpread=value(OrganSpread); engine.organChorus=value(OrganChorus);
-    engine.harpSound=static_cast<int>(value(HarpSound)); engine.attackSeconds=value(HarpAttack)*0.001f;
+    readSynthParameters();
     masterGain.setTargetValue(value(Gain));
     double bpm=value(DelayTempo); bool fromHost=false;
-    if(auto* playhead=getPlayHead()) if(const auto position=playhead->getPosition()) if(const auto hostBpm=position->getBpm()) {
-        if(std::isfinite(*hostBpm) && *hostBpm>0) { bpm=*hostBpm; fromHost=true; }
+    bool hasPpq=false,hostPlaying=false;double ppq=0;
+    if(auto* playhead=getPlayHead()) if(const auto position=playhead->getPosition()) {
+        if(const auto hostBpm=position->getBpm()) if(std::isfinite(*hostBpm) && *hostBpm>0) {bpm=*hostBpm;fromHost=true;}
+        if(const auto beat=position->getPpqPosition()) if(std::isfinite(*beat) && std::abs(*beat)<1e9) {hasPpq=true;ppq=*beat;}
+        hostPlaying=position->getIsPlaying();
     }
     bpm=juce::jlimit(20.0,400.0,bpm); currentTempo.store(bpm); hostTempo.store(fromHost);
+    readRhythmParameters(hasPpq,ppq,hostPlaying);
     delay.synced=value(DelaySync)>0.5f;
     delay.milliseconds=delay.synced?static_cast<float>(chordharp::syncedDelayMs(bpm,static_cast<int>(value(DelayDivision)))):value(DelayTime);
     delay.feedback=value(DelayFeedback); delay.mix=value(DelayEnabled)>.5f?value(DelayMix):0;
@@ -292,10 +239,14 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
     const bool pad=value(Pad)>0.5f,sustain=value(ChordSustain)>0.5f;
     if(chordRetrigger.exchange(false) || activeChord!=lastChord || pad!=lastPad || sustain!=lastChordSustain) organSilenced=false;
     if(!sustain && held>=0) { activeChord=held; setChordFromMidi(held); }
-    const auto refreshOrgan=[&] { engine.chord(activeChord%12,activeChord/12,pad && !organSilenced && (sustain || held>=0)); };
+    const auto refreshOrgan=[&] {
+        const bool gate=pad && !organSilenced && (sustain || held>=0);
+        engine.chord(activeChord%12,activeChord/12,gate);
+        sampleChords.chord(activeChord%12,activeChord/12,gate && engine.organModel==4,engine.organOctave);
+    };
     const auto silence=[&] {
         engine.reset(); delay.reset(); reverb.reset(); tape.reset(); heldChords.clear(); held=-1;
-        organSilenced=true; tapeMuted=true;
+        organSilenced=true; tapeMuted=true;rhythmMuted=true;rhythm.enabled=false;rhythm.reset();sampleChords.reset();sampleFilter.reset();sampleDC.reset();
     };
     const bool stop=panic.exchange(false);
     if(stop) { silence(); guiChordMidi.clear(); }
@@ -338,22 +289,29 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
         refreshOrgan();
         for(auto it=arpBegin;it!=groupEnd;++it) {
             const auto message=(*it).getMessage();
+            if(message.isNoteOff() && message.getNoteNumber()>=72)engine.releaseHarp((message.getChannel()-1)*128+message.getNoteNumber());
             if(message.isNoteOn() && message.getNoteNumber()>=72) {
                 tapeMuted=false;
-                engine.pluck(chordharp::harpFromMidi(message.getNoteNumber(),activeChord,value(HarpQuantize)>0.5f),message.getFloatVelocity());
+                engine.pluck(chordharp::harpFromMidi(message.getNoteNumber(),activeChord,value(HarpQuantize)>0.5f),message.getFloatVelocity(),(message.getChannel()-1)*128+message.getNoteNumber());
             }
         }
         event=groupEnd;
         engine.next();
-        float left=engine.leftOutput,right=engine.rightOutput;
+        if((sample&15)==0)sampleFilter.tick();
+        const auto sampleAudio=sampleChords.next();
+        const auto drums=rhythm.next();const float send=rhythmRaw[5]->load();
+        float left=engine.leftOutput+sampleFilter.next(sampleDC.next(sampleAudio[0],0),0)+drums[0]*send;
+        float right=engine.rightOutput+sampleFilter.next(sampleDC.next(sampleAudio[1],1),1)+drums[1]*send;
         delay.process(left,right);
         reverb.process(left,right);
+        left+=drums[0]*(1-send);right+=drums[1]*(1-send);
         tape.process(left,right,!tapeMuted);
         const float master=masterGain.getNextValue();
         left=std::tanh(left*master); right=std::tanh(right*master);
         if(buffer.getNumChannels()==1) buffer.setSample(0,sample,(left+right)*0.5f);
         else { buffer.setSample(0,sample,left); buffer.setSample(1,sample,right); }
     }
+    playingStep.store(rhythm.enabled?rhythm.lastStep:-1);
     lastChord=activeChord; lastPad=pad; lastChordSustain=sustain;
     midi.clear();
 }
@@ -361,27 +319,27 @@ double ChordHarpProcessor::getTailLengthSeconds() const {
     if(!raw[DelayFeedback]) return 120;
     const double ms=raw[DelaySync]->load()>0.5f?chordharp::syncedDelayMs(currentTempo.load(),static_cast<int>(raw[DelayDivision]->load())):raw[DelayTime]->load()*1.13;
     const double feedback=raw[DelayFeedback]->load();
-    return 30+ms/1000*(feedback>0.001?std::ceil(std::log(0.0001)/std::log(std::min(.85,feedback))):1);
+    return 80+ms/1000*(feedback>0.001?std::ceil(std::log(0.0001)/std::log(std::min(.85,feedback))):1);
 }
 void ChordHarpProcessor::getStateInformation(juce::MemoryBlock& dest) {
     auto snapshot=state.copyState();
     snapshot.removeProperty("customLogo",nullptr);
     snapshot.setProperty("presetName",getPresetName(),nullptr);
+    snapshot.setProperty("synthVersion",6,nullptr);
+    snapshot.setProperty("sampleLibrary",sampleLibraryPath(),nullptr);
     snapshot.setProperty("guiLayout",magicState.getGuiTree().toXmlString(),nullptr);
     if(auto xml=snapshot.createXml()) copyXmlToBinary(*xml,dest);
 }
 void ChordHarpProcessor::setStateInformation(const void* data,int size) {
     if(auto xml=getXmlFromBinary(data,size)) if(xml->hasTagName(state.state.getType())) {
         auto restored=juce::ValueTree::fromXml(*xml);
+        if(static_cast<int>(restored.getProperty("synthVersion",0))!=6)return;
+        const auto samples=restored.getProperty("sampleLibrary").toString();
+        if(samples.isNotEmpty() && samples!=sampleLibraryPath()) {juce::String error;loadSampleLibrary(juce::File(samples),error);}
         restored.removeProperty("customLogo",nullptr);
         const auto layout=juce::ValueTree::fromXml(restored.getProperty("guiLayout").toString());
         if(layout.hasType("magic") && layout.getChildWithName("View").isValid())
             magicState.setGuiValueTree(upgradeLayout(layout));
-        for(const auto* id:{"major7","organSpread","organChorus","theme","chordSustain","tapeEnabled","tapeNoise","tapeWow","tapeFlutter","tapeDrive","organRotary","organPercussion","reverbPredelay","reverbLow","reverbMid","reverbHigh","reverbEarly","delaySync","delayDivision","delayTempo","delayEnabled","reverbEnabled"}) {
-            auto* parameter=state.getParameter(id);
-            parameter->setValueNotifyingHost(parameter->getDefaultValue());
-        }
-        state.getParameter("organModel")->setValueNotifyingHost(0); // Sessions before v0.5 retain their exact legacy organ.
         state.replaceState(restored);
         updatePresetName(restored.getProperty("presetName","Proyecto").toString());
     }

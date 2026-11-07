@@ -46,3 +46,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ## JUCE
 
 JUCE is supplied separately by the developer. Its licensing terms apply; see https://juce.com/legal/.
+
+## Google Music Synthesizer for Android (MSFA)
+
+The 32 DX algorithm routing tables in `Source/FMAlgorithms.h` are adapted from
+`app/src/main/jni/fm_core.cc` in https://github.com/google/music-synthesizer-for-android.
+Copyright 2012 Google Inc. Licensed under the Apache License, Version 2.0;
+see `licenses/MSFA-Apache-2.0.txt` included with source and binary distributions.
+The floating-point operators, envelopes, unison and rendering engine are original
+Omnichord code. No Yamaha ROM, sound bank or chip emulation is included.

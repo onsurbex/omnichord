@@ -59,18 +59,18 @@ int main() {
         muted.organGain=0; muted.prepare(rate); muted.chord(0,0,true);
         for(int i=0;i<10000;++i) require(muted.next()==0,"Independent organ mute");
         for(int mode=0;mode<4;++mode) {
-            Engine voice; voice.organSound=mode; voice.harpSound=mode;
+            Engine voice; voice.organModel=mode; voice.harpSound=mode>0?1:0;
             voice.prepare(rate); voice.pluck(72); voice.chord(6,2,true);
             for(int quality=0;quality<4;++quality) {
                 voice.chord(6,quality,true);
                 for(int i=0;i<10000;++i) require(std::isfinite(voice.next()),"Voice mode stability");
             }
         }
-        Engine wide; wide.organChorus=0.8f; wide.prepare(rate); wide.chord(0,3,true);
+        Engine wide; wide.organUnison.voices=7;wide.organUnison.detune=12; wide.prepare(rate); wide.chord(0,3,true);
         double stereo=0; for(int i=0;i<rate;++i) { wide.next(); const auto d=wide.leftOutput-wide.rightOutput; stereo+=d*d; }
-        require(stereo>0.01,"Organ chorus produces a measurable stereo image");
-        Engine mono; mono.organChorus=0; mono.prepare(rate); mono.chord(0,3,true);
-        for(int i=0;i<10000;++i) { mono.next(); require(mono.leftOutput==mono.rightOutput,"Zero chorus remains mono"); }
+        require(stereo>0.01,"Unison produces a measurable stereo image");
+        Engine mono; mono.organUnison.voices=1;mono.organUnison.width=0; mono.prepare(rate); mono.chord(0,3,true);
+        for(int i=0;i<10000;++i) { mono.next(); require(mono.leftOutput==mono.rightOutput,"One centered voice remains mono"); }
         Engine organ; organ.vibrato=0; organ.prepare(rate); organ.chord(0,0,true);
         for(int i=0;i<rate/2;++i) organ.next();
         double lowSin=0,lowCos=0,raisedSin=0,raisedCos=0;
@@ -150,19 +150,12 @@ int main() {
     require(std::abs(syncedDelayMs(90,9)-500)<.001,"Dotted eighth timing");
     require(syncedDelayMs(20,0)==12000,"Whole note at the lowest tempo fits the delay buffer");
     for(double rate:{44100.0,48000.0,96000.0}) {
-        for(int model=0;model<=10;++model) {
+        for(int model=0;model<=3;++model) {
             Engine organ; organ.organModel=model; organ.prepare(rate); organ.chord(9,3,true); double energy=0;
             for(int i=0;i<rate/2;++i) { const float sample=organ.next(); require(std::isfinite(sample) && std::abs(sample)<=1,"All organ models remain finite and bounded"); energy+=sample*sample; }
             require(energy>.1,"Every organ registration must be audible");
             organ.chord(9,3,false);for(int i=0;i<rate*2;++i) organ.next();require(std::abs(organ.next())<.00001,"All organ models release after note off");
         }
-        const auto subEnergy=[&](int model) {
-            Engine organ;organ.organModel=model;organ.vibrato=0;organ.organChorus=organ.organRotary=0;organ.prepare(rate);organ.chord(9,0,true);
-            double sine=0,cosine=0;
-            for(int i=0;i<rate*2;++i) { const double y=organ.next();if(i>=rate){sine+=y*std::sin(2*pi*110*i/rate);cosine+=y*std::cos(2*pi*110*i/rate);} }
-            return sine*sine+cosine*cosine;
-        };
-        require(subEnergy(8)>subEnergy(4)*10,"Tonewheel drawbars add a genuine 16-foot sub-octave rank");
         StereoDelay clock;clock.synced=true;clock.milliseconds=static_cast<float>(syncedDelayMs(120,4));clock.feedback=0;clock.mix=1;clock.prepare(rate);
         float peak=0;int peakAt=0;
         for(int i=0;i<rate*.7;++i){float l=i==0?1.0f:0,r=l;clock.process(l,r);if(i>1){require(l==r,"Synced stereo echoes share the exact beat duration");if(l>peak){peak=l;peakAt=i;}}}

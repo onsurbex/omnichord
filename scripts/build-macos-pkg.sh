@@ -37,6 +37,7 @@ ditto "$vst_bundle" "$plugin_dir/Omnichord.vst3"
 ditto "$app_bundle" "$app_dir/Omnichord.app"
 cp "$repo_dir/THIRD_PARTY_NOTICES.md" "$docs_dir/"
 cp "$repo_dir/README.md" "$docs_dir/"
+cp -R "$repo_dir/licenses" "$docs_dir/"
 
 pkgbuild --analyze --root "$payload" "$pkg_stage/components.plist"
 python3 - "$pkg_stage/components.plist" <<'PY'
