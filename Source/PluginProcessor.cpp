@@ -47,19 +47,20 @@ juce::ValueTree upgradeLayout(juce::ValueTree layout) {
         controls.removeAllChildren(nullptr);
         for(auto page:findNode(defaults,"sound-controls"))controls.appendChild(page.createCopy(),nullptr);
     }
+    if(static_cast<int>(root.getProperty("layout-version",0))<11) {auto panel=findNode(root,"rhythmpanel");if(panel.isValid())panel.setProperty("pos-height",228,nullptr);}
     auto types=layout.getChildWithName("Styles").getChild(0).getChildWithName("Types");
     for(const auto* type:{"SynthSelector","FMPanel","SamplePanel","RhythmPanel","MixerPanel","ModeLabels"})if(!types.getChildWithName(type).isValid())types.appendChild(defaults.getChildWithName("Styles").getChild(0).getChildWithName("Types").getChildWithName(type).createCopy(),nullptr);
     // Foleys tab-selected binds to a property name, not an initial index.
     // Leave it unbound so each container starts at zero independently.
     findNode(root,"sound-controls").removeProperty("tab-selected",nullptr);
     findNode(root,"fx-tabs").removeProperty("tab-selected",nullptr);
-    root.setProperty("layout-version",10,nullptr);omnichord::prepareThemes(layout);root.setProperty("background-color","ff292a2d",nullptr);return layout;
+    root.setProperty("layout-version",11,nullptr);omnichord::prepareThemes(layout);root.setProperty("background-color","ff292a2d",nullptr);return layout;
 }
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::parameters() {
     juce::AudioProcessorValueTreeState::ParameterLayout p;
-    p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"gain",1},"Volume",juce::NormalisableRange<float>(0,1),0.65f,omnichord::gainAttributes()));
+    p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"gain",1},"Volume",juce::NormalisableRange<float>(0,omnichord::maximumGain),0.65f,omnichord::gainAttributes()));
     p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"tone",1},"Tone",0.0f,1.0f,0.35f));
     p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"sustain",1},"Sustain",juce::NormalisableRange<float>(0.15f,5.0f,0.01f,0.5f),1.6f));
     p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"vibrato",1},"Vibrato",0.0f,1.0f,0.12f));
@@ -69,7 +70,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
         p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{id,1},name,low,high,value));
     };
     const auto addGain=[&](const char* id,const char* name,float initial) {
-        p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{id,1},name,juce::NormalisableRange<float>(0,1),initial,omnichord::gainAttributes()));
+        p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{id,1},name,juce::NormalisableRange<float>(0,omnichord::maximumGain),initial,omnichord::gainAttributes()));
     };
     addGain("harpGain","Harp Volume",1);
     addGain("organGain","Organ Volume",1);
@@ -149,7 +150,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
         if(channel<4)p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{mixerParameter(channel,"Enabled"),1},juce::String("Layer ")+mixerParameter(channel,"Enabled"),channel==0));
         for(const auto* field:{"Solo"})p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{mixerParameter(channel,field),1},mixerParameter(channel,field),false));
         p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{mixerParameter(channel,"Pan"),1},mixerParameter(channel,"Pan"),-1.f,1.f,0.f));
-        for(const auto* field:{"DelaySend","ReverbSend"})p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{mixerParameter(channel,field),1},mixerParameter(channel,field),juce::NormalisableRange<float>(0,1),0.f,omnichord::gainAttributes()));
+        for(const auto* field:{"DelaySend","ReverbSend"})p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{mixerParameter(channel,field),1},mixerParameter(channel,field),juce::NormalisableRange<float>(0,omnichord::maximumGain),0.f,omnichord::gainAttributes()));
     }
     addGain("fmGain","FM Volume",1);addGain("sampleGain","Sample Volume",1);
     addFloat("fmTone","FM Modulation",0,1,.4f);
@@ -163,13 +164,15 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     }
     for(int channel=5;channel<7;++channel) {
         p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{mixerParameter(channel,"Solo"),1},mixerParameter(channel,"Solo"),false));
-        p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{mixerParameter(channel,"Width"),1},mixerParameter(channel,"Width"),0.f,2.f,1.f));
+        p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{mixerParameter(channel,"Width"),1},mixerParameter(channel,"Width"),juce::NormalisableRange<float>(0,2),1.f,omnichord::widthAttributes()));
     }
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"masterEnabled",1},"Master Enabled",true));
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"fxEnabled",1},"FX Returns Enabled",true));
-    addFloat("masterWidth","Master Stereo Width",0,2,1);
+    p.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"masterWidth",1},"Master Stereo Width",juce::NormalisableRange<float>(0,2),1.f,omnichord::widthAttributes()));
     p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"playMode",1},"Keyboard Mode",juce::StringArray{"CHORD","CHROMATIC"},0));
     p.add(std::make_unique<DiscreteIntParameter>(juce::ParameterID{"computerOctave",1},"Mac Piano Octave (Ableton)",-2,6,3));
+    p.add(std::make_unique<DiscreteIntParameter>(juce::ParameterID{"rhythmLength",1},"Rhythm Length (steps)",1,16,16));
+    p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"masterClipper",1},"Master Soft Clipper",true));
     return p;
 }
 ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(BusesProperties().withOutput("Output",juce::AudioChannelSet::stereo(),true)),state(*this,nullptr,"ChordHarp",parameters()),presetHome(presetRoot==juce::File{}?defaultPresetHome():presetRoot) {
@@ -185,7 +188,7 @@ ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(Bus
         for(size_t i=0;i<9;++i)synthRefs[bank].common[i]=state.getRawParameterValue((organ && i<7?juce::String("fm"):prefix)+common[i]);
         for(int op=0;op<6;++op)for(size_t i=0;i<8;++i)synthRefs[bank].op[static_cast<size_t>(op)][i]=state.getRawParameterValue(fmOperatorID(organ,op,fields[i]));
     }
-    const char* rhythmIDs[]{"rhythmEnabled","rhythmHost","rhythmPattern","rhythmSwing","rhythmVolume","rhythmSend","organSample","sampleRoot","sampleRelease","rhythmUseLoop","rhythmLoop"};
+    const char* rhythmIDs[]{"rhythmEnabled","rhythmHost","rhythmPattern","rhythmSwing","rhythmVolume","rhythmSend","organSample","sampleRoot","sampleRelease","rhythmUseLoop","rhythmLoop","rhythmLength"};
     for(size_t i=0;i<rhythmRaw.size();++i)rhythmRaw[i]=state.getRawParameterValue(rhythmIDs[i]);
     const char* sampleIDs[]{"sampleChord","sampleLoop","organCutoff","organResonance","organFilterType"};
     for(size_t i=0;i<sampleRaw.size();++i)sampleRaw[i]=state.getRawParameterValue(sampleIDs[i]);
@@ -206,6 +209,7 @@ ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(Bus
     const char* organIDs[]{"organUnison","organDetune","organWidth","organDrift","organCutoff","organResonance","organFilterType"};
     for(size_t i=0;i<organRefs.size();++i)organRefs[i]=state.getRawParameterValue(organIDs[i]);
     const char* filterIDs[]{"sampleCutoff","sampleResonance","sampleFilterType"};for(size_t i=0;i<3;++i)sampleFilterRefs[i]=state.getRawParameterValue(filterIDs[i]);
+    masterClipperRaw=state.getRawParameterValue("masterClipper");
     fmLayer.fm=true;
     chordParameter=state.getParameter("chord");
     major7Parameter=state.getParameter("major7");
@@ -421,6 +425,9 @@ void ChordHarpProcessor::setStateInformation(const void* data,int size) {
         const auto layout=juce::ValueTree::fromXml(restored.getProperty("guiLayout").toString());
         if(layout.hasType("magic") && layout.getChildWithName("View").isValid())
             magicState.setGuiValueTree(upgradeLayout(layout));
+        // Restore new controls deterministically when loading an older project.
+        for(auto* p:getParameters())if(auto* ranged=dynamic_cast<juce::RangedAudioParameter*>(p))
+            if(!restored.getChildWithProperty("id",ranged->paramID).isValid())restored.appendChild(juce::ValueTree("PARAM",{{"id",ranged->paramID},{"value",ranged->convertFrom0to1(ranged->getDefaultValue())}}),nullptr);
         state.replaceState(restored);clearDisabledMixerSolos();presetReset.store(true);
         updatePresetName(restored.getProperty("presetName","Proyecto").toString());
     }

@@ -77,8 +77,40 @@ private:
         activate.setToggleState(processor.state.getRawParameterValue("samplesEnabled")->load()>.5f,juce::dontSendNotification);sampleui::colours(processor,*this);
     }
 };
+class PatternRuler final : public juce::Component,public juce::SettableTooltipClient {
+    ChordHarpProcessor& processor;bool resizing=false;float anchor=0;int originalLength=16;
+    int edge() const {return processor.rhythmPatternLength()*25-2;}
+public:
+    explicit PatternRuler(ChordHarpProcessor& p):processor(p) {
+        setComponentID("rhythm-ruler");setWantsKeyboardFocus(false);setTooltip("Arrastra el tirador derecho para elegir 1-16 pasos. Los pasos ocultos se conservan.");
+    }
+    void paint(juce::Graphics& g) override {
+        const auto ink=sampleui::palette(processor,"color-ff263e38"),accent=sampleui::palette(processor,"color-ffb66b44"),button=sampleui::palette(processor,"color-ffdad3bc");
+        const int length=processor.rhythmPatternLength(),current=processor.rhythmStep();g.setFont(juce::FontOptions(10.f));
+        for(int step=0;step<length;++step) {
+            const bool active=step==current;auto cell=juce::Rectangle<float>(static_cast<float>(step*25),1,22,20);
+            g.setColour(active?accent:((step/2)%2?button.darker(.18f):button));g.fillRoundedRectangle(cell,2);
+            g.setColour(ink.withAlpha(.2f));g.drawRoundedRectangle(cell,2,.7f);
+            g.setColour(active?accent.contrasting():ink);g.drawText(juce::String(step+1),cell.toNearestInt(),juce::Justification::centred);
+        }
+        const float x=static_cast<float>(edge());g.setColour(resizing?accent:ink.withAlpha(.7f));
+        g.fillRoundedRectangle(x-2,0,7,22,2);g.setColour(ink.contrasting(.8f));g.drawLine(x,5,x,17,1);g.drawLine(x+2,5,x+2,17,1);
+    }
+    void mouseMove(const juce::MouseEvent& e) override {setMouseCursor(std::abs(e.x-edge())<=8?juce::MouseCursor::LeftRightResizeCursor:juce::MouseCursor::NormalCursor);}
+    void mouseDown(const juce::MouseEvent& e) override {
+        if(std::abs(e.x-edge())>8)return;resizing=true;anchor=e.position.x;originalLength=processor.rhythmPatternLength();
+        processor.state.getParameter("rhythmLength")->beginChangeGesture();repaint();
+    }
+    void mouseDrag(const juce::MouseEvent& e) override {
+        if(resizing){processor.resizeRhythmPattern(originalLength+juce::roundToInt((e.position.x-anchor)/25));repaint();}
+    }
+    void mouseUp(const juce::MouseEvent&) override {
+        if(resizing){resizing=false;processor.state.getParameter("rhythmLength")->endChangeGesture();repaint();}
+    }
+};
+
 class RhythmPanel final : public juce::Component,private juce::Timer {
-    ChordHarpProcessor& processor;juce::TextButton play{"PLAY"},follow{"DAW"},load{"ZIP"},loopMode{"LOOP"};juce::ComboBox pattern;
+    ChordHarpProcessor& processor;PatternRuler ruler;juce::TextButton play{"PLAY"},follow{"DAW"},load{"ZIP"},loopMode{"LOOP"};juce::ComboBox pattern;
     juce::Slider tempo,swing,volume,send;juce::Label bpmLabel,swingLabel,volumeLabel,sendLabel,loopNotice,transport;
     std::array<juce::ComboBox,5> samples;std::array<std::array<juce::TextButton,16>,5> steps;
     std::vector<std::unique_ptr<juce::SliderParameterAttachment>> sliders;
@@ -86,7 +118,8 @@ class RhythmPanel final : public juce::Component,private juce::Timer {
     std::unique_ptr<juce::ComboBoxParameterAttachment> patternAttachment;
     std::unique_ptr<juce::FileChooser> chooser;unsigned revision=~0u;bool shownLoop=false;
 public:
-    explicit RhythmPanel(ChordHarpProcessor& p):processor(p) {
+    explicit RhythmPanel(ChordHarpProcessor& p):processor(p),ruler(p) {
+        addAndMakeVisible(ruler);
         for(auto* c:std::array<juce::Component*,14>{{&play,&follow,&load,&loopMode,&pattern,&tempo,&swing,&volume,&send,&bpmLabel,&swingLabel,&volumeLabel,&sendLabel,&loopNotice}})addAndMakeVisible(c);
         transport.setComponentID("rhythm-transport");transport.setFont(juce::FontOptions(10.f));addAndMakeVisible(transport);
         play.setComponentID("rhythm-play");follow.setComponentID("rhythm-follow");pattern.setComponentID("rhythm-pattern");
@@ -104,7 +137,7 @@ public:
             samples[t].onChange=[this,t]{if(samples[t].getSelectedId()>0){auto* p=processor.state.getParameter("rhythmSample"+juce::String(static_cast<int>(t)));p->setValueNotifyingHost(p->convertTo0to1(static_cast<float>(samples[t].getSelectedId()-1)));}};
             for(size_t s=0;s<16;++s) {
                 auto& b=steps[t][s];addAndMakeVisible(b);b.setClickingTogglesState(true);b.setComponentID(ChordHarpProcessor::rhythmStepID(static_cast<int>(t),static_cast<int>(s)));
-                b.setButtonText(juce::String(static_cast<int>(s+1)));b.onClick=[this,t,s]{processor.editRhythmStep(static_cast<int>(t),static_cast<int>(s),steps[t][s].getToggleState());};
+                b.setButtonText({});b.setWantsKeyboardFocus(false);b.onClick=[this,t,s]{processor.editRhythmStep(static_cast<int>(t),static_cast<int>(s),steps[t][s].getToggleState());};
             }
         }
         tempo.setTooltip("BPM de standalone. Si el DAW aporta tempo se utiliza el del DAW.");follow.setTooltip("Sigue la posicion y play/stop del DAW. Desactivado: el patron corre libre al BPM actual.");
@@ -115,7 +148,7 @@ public:
         bpmLabel.setBounds(250,2,30,24);tempo.setBounds(280,2,100,24);swingLabel.setBounds(390,2,45,24);swing.setBounds(435,2,90,24);
         load.setBounds(0,31,50,23);loopMode.setBounds(57,31,58,23);volumeLabel.setBounds(120,31,30,23);volume.setBounds(155,31,150,23);sendLabel.setBounds(330,31,25,23);send.setBounds(360,31,165,23);
         for(int t=0;t<5;++t){const int y=60+t*24;samples[static_cast<size_t>(t)].setBounds(0,y,110,22);for(int s=0;s<16;++s)steps[static_cast<size_t>(t)][static_cast<size_t>(s)].setBounds(117+s*25,y,22,22);}
-        loopNotice.setBounds(0,60,525,118);transport.setBounds(0,192,525,26);
+        loopNotice.setBounds(0,60,525,118);ruler.setBounds(117,181,408,22);transport.setBounds(0,204,525,22);
     }
     void configure(foleys::GuiItem&) {}
     static std::vector<std::pair<juce::String,int>> colours(){return {};}
@@ -138,12 +171,13 @@ private:
             } else {
                 for(int i=0;i<7;++i)pattern.addItem(chordharp::rhythmNames[static_cast<size_t>(i)],i+1);
                 patternAttachment=std::make_unique<juce::ComboBoxParameterAttachment>(*processor.state.getParameter("rhythmPattern"),pattern);
+                pattern.onChange=[this]{const int selected=pattern.getSelectedId()-1;if(selected>=0 && selected<6){auto* length=processor.state.getParameter("rhythmLength");length->beginChangeGesture();length->setValueNotifyingHost(length->convertTo0to1(selected==5?12.f:16.f));length->endChangeGesture();}};
             }
         }
         if(looping)pattern.setSelectedId(static_cast<int>(processor.state.getRawParameterValue("rhythmLoop")->load())+1,juce::dontSendNotification);
-        loopNotice.setVisible(looping);swing.setEnabled(!looping);
-        loopNotice.setText("LOOP GRABADO - "+pattern.getText()+"\nTempo original: 100 BPM | Actual: "+juce::String(processor.getCurrentTempo(),1)+" BPM\nAfinacion conservada. Desactiva LOOP para editar golpes y swing.",juce::dontSendNotification);
-        const int selected=static_cast<int>(processor.state.getRawParameterValue("rhythmPattern")->load()),current=processor.rhythmStep();const bool waltz=selected==5;
+        loopNotice.setVisible(looping);ruler.setVisible(!looping);ruler.repaint();swing.setEnabled(!looping);
+        loopNotice.setText("LOOP GRABADO - "+pattern.getText()+"\nTempo original: 100 BPM | Actual: "+juce::String(processor.getCurrentTempo(),1)+" BPM\nAfinacion conservada. Desactiva LOOP para editar golpes, swing y longitud.",juce::dontSendNotification);
+        const int selected=static_cast<int>(processor.state.getRawParameterValue("rhythmPattern")->load());const int length=processor.rhythmPatternLength();
         const auto accent=sampleui::palette(processor,"color-ffb66b44"),ink=sampleui::palette(processor,"color-ff263e38"),button=sampleui::palette(processor,"color-ffdad3bc");
         sampleui::colours(processor,*this);tempo.setEnabled(!processor.tempoComesFromHost());
         for(size_t t=0;t<5;++t) {
@@ -151,8 +185,8 @@ private:
             samples[t].setSelectedId(static_cast<int>(processor.state.getRawParameterValue("rhythmSample"+juce::String(static_cast<int>(t)))->load())+1,juce::dontSendNotification);
             for(size_t s=0;s<16;++s) {
                 auto& b=steps[t][s];const bool on=selected<6?(chordharp::rhythmPatterns[static_cast<size_t>(selected)][t]&(1u<<s))!=0:processor.state.getRawParameterValue(ChordHarpProcessor::rhythmStepID(static_cast<int>(t),static_cast<int>(s)))->load()>.5f;
-                b.setVisible(!looping);b.setToggleState(on,juce::dontSendNotification);b.setEnabled(!waltz || s<12);
-                b.setColour(juce::TextButton::buttonColourId,static_cast<int>(s)==current?button.brighter(.5f):button);b.setColour(juce::TextButton::buttonOnColourId,static_cast<int>(s)==current?accent.brighter(.4f):accent);b.setColour(juce::TextButton::textColourOffId,ink);b.setColour(juce::TextButton::textColourOnId,ink.contrasting());
+                b.setVisible(!looping && static_cast<int>(s)<length);b.setToggleState(on,juce::dontSendNotification);b.setEnabled(static_cast<int>(s)<length);
+                b.setColour(juce::TextButton::buttonColourId,(s/2)%2?button.darker(.18f):button);b.setColour(juce::TextButton::buttonOnColourId,(s/2)%2?accent.darker(.18f):accent);b.setColour(juce::TextButton::textColourOffId,ink);b.setColour(juce::TextButton::textColourOnId,ink.contrasting());
             }
         }
     }

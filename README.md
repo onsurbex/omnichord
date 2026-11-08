@@ -1,4 +1,4 @@
-# Omnichord — BLINBLIN · versión 0.7.2
+# Omnichord — BLINBLIN · versión 0.7.3
 
 Prototipo de instrumento inspirado en el Omnichord para Ableton Live en macOS.
 Incluye 48 acordes (mayores, menores, séptimas y séptimas mayores), una franja de rasgueo de
@@ -61,7 +61,7 @@ de edición de Foleys. Conservan el diseño de `Assets/magic.xml` y los temas.
 La firma es ad hoc, sin notarización de Apple; la carga en Ableton y la fidelidad
 respecto al instrumento real requieren una prueba manual en un Mac.
 
-El artefacto incluye **Omnichord-0.7.2.pkg**. Ábrelo con el instalador de macOS:
+El artefacto incluye **Omnichord-0.7.3.pkg**. Ábrelo con el instalador de macOS:
 instala el VST3 en `/Library/Audio/Plug-Ins/VST3/Omnichord.vst3` y la aplicación
 en `/Applications/Omnichord.app`. El asistente solicita permisos de administrador.
 Después vuelve a explorar los plugins en Ableton Live. La compilación automática
@@ -459,3 +459,24 @@ Apagar CHORDS limpia los solos de Organ, FM y Samples; apagar FX limpia los
 de Delay y Reverb. Encender de nuevo un canal no recupera su solo anterior.
 Los presets y proyectos también descartan solos guardados en canales apagados.
 Ctrl+clic en MSTR sigue quitando todos los solos.
+
+## Revisión 0.7.3: secuenciador y máster
+
+La rejilla de golpes deja las casillas sin números y agrupa el sombreado de
+dos en dos. Una única regla inferior muestra 1–16 y resalta el paso que suena
+con el color de detalle del tema. Arrastra su tirador derecho para ajustar
+la longitud de 1 a 16 pasos. Los pasos fuera del tramo se ocultan sin borrarse
+y se recuperan al ampliarlo. La longitud se guarda con presets y proyectos.
+Los patrones de fábrica cargan su longitud habitual (Waltz: 12); al editar o
+recortar se conserva el patrón en Custom. La regla edita el modo de pasos;
+los loops grabados conservan su duración y afinación originales.
+
+Width del mixer muestra 0–200 % y un sector relleno que se abre desde el centro.
+Los faders, volúmenes, retornos y envíos llegan a +6 dB. Los presets anteriores
+conservan sus ganancias reales; al ampliarse el rango, las automatizaciones
+normalizadas del host pueden necesitar ajuste.
+
+El botón CLIP del mixer activa un soft clipper al final del máster, después
+de Tape, Width y volumen. Es lineal a niveles bajos y suaviza picos cerca de
+0 dBFS. Comienza activado y su bypass tiene una transición corta. Con CLIP
+apagado, la salida puede superar 0 dBFS; no queda otra limitación fija en el máster.

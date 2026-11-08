@@ -33,7 +33,7 @@
       </Palettes>
     </Style>
   </Styles>
-  <View id="root" width="1060" height="805" resizable="0" resize-corner="0" display="contents" background-color="ff292a2d" margin="0" padding="0" border="0" lookAndFeel="BLINBLIN" layout-version="10">
+  <View id="root" width="1060" height="805" resizable="0" resize-corner="0" display="contents" background-color="ff292a2d" margin="0" padding="0" border="0" lookAndFeel="BLINBLIN" layout-version="11">
     <InstrumentShadow id="body-shadow" pos-x="3" pos-y="63" pos-width="1054" pos-height="739" background-color="00000000" />
     <View id="shell" pos-x="15" pos-y="75" pos-width="1030" pos-height="715" display="contents" background-color="ffeee6cf" radius="55">
       <InstrumentBody id="instrument-body" pos-x="0" pos-y="0" pos-width="1030" pos-height="715" background-color="00000000" />
@@ -151,7 +151,7 @@
           <SamplePanel id="samplepanel" pos-x="5" pos-y="0" pos-width="527" pos-height="228" />
         </View>
         <View id="rhythm-controls" tab-caption="Ritmos" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
-          <RhythmPanel id="rhythmpanel" pos-x="5" pos-y="0" pos-width="527" pos-height="184" />
+          <RhythmPanel id="rhythmpanel" pos-x="5" pos-y="0" pos-width="527" pos-height="228" />
         </View>
         <View id="fx-controls" tab-caption="FX" tab-color="ffeee6cf" display="contents" background-color="ffeee6cf">
           <View id="fx-tabs" display="tabbed" tab-height="24" pos-x="0" pos-y="0" pos-width="537" pos-height="228" padding="0" border="0" background-color="ffeee6cf">
