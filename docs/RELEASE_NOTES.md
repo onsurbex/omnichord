@@ -1,5 +1,6 @@
 Omnichord 0.7.4 para macOS, Apple Silicon e Intel.
 
+- Corrige el contraste de los valores de Delay: texto claro sobre fondo gris oscuro en milisegundos, divisiones de nota, BPM y desplegable.
 - Integra las 477 grabaciones de GraySlate en Samples, junto a los 15 samples originales: 36 acordes, 431 notas de arpa y 10 grabaciones rítmicas.
 - Menú agrupado por acorde, notas raíz y niveles iniciales medidos. Los acordes completos conservan la calidad grabada; las notas de arpa pueden generar los acordes seleccionados.
 - Carga bajo demanda de una grabación por instancia, fuera del callback de audio. Soporte para los 103 WAV float64, manteniendo los 96 kHz originales.

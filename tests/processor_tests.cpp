@@ -836,6 +836,10 @@ int main() {
     auto* division=dynamic_cast<juce::ComboBox*>(findComponent(*timing,"delay-note"));
     division->setSelectedId(9,juce::sendNotificationSync);
     require(restored.state.getRawParameterValue("delayDivision")->load()==8,"Triplet selection must reach the delay engine");
+    {
+        auto output=juce::File::getCurrentWorkingDirectory().getChildFile("Omnichord-delay-panel-preview.png").createOutputStream();
+        require(output && png.writeImageToStream(panelItem->createComponentSnapshot(panelItem->getLocalBounds()),*output),"Delay contrast review must render");
+    }
     syncButton->setToggleState(false,juce::sendNotificationSync);
     juce::MessageManager::getInstance()->runDispatchLoopUntil(150);
     require(findComponent(*timing,"delay-ms")->isVisible() && !findComponent(*timing,"delay-note")->isVisible(),"Free delay must show milliseconds");

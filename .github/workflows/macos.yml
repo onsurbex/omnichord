@@ -36,7 +36,7 @@ jobs:
         run: |
           python3 - <<'PYIMAGE'
           import base64, pathlib
-          for name, prefix in [('mixer', 'OMNI_MIXER'), ('fm-simple', 'OMNI_FM_SIMPLE'), ('fm-advanced', 'OMNI_FM_ADVANCED'), ('rhythm', 'OMNI_RHYTHM'), ('rhythm-short', 'OMNI_RHYTHM_SHORT')]:
+          for name, prefix in [('mixer', 'OMNI_MIXER'), ('fm-simple', 'OMNI_FM_SIMPLE'), ('fm-advanced', 'OMNI_FM_ADVANCED'), ('rhythm', 'OMNI_RHYTHM'), ('rhythm-short', 'OMNI_RHYTHM_SHORT'), ('delay', 'OMNI_DELAY')]:
               image = pathlib.Path(f'build/Omnichord-{name}-panel-preview.png')
               if image.exists():
                   encoded = base64.b64encode(image.read_bytes()).decode()
