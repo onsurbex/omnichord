@@ -4,7 +4,7 @@ void ChordHarpProcessor::timerCallback() {
     juce::String error;ensureSampleLoaded(static_cast<int>(rhythmRaw[6]->load()),error);
 }
 bool ChordHarpProcessor::ensureSampleLoaded(int index,juce::String& error) {
-    const juce::ScopedLock loadLock(sampleLoadLock);juce::File file,archive;
+    juce::File file,archive;
     {
         const juce::ScopedLock lock(libraryLock);
         if(!sampleLibrary || index<0 || index>=static_cast<int>(sampleLibrary->entries.size()))return true;

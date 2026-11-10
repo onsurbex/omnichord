@@ -92,7 +92,6 @@ public:
 private:
     void timerCallback() override;
     juce::File factoryCatalogRoot;
-    juce::CriticalSection sampleLoadLock;
     static juce::File defaultPresetHome();
     juce::File presetHome;
     juce::ValueTree factoryPreset;
