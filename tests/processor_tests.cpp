@@ -538,8 +538,11 @@ static void checkPatternRuler(ChordHarpProcessor& processor,juce::Component& pan
     require(processor.rhythmPatternLength()==16 && findComponent(panel,"rhythmStep0_14")->isVisible(),"Dragging the edge back out must restore all sixteen columns");setActual(processor,"rhythmEnabled",0);
 }
 
+#include "GraySlateChecks.h"
+
 int main() {
     juce::ScopedJuceInitialiser_GUI gui;
+    checkGraySlateSamples();
     checkPatternLengthGainAndClipper();
     checkSoloCleanup();
     checkTransportAndLevels();

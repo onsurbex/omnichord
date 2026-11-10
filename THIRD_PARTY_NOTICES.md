@@ -55,3 +55,10 @@ Copyright 2012 Google Inc. Licensed under the Apache License, Version 2.0;
 see `licenses/MSFA-Apache-2.0.txt` included with source and binary distributions.
 The floating-point operators, envelopes, unison and rendering engine are original
 Omnichord code. No Yamaha ROM, sound bank or chip emulation is included.
+
+## GraySlate's Omnichord Pack
+
+Recordings credited to GraySlate, supplied by the user in
+`samples/GraySlate's Omnichord Pack/`. The original WAV files are retained
+unchanged; the factory bank uses lossless ZIP compression. This notice does not
+relicense the recordings under the source-code licenses above.

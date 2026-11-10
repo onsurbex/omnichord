@@ -25,6 +25,7 @@ void ChordHarpProcessor::registerSoloCleanup() {
     state.addParameterListener("pad",this);state.addParameterListener("fxEnabled",this);
 }
 ChordHarpProcessor::~ChordHarpProcessor() {
+    stopTimer();
     for(const auto& id:mixerEnableIDs)state.removeParameterListener(id,this);
     state.removeParameterListener("pad",this);state.removeParameterListener("fxEnabled",this);
 }

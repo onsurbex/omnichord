@@ -1,5 +1,71 @@
 #include "SampleLibrary.h"
 #include "FactorySamples.h"
+#include <bit>
+
+juce::File SampleLibrary::bundledDirectory() {
+    const auto resources=juce::File::getSpecialLocation(juce::File::currentExecutableFile).getParentDirectory().getSiblingFile("Resources");
+    return resources.getChildFile("grayslate-index.json").existsAsFile()?resources:juce::File{};
+}
+bool SampleLibrary::appendGraySlate(const juce::File& directory,juce::String& error) {
+    if(directory==juce::File{})return true;
+    const auto document=juce::JSON::parse(directory.getChildFile("grayslate-index.json").loadFileAsString());
+    const auto* list=document["entries"].getArray();
+    if(static_cast<int>(document["format"])!=1 || !list || list->isEmpty() || list->size()>1024){error="Catalogo GraySlate no valido.";return false;}
+    std::vector<SampleEntry> added;
+    const auto archive=directory.getChildFile("GraySlateSamples.zip");
+    std::unique_ptr<juce::ZipFile> packed;if(archive.existsAsFile())packed=std::make_unique<juce::ZipFile>(archive);
+    const auto folder=directory.getChildFile("GraySlate's Omnichord Pack");
+    for(const auto& item:*list) {
+        const auto path=item["file"].toString();
+        if(path.isEmpty() || juce::File::isAbsolutePath(path) || path.contains("..") || path.contains("\\")){error="Ruta GraySlate no valida.";return false;}
+        SampleEntry entry;entry.path="GraySlate/"+path;entry.name=item["name"].toString();entry.recording=folder.getChildFile(path);if(packed)entry.archive=archive;
+        const int root=static_cast<int>(item["root"]);const float gain=static_cast<float>(item["gain"]);
+        const bool available=packed?packed->getIndexOfFileName("GraySlate's Omnichord Pack/"+path)>=0:entry.recording.existsAsFile();
+        if(!available || root<0 || root>127 || !std::isfinite(gain) || gain<=0 || gain>6){error="Falta una grabacion o sus metadatos no son validos: "+path;return false;}
+        entry.audio.root=root;entry.audio.gain=gain;entry.audio.sustain=static_cast<bool>(item["loop"]);entry.wholeChord=static_cast<bool>(item["wholeChord"]);
+        added.push_back(std::move(entry));
+    }
+    for(auto& entry:added){instruments.push_back(static_cast<int>(entries.size()));entries.push_back(std::move(entry));}
+    error.clear();return true;
+}
+bool SampleLibrary::decodeRecording(const juce::File& file,chordharp::SampleAudio& audio,juce::String& error,const juce::File& archive) {
+    juce::AudioFormatManager formats;formats.registerBasicFormats();
+    std::unique_ptr<juce::ZipFile> packed;int entry=-1;
+    if(archive.existsAsFile()) {
+        packed=std::make_unique<juce::ZipFile>(archive);entry=packed->getIndexOfFileName(file.getRelativePathFrom(archive.getParentDirectory()).replace("\\","/"));
+        if(entry<0 || packed->getEntry(entry)->uncompressedSize>64ll*1024*1024){error="Grabacion no encontrada en el banco.";return false;}
+    }
+    const auto stream=[&]() -> std::unique_ptr<juce::InputStream> {return packed?std::unique_ptr<juce::InputStream>(packed->createStreamForEntry(entry)):std::unique_ptr<juce::InputStream>(file.createInputStream());};
+    std::unique_ptr<juce::AudioFormatReader> reader(formats.createReaderFor(stream()));
+    if(reader) {
+        if(reader->numChannels<1 || reader->numChannels>2 || reader->sampleRate<8000 || reader->sampleRate>192000 || reader->lengthInSamples<4 || reader->lengthInSamples>reader->sampleRate*30){error="Grabacion fuera de limites.";return false;}
+        const int n=static_cast<int>(reader->lengthInSamples);juce::AudioBuffer<float> buffer(2,n);
+        if(!reader->read(&buffer,0,n,0,true,true)){error="No se puede leer el WAV.";return false;}
+        if(reader->numChannels==1)buffer.copyFrom(1,0,buffer,0,0,n);
+        audio.rate=reader->sampleRate;
+        for(size_t c=0;c<2;++c)audio.channel[c].assign(buffer.getReadPointer(static_cast<int>(c)),buffer.getReadPointer(static_cast<int>(c))+n);
+    } else {
+        // 103 originals use IEEE float64 WAV, unsupported by JUCE's reader.
+        // Convert to the engine's float buffers on load, retaining the 96 kHz rate.
+        juce::MemoryBlock block;
+        auto input=stream();
+        if(!input || input->getTotalLength()>64ll*1024*1024 || input->readIntoMemoryBlock(block,64ll*1024*1024)<12){error="WAV no valido.";return false;}
+        const auto* bytes=static_cast<const unsigned char*>(block.getData());const auto size=block.getSize();
+        if(std::memcmp(bytes,"RIFF",4)!=0 || std::memcmp(bytes+8,"WAVE",4)!=0){error="Formato WAV no valido.";return false;}
+        unsigned channels=0,rate=0,bits=0,code=0;size_t start=0,length=0;
+        for(size_t offset=12;offset+8<=size;) {
+            const size_t count=juce::ByteOrder::littleEndianInt(bytes+offset+4);offset+=8;if(count>size-offset){error="WAV truncado.";return false;}
+            if(std::memcmp(bytes+offset-8,"fmt ",4)==0 && count>=16){code=juce::ByteOrder::littleEndianShort(bytes+offset);channels=juce::ByteOrder::littleEndianShort(bytes+offset+2);rate=juce::ByteOrder::littleEndianInt(bytes+offset+4);bits=juce::ByteOrder::littleEndianShort(bytes+offset+14);}
+            if(std::memcmp(bytes+offset-8,"data",4)==0){start=offset;length=count;}
+            offset+=count+count%2;
+        }
+        if(code!=3 || bits!=64 || channels<1 || channels>2 || rate<8000 || rate>192000 || length<channels*8*4 || length%(channels*8)!=0 || length/(channels*8)>rate*30){error="WAV float64 no valido.";return false;}
+        const size_t frames=length/(channels*8);audio.rate=rate;
+        for(size_t c=0;c<2;++c){auto& output=audio.channel[c];output.resize(frames);for(size_t n=0;n<frames;++n)output[n]=static_cast<float>(std::bit_cast<double>(juce::ByteOrder::littleEndianInt64(bytes+start+(n*channels+std::min(c,static_cast<size_t>(channels-1)))*8)));}
+    }
+    for(const auto& channel:audio.channel)for(float x:channel)if(!std::isfinite(x)){error="El WAV contiene valores no finitos.";return false;}
+    error.clear();return true;
+}
 
 std::unique_ptr<SampleLibrary> SampleLibrary::readZip(const juce::File& file,juce::String& error) {
     error.clear();

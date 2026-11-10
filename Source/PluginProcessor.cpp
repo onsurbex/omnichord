@@ -137,7 +137,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     p.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"rhythmLoop",1},"Rhythm Loop",0,127,0));
     p.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"rhythmPattern",1},"Rhythm Pattern",juce::StringArray{"Omni Pop","Disco","Bossa","Half-time","Shuffle","Waltz","Custom"},0));
     addFloat("rhythmSwing","Rhythm Swing",0,.6f,0);addGain("rhythmVolume","Rhythm Volume",.7f);addGain("rhythmSend","Rhythm FX Send",0);
-    p.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"organSample",1},"Organ Sample",0,127,0));
+    p.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"organSample",1},"Organ Sample",0,1023,0));
     p.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"sampleRoot",1},"Sample Root MIDI Note",0,127,60));
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"sampleChord",1},"Sample Is Whole Chord",false));
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"sampleLoop",1},"Sample Loop",false));
@@ -175,7 +175,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"masterClipper",1},"Master Soft Clipper",true));
     return p;
 }
-ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(BusesProperties().withOutput("Output",juce::AudioChannelSet::stereo(),true)),state(*this,nullptr,"ChordHarp",parameters()),presetHome(presetRoot==juce::File{}?defaultPresetHome():presetRoot) {
+ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot,juce::File sampleBank):AudioProcessor(BusesProperties().withOutput("Output",juce::AudioChannelSet::stereo(),true)),state(*this,nullptr,"ChordHarp",parameters()),presetHome(presetRoot==juce::File{}?defaultPresetHome():presetRoot) {
+    factoryCatalogRoot=sampleBank==juce::File{}?SampleLibrary::bundledDirectory():sampleBank;
     const char* ids[]{"gain","tone","sustain","vibrato","chord","pad","harpGain","organGain",
         "organTone","organOctave","harpSound","harpAttack","harpQuantize",
         "delayTime","delayFeedback","delayMix","reverbSize","reverbDamping","reverbMix","computerKeys","major7","theme","chordSustain","tapeEnabled","tapeNoise","tapeWow","tapeFlutter","tapeDrive","organModel","reverbPredelay","reverbLow","reverbMid","reverbHigh","reverbEarly","delaySync","delayDivision","delayTempo","delayEnabled","reverbEnabled"};
@@ -226,6 +227,7 @@ ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(Bus
         if(bundledSamples.getFile().replaceWithData(BinaryData::FactorySamples_zip,static_cast<size_t>(BinaryData::FactorySamples_zipSize))
             && loadSampleLibrary(bundledSamples.getFile(),error)) {
             factoryLibraryPath=sampleLibraryPath();
+            if(sampleLibrary->appendGraySlate(factoryCatalogRoot,error))++sampleRevision;
             // Start with an instrument selected in the sampler, rather than
             // the first alphabetically sorted drum loop. Sources stay OFF.
             if(!sampleLibrary->instruments.empty())selectSampleSound(sampleLibrary->instruments[0]);
@@ -235,7 +237,7 @@ ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(Bus
 #endif
     registerSoloCleanup();
     factoryPreset=capturePreset("Inicio");
-    loadStartupPreset();clearDisabledMixerSolos();
+    loadStartupPreset();clearDisabledMixerSolos();startTimerHz(20);
     magicState.addTrigger("silence",[this] {
         auto* parameter=state.getParameter("pad");
         parameter->beginChangeGesture(); parameter->setValueNotifyingHost(0); parameter->endChangeGesture();
@@ -245,6 +247,7 @@ ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot):AudioProcessor(Bus
     });
 }
 void ChordHarpProcessor::prepareToPlay(double rate,int blockSize) {
+    juce::String sampleError;ensureSampleLoaded(static_cast<int>(rhythmRaw[6]->load()),sampleError);
     readSynthParameters();readMixerParameters();engine.prepare(rate);organLayer.prepare(rate);fmLayer.prepare(rate);mixer.prepare(rate);
     setLatencySamples(engine.latencySamples());
     rhythm.prepare(rate,engine.latencySamples());sampleChords.prepare(rate,engine.latencySamples());sampleFilter.prepare(rate);sampleDC.prepare(rate);
@@ -428,7 +431,7 @@ void ChordHarpProcessor::setStateInformation(const void* data,int size) {
         // Restore new controls deterministically when loading an older project.
         for(auto* p:getParameters())if(auto* ranged=dynamic_cast<juce::RangedAudioParameter*>(p))
             if(!restored.getChildWithProperty("id",ranged->paramID).isValid())restored.appendChild(juce::ValueTree("PARAM",{{"id",ranged->paramID},{"value",ranged->convertFrom0to1(ranged->getDefaultValue())}}),nullptr);
-        state.replaceState(restored);clearDisabledMixerSolos();presetReset.store(true);
+        state.replaceState(restored);juce::String sampleError;ensureSampleLoaded(static_cast<int>(rhythmRaw[6]->load()),sampleError);clearDisabledMixerSolos();presetReset.store(true);
         updatePresetName(restored.getProperty("presetName","Proyecto").toString());
     }
 }

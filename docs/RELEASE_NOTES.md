@@ -1,11 +1,10 @@
-Omnichord 0.7.3 para macOS 11 o posterior, Apple Silicon e Intel.
+Omnichord 0.7.4 para macOS, Apple Silicon e Intel.
 
-- Secuenciador con casillas sin números y sombreado alterno cada dos columnas. La regla inferior muestra la numeración una sola vez y resalta el paso actual en el color de detalle de cada tema.
-- Longitud de 1–16 pasos mediante el tirador del extremo derecho. Acortar oculta los pasos sobrantes sin borrarlos; ampliar los recupera. El swing también respeta los ciclos impares. La longitud se guarda en presets y proyectos. Los loops de audio grabados mantienen su duración original.
-- Width del mixer en 0–200 %, con un sector relleno que se abre desde el centro y puntos simétricos.
-- Volúmenes, faders, retornos y envíos hasta +6 dB. Los presets conservan las ganancias reales anteriores; las automatizaciones normalizadas del DAW pueden requerir ajuste al ampliarse el rango.
-- Soft clipper con botón CLIP en el máster, activado inicialmente. Deja lineal la señal baja y redondea los picos cerca de 0 dBFS. Su bypass es real y cambia con una transición corta; apagado permite salida flotante por encima de 0 dBFS.
+- Integra las 477 grabaciones de GraySlate en Samples, junto a los 15 samples originales: 36 acordes, 431 notas de arpa y 10 grabaciones rítmicas.
+- Menú agrupado por acorde, notas raíz y niveles iniciales medidos. Los acordes completos conservan la calidad grabada; las notas de arpa pueden generar los acordes seleccionados.
+- Carga bajo demanda de una grabación por instancia, fuera del callback de audio. Soporte para los 103 WAV float64, manteniendo los 96 kHz originales.
+- WAV originales intactos, empaquetados sin pérdida y verificados por SHA-256. El VST3, standalone y PKG llevan el banco dentro de sus recursos.
+- Presets y proyectos conservan la selección del banco mediante la referencia portable de fábrica. El selector amplía su rango; las automatizaciones normalizadas antiguas de selección pueden necesitar ajuste.
 
-Conserva el aviso de solos por parpadeo, limpieza automática al apagar canales, transporte DAW, capas simultáneas, FM sencilla/avanzada, Tape, efectos por envío, temas, librería Omnichord Vol. 1 y presets completos.
-
-El PKG instala VST3 en `/Library/Audio/Plug-Ins/VST3/` y standalone en `/Applications/`. Los bundles usan firma ad hoc; el instalador no está notarizado. La prueba directa dentro de Ableton requiere un Mac.
+Las diez grabaciones rítmicas nuevas son one-shots en Samples; su BPM no está confirmado y no sustituyen a los loops sincronizados anteriores.
+Windows queda pendiente para una futura 0.8 y no forma parte de estos cambios.

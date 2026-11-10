@@ -1,4 +1,9 @@
-# Omnichord — BLINBLIN · versión 0.7.3
+# Omnichord — BLINBLIN · versión 0.7.4
+
+La versión **0.7.4** añade las 477 grabaciones de GraySlate al menú de Samples,
+agrupadas por acorde. Conserva los cinco instrumentos, seis golpes y cuatro loops
+del pack anterior. Los WAV originales se empaquetan sin pérdida y se decodifica
+solo la grabación seleccionada. Windows queda pendiente para la futura 0.8.
 
 Prototipo de instrumento inspirado en el Omnichord para Ableton Live en macOS.
 Incluye 48 acordes (mayores, menores, séptimas y séptimas mayores), una franja de rasgueo de

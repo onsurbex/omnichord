@@ -15,9 +15,9 @@
 #include "MixerDSP.h"
 #include <atomic>
 
-class ChordHarpProcessor final : public juce::AudioProcessor,private juce::AudioProcessorValueTreeState::Listener {
+class ChordHarpProcessor final : public juce::AudioProcessor,private juce::AudioProcessorValueTreeState::Listener,private juce::Timer {
 public:
-    explicit ChordHarpProcessor(juce::File presetRoot={});
+    explicit ChordHarpProcessor(juce::File presetRoot={},juce::File sampleBank={});
     ~ChordHarpProcessor() override;
     void prepareToPlay(double, int) override;
     void releaseResources() override {}
@@ -88,7 +88,11 @@ public:
     void editRhythmStep(int track,int step,bool on);
     int rhythmPatternLength() const;
     void resizeRhythmPattern(int length);
+    bool ensureSampleLoaded(int index,juce::String& error);
 private:
+    void timerCallback() override;
+    juce::File factoryCatalogRoot;
+    juce::CriticalSection sampleLoadLock;
     static juce::File defaultPresetHome();
     juce::File presetHome;
     juce::ValueTree factoryPreset;

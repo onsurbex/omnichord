@@ -1,0 +1,4776 @@
+{
+  "format": 1,
+  "source": "GraySlate's Omnichord Pack",
+  "entries": [
+    {
+      "file": "a/a-chord.wav",
+      "name": "GraySlate / A / Chord",
+      "root": 57,
+      "gain": 0.5528,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 9.69,
+      "sha256": "2d92b86c4ce7c1c69467600135de3c781652b6b10fd7f0cc99f6466384bbf841"
+    },
+    {
+      "file": "a/a0.wav",
+      "name": "GraySlate / A / Harp 00",
+      "root": 57,
+      "gain": 1.45164,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "1b57374a8de2d0aad992f38597ea7fc4ff035288bc8be1a9a92fc8607eb22a89"
+    },
+    {
+      "file": "a/a1.wav",
+      "name": "GraySlate / A / Harp 01",
+      "root": 61,
+      "gain": 1.03443,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.76,
+      "sha256": "d22898d92ea29ca9c6a1ce02b3c536d8619384d27fc23177271d467b4572cac6"
+    },
+    {
+      "file": "a/a10.wav",
+      "name": "GraySlate / A / Harp 10",
+      "root": 97,
+      "gain": 2.70046,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "efdede6d2050390e266cbebec4d8fc0d65fc128ec3aaa82a178857f06a898f04"
+    },
+    {
+      "file": "a/a11.wav",
+      "name": "GraySlate / A / Harp 11",
+      "root": 100,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "ee7db7f2e9d530268f86728f216216a104bd8e09528ba4883a66b6613953ee21"
+    },
+    {
+      "file": "a/a2.wav",
+      "name": "GraySlate / A / Harp 02",
+      "root": 64,
+      "gain": 1.31101,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "3b3c5babe7b6052173b211f230b47b73115229e035e720e9d5ef5069a5152c64"
+    },
+    {
+      "file": "a/a3.wav",
+      "name": "GraySlate / A / Harp 03",
+      "root": 69,
+      "gain": 0.99471,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.71,
+      "sha256": "848b5dc696593590302cc63a091c300d65a95035711a0e83e4c29addae3d505a"
+    },
+    {
+      "file": "a/a4.wav",
+      "name": "GraySlate / A / Harp 04",
+      "root": 73,
+      "gain": 0.85713,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.76,
+      "sha256": "8b107feaf6a92d56285ce428df7943c8109139cb99262a2ef3677366de319e32"
+    },
+    {
+      "file": "a/a5.wav",
+      "name": "GraySlate / A / Harp 05",
+      "root": 76,
+      "gain": 1.20624,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.56,
+      "sha256": "48fdd81167c00b7acefdcfc31dbdfac82ec5bbfe5b6d8514f250f17d95f34da4"
+    },
+    {
+      "file": "a/a6.wav",
+      "name": "GraySlate / A / Harp 06",
+      "root": 81,
+      "gain": 1.33832,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.52,
+      "sha256": "7be1801c1121077f171787c665d76246af8c6db7ad4416da9f9b5f43f7a27dd1"
+    },
+    {
+      "file": "a/a7.wav",
+      "name": "GraySlate / A / Harp 07",
+      "root": 85,
+      "gain": 1.35202,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.4,
+      "sha256": "af40b30117478932698bb588f94aa85174c206d482bd221d9510504383f877a8"
+    },
+    {
+      "file": "a/a8.wav",
+      "name": "GraySlate / A / Harp 08",
+      "root": 88,
+      "gain": 2.22474,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.32,
+      "sha256": "5f4ab6035787838dbbd488147b5328af6586a428e1e66740b3f670c0a8057b2e"
+    },
+    {
+      "file": "a/a9.wav",
+      "name": "GraySlate / A / Harp 09",
+      "root": 93,
+      "gain": 2.95489,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.17,
+      "sha256": "3994de624f79c75c076cb64cdb77e1a69a8a2fa390521e1d40db151bd3165951"
+    },
+    {
+      "file": "a7/a7-chord.wav",
+      "name": "GraySlate / A7 / Chord",
+      "root": 57,
+      "gain": 0.55298,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 9.35,
+      "sha256": "bb1266b6c35a875e4ca9e48835a21b87b24028dccdba10dcbe4c75591491f950"
+    },
+    {
+      "file": "a7/a70.wav",
+      "name": "GraySlate / A7 / Harp 00",
+      "root": 57,
+      "gain": 1.30168,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.75,
+      "sha256": "17439ab77f10db5c2eca159141ae87ab42c5ddf7518fad798973eb0bdf84c62a"
+    },
+    {
+      "file": "a7/a71.wav",
+      "name": "GraySlate / A7 / Harp 01",
+      "root": 61,
+      "gain": 0.9783,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.87,
+      "sha256": "4d247d897ce445fe56cdcb21be958ae2dbbad0243fd1cf21f48e8cd2c9ef96a4"
+    },
+    {
+      "file": "a7/a710.wav",
+      "name": "GraySlate / A7 / Harp 10",
+      "root": 97,
+      "gain": 2.89796,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.12,
+      "sha256": "7f77896774af4248e28915f794f689a4c825b97e24ce3bc7c18508d5b5648d36"
+    },
+    {
+      "file": "a7/a711.wav",
+      "name": "GraySlate / A7 / Harp 11",
+      "root": 91,
+      "gain": 1.46881,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "d5a92e7e0e9d4cccfd9a9afcbfff30e07c8aa846695f5af63af06e4bc6b6e792"
+    },
+    {
+      "file": "a7/a72.wav",
+      "name": "GraySlate / A7 / Harp 02",
+      "root": 55,
+      "gain": 1.10776,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.61,
+      "sha256": "381fc067e42d377a7b538f97e82ee899a4bf0ee743b9d12bed095a5ef49fe3a6"
+    },
+    {
+      "file": "a7/a73.wav",
+      "name": "GraySlate / A7 / Harp 03",
+      "root": 69,
+      "gain": 0.97255,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.78,
+      "sha256": "228d03001ecc14cf054ce0b9409fb13be78358250d305a40a5c1de4becd0d7b7"
+    },
+    {
+      "file": "a7/a74.wav",
+      "name": "GraySlate / A7 / Harp 04",
+      "root": 73,
+      "gain": 0.85394,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.75,
+      "sha256": "b8c4452594fba17d4748321b32642e1b7dc5fa01de37a1e7cff467a90fa8e11d"
+    },
+    {
+      "file": "a7/a75.wav",
+      "name": "GraySlate / A7 / Harp 05",
+      "root": 67,
+      "gain": 0.80581,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.75,
+      "sha256": "d57ac6adb2e81074f70be8e078305ee13de0f413dcafdb32eb75bd0257267728"
+    },
+    {
+      "file": "a7/a76.wav",
+      "name": "GraySlate / A7 / Harp 06",
+      "root": 81,
+      "gain": 1.22055,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.85,
+      "sha256": "5693994ed82ce3d864436fb8d8caeccdf30dedea0bd6819fbacdd8072d4cb035"
+    },
+    {
+      "file": "a7/a77.wav",
+      "name": "GraySlate / A7 / Harp 07",
+      "root": 85,
+      "gain": 1.4515,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.6,
+      "sha256": "7db4272f29f96feba3633ddbc8017fe29ac4a8454bc2ae0086d136dce6f7ac01"
+    },
+    {
+      "file": "a7/a78.wav",
+      "name": "GraySlate / A7 / Harp 08",
+      "root": 79,
+      "gain": 0.88592,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.83,
+      "sha256": "00d06c8294bdb8e6b4525d1f80290de910619c56c90f94f38aebfe1f6b66247e"
+    },
+    {
+      "file": "a7/a79.wav",
+      "name": "GraySlate / A7 / Harp 09",
+      "root": 93,
+      "gain": 3.07264,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.09,
+      "sha256": "c46a147cd8355e17f4f4f17ed2470586294517f1855f3e1829c1f58f6421a798"
+    },
+    {
+      "file": "ab/ab-chord.wav",
+      "name": "GraySlate / AB / Chord",
+      "root": 56,
+      "gain": 1.47295,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 13.02,
+      "sha256": "0ba8f8c1fa10838f0a3bcbc26664538aab77e0f4885d272bff8265b2c7906519"
+    },
+    {
+      "file": "ab/ab0.wav",
+      "name": "GraySlate / AB / Harp 00",
+      "root": 56,
+      "gain": 1.87396,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.53,
+      "sha256": "b23911a0fae6db0ed143119ee84b505f29854312e129846a051c2cb8c678232c"
+    },
+    {
+      "file": "ab/ab1.wav",
+      "name": "GraySlate / AB / Harp 01",
+      "root": 60,
+      "gain": 1.95108,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.75869,
+      "sha256": "efaac59352f372a92a90bb0460bd86ffcf7348d25baed9449c2bb6e231e2c36c"
+    },
+    {
+      "file": "ab/ab10.wav",
+      "name": "GraySlate / AB / Harp 10",
+      "root": 96,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "07e78f0b344a6ae651e650fe13049c85d1d6cc7ab01ac29953489dbfb9acd6d8"
+    },
+    {
+      "file": "ab/ab11.wav",
+      "name": "GraySlate / AB / Harp 11",
+      "root": 99,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.96,
+      "sha256": "729bacc5722eba4eded6a9d2eb9458b52d508cf5a59a57591f28bc913e61b58a"
+    },
+    {
+      "file": "ab/ab2.wav",
+      "name": "GraySlate / AB / Harp 02",
+      "root": 63,
+      "gain": 1.68897,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.83,
+      "sha256": "0dc2343b2f211f67e6add663d6749f7bd953dfe5d982b01285a3fceb6e0cd967"
+    },
+    {
+      "file": "ab/ab3.wav",
+      "name": "GraySlate / AB / Harp 03",
+      "root": 68,
+      "gain": 1.94565,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.81,
+      "sha256": "42a79642c189e460203ccdd9c69d4c7a20f02658f34031d9f9d24d5d8efbb5b2"
+    },
+    {
+      "file": "ab/ab4.wav",
+      "name": "GraySlate / AB / Harp 04",
+      "root": 72,
+      "gain": 1.64183,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.8,
+      "sha256": "1a19de48b4f2f40425372f9fae0de44dd8654805c9b55ac6a0b48e04b92c00a0"
+    },
+    {
+      "file": "ab/ab5.wav",
+      "name": "GraySlate / AB / Harp 05",
+      "root": 75,
+      "gain": 1.65607,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.0,
+      "sha256": "959a46436d307ecc2519b22b0802114db1fc6f1c66866f8427f4c1efc5c4a173"
+    },
+    {
+      "file": "ab/ab6.wav",
+      "name": "GraySlate / AB / Harp 06",
+      "root": 80,
+      "gain": 2.20499,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.62,
+      "sha256": "a47a1230950171563909ed8394c79bcb88031e468701def494b3513365b32e84"
+    },
+    {
+      "file": "ab/ab7.wav",
+      "name": "GraySlate / AB / Harp 07",
+      "root": 84,
+      "gain": 2.41378,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.7,
+      "sha256": "3eb355027f6940c0466bc4fb0d7c94c366c8effe91e7c60e5b486ed709f83db6"
+    },
+    {
+      "file": "ab/ab8.wav",
+      "name": "GraySlate / AB / Harp 08",
+      "root": 87,
+      "gain": 2.99801,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.13,
+      "sha256": "6e5aa7c7370ea323126c95fab3be9a2fa9c3114f1982b35358f6458545e0ed5e"
+    },
+    {
+      "file": "ab/ab9.wav",
+      "name": "GraySlate / AB / Harp 09",
+      "root": 92,
+      "gain": 4.08792,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.43,
+      "sha256": "69e9b6ccc4358cf498f47fef3b40fe717a5528d2b80568fc9a438ead8c63affc"
+    },
+    {
+      "file": "ab7/ab7-chord.wav",
+      "name": "GraySlate / AB7 / Chord",
+      "root": 56,
+      "gain": 1.50264,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 14.26,
+      "sha256": "1d6b092bcb28c00003de74dc441dbc359220de14bbf6859cb1b71aefff476d90"
+    },
+    {
+      "file": "ab7/ab70.wav",
+      "name": "GraySlate / AB7 / Harp 00",
+      "root": 56,
+      "gain": 1.96928,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.06,
+      "sha256": "d244d6bd1f2d26a0cb7570d29d56da5514d7c1cfb76641579a5322f8f856b517"
+    },
+    {
+      "file": "ab7/ab71.wav",
+      "name": "GraySlate / AB7 / Harp 01",
+      "root": 60,
+      "gain": 1.87675,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.95,
+      "sha256": "57d093fbda737a2e59bcfcecfea446b8c9cc8b186bb29f762c1ffda3627be6dd"
+    },
+    {
+      "file": "ab7/ab710.wav",
+      "name": "GraySlate / AB7 / Harp 10",
+      "root": 96,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.73,
+      "sha256": "853e286c04dcdf895a60b3783d5d39e7acbe678fc80ffdd0fcf6e183e7585258"
+    },
+    {
+      "file": "ab7/ab711.wav",
+      "name": "GraySlate / AB7 / Harp 11",
+      "root": 90,
+      "gain": 2.2366,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.61,
+      "sha256": "d9ecc98ee17f683a37f685ba74125f0bfd21f74e0cb6857a552d49e290355c1d"
+    },
+    {
+      "file": "ab7/ab72.wav",
+      "name": "GraySlate / AB7 / Harp 02",
+      "root": 54,
+      "gain": 2.16757,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.92,
+      "sha256": "26768bbebe09614b88fff00c08b99bc6d4cd1c6f0ea161626087332edc69f7f9"
+    },
+    {
+      "file": "ab7/ab73.wav",
+      "name": "GraySlate / AB7 / Harp 03",
+      "root": 68,
+      "gain": 1.95559,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.6,
+      "sha256": "3885b2833e5837e39f14a1c89bcca889b2daaa9973b4bc57e126855003b29124"
+    },
+    {
+      "file": "ab7/ab74.wav",
+      "name": "GraySlate / AB7 / Harp 04",
+      "root": 72,
+      "gain": 1.68135,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.86,
+      "sha256": "2c532b328dbee42b0c23f82aaa19a3692cec2c53fdd69b6f56aadf77dcff9ca7"
+    },
+    {
+      "file": "ab7/ab75.wav",
+      "name": "GraySlate / AB7 / Harp 05",
+      "root": 66,
+      "gain": 1.40699,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.31,
+      "sha256": "1b0987869d804ed5a2c23c589734985f274a6cd8a24786f5c892bdfb7a775d07"
+    },
+    {
+      "file": "ab7/ab76.wav",
+      "name": "GraySlate / AB7 / Harp 06",
+      "root": 80,
+      "gain": 2.58171,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.96,
+      "sha256": "cc1e317faa583327c2f56537893e63d38c1f3bd01d23e59f60953ab2f36fbec5"
+    },
+    {
+      "file": "ab7/ab77.wav",
+      "name": "GraySlate / AB7 / Harp 07",
+      "root": 84,
+      "gain": 2.89189,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.35,
+      "sha256": "a5796ac0c3ee54e97f0eb8279d901c90cc6d210c5e2de25b648834f93f2e093f"
+    },
+    {
+      "file": "ab7/ab78.wav",
+      "name": "GraySlate / AB7 / Harp 08",
+      "root": 78,
+      "gain": 1.5522,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.95,
+      "sha256": "3c30f8cb8216afd1b4ff708715b64d641ef3e7ac5d975a4c44ab37bd0b48d05e"
+    },
+    {
+      "file": "ab7/ab79.wav",
+      "name": "GraySlate / AB7 / Harp 09",
+      "root": 92,
+      "gain": 4.3712,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.26,
+      "sha256": "e99d22a324ead180abec29431f7f985ba0829194d07d0251de67088da76c4005"
+    },
+    {
+      "file": "abm/abm-chord.wav",
+      "name": "GraySlate / ABM / Chord",
+      "root": 56,
+      "gain": 1.47887,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 11.78,
+      "sha256": "51d14986a593399cea3459d92e69f045d112ca26e7615c91a9a61e90b0963bac"
+    },
+    {
+      "file": "abm/abm0.wav",
+      "name": "GraySlate / ABM / Harp 00",
+      "root": 56,
+      "gain": 1.92153,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.7,
+      "sha256": "9bd17410857bf3aa18651673e398d15cd362b7b15c0e5ab02a5fdf50695d1466"
+    },
+    {
+      "file": "abm/abm1.wav",
+      "name": "GraySlate / ABM / Harp 01",
+      "root": 59,
+      "gain": 1.97735,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.11,
+      "sha256": "6005a427bb95edb2930165274edc99f3e742b62c2f8bb07121a61e48d642887f"
+    },
+    {
+      "file": "abm/abm10.wav",
+      "name": "GraySlate / ABM / Harp 10",
+      "root": 95,
+      "gain": 5.11896,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.59,
+      "sha256": "ba542cba91eeaa1060104af6b396eb896599538b23ded42c47ca8db70d98e671"
+    },
+    {
+      "file": "abm/abm11.wav",
+      "name": "GraySlate / ABM / Harp 11",
+      "root": 99,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.92,
+      "sha256": "3440cef0cd60c6b271e9a6b84feca1ba07133ba742d1a5c37bdb6131afdafb03"
+    },
+    {
+      "file": "abm/abm2.wav",
+      "name": "GraySlate / ABM / Harp 02",
+      "root": 63,
+      "gain": 1.9075,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.91,
+      "sha256": "49d15c7a2ccce654cb33ffaba7095955ccb202fe401157ba76ab13b6403516a5"
+    },
+    {
+      "file": "abm/abm3.wav",
+      "name": "GraySlate / ABM / Harp 03",
+      "root": 68,
+      "gain": 1.93438,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.91,
+      "sha256": "edd6c009795180155e0cd177528b98a3610401b3ef3617e5b39b2e8a7f1b0019"
+    },
+    {
+      "file": "abm/abm4.wav",
+      "name": "GraySlate / ABM / Harp 04",
+      "root": 71,
+      "gain": 1.58801,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.93,
+      "sha256": "9325a5c62b13ff9c33612854a366664c2de6360ddac32f9ed979b8f7b320edba"
+    },
+    {
+      "file": "abm/abm5.wav",
+      "name": "GraySlate / ABM / Harp 05",
+      "root": 75,
+      "gain": 1.63447,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.89,
+      "sha256": "e9930fcdb957277d1f32e686bde3e408241e88b20755450bbd0210769b56eed8"
+    },
+    {
+      "file": "abm/abm6.wav",
+      "name": "GraySlate / ABM / Harp 06",
+      "root": 80,
+      "gain": 2.16046,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.84,
+      "sha256": "ec5c1468d2b3b85e8307ffe18fca20818a1d5d2167ad646bd4c8b9388db4151c"
+    },
+    {
+      "file": "abm/abm7.wav",
+      "name": "GraySlate / ABM / Harp 07",
+      "root": 83,
+      "gain": 2.25191,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.68,
+      "sha256": "f78d897d8798927e157eb34066a1f8cbef76a4890a15321693b085823768a37d"
+    },
+    {
+      "file": "abm/abm8.wav",
+      "name": "GraySlate / ABM / Harp 08",
+      "root": 87,
+      "gain": 2.97163,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.26,
+      "sha256": "a1cbcdee2629e7ad827c3fdebcc110b81f204c65ade7d0f35615137c0070ed71"
+    },
+    {
+      "file": "abm/abm9.wav",
+      "name": "GraySlate / ABM / Harp 09",
+      "root": 92,
+      "gain": 4.51332,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.32,
+      "sha256": "11088e3bf7445fc209ba10c10f5d220d57442e48457fb51a788bb62db51d4f84"
+    },
+    {
+      "file": "am/am-chord.wav",
+      "name": "GraySlate / AM / Chord",
+      "root": 57,
+      "gain": 0.52382,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 11.16,
+      "sha256": "401380c5749144671cf5fa6081671660eea0f7997bf26ac2d5ac88e64bc1fe6a"
+    },
+    {
+      "file": "am/am0.wav",
+      "name": "GraySlate / AM / Harp 00",
+      "root": 57,
+      "gain": 1.50443,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.48,
+      "sha256": "005235fe174cef5d39cd07b2425bb84509e9c3a00c99c4bfdabe0ff241333b2d"
+    },
+    {
+      "file": "am/am1.wav",
+      "name": "GraySlate / AM / Harp 01",
+      "root": 60,
+      "gain": 1.29667,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.66,
+      "sha256": "9ef23d31933968068f8aff197b0697b8d3dab18135cfef051dbcfc7194d165e3"
+    },
+    {
+      "file": "am/am10.wav",
+      "name": "GraySlate / AM / Harp 10",
+      "root": 96,
+      "gain": 3.06244,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.18,
+      "sha256": "4609178c802bafa9bf7947ad1b0611c3ea4bc40ffba91d561bfa0d9786d9f5a0"
+    },
+    {
+      "file": "am/am11.wav",
+      "name": "GraySlate / AM / Harp 11",
+      "root": 100,
+      "gain": 5.19418,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "624fc5ed3271521db11d28bd6f66f43a335097fbc13906188930211306c18f5b"
+    },
+    {
+      "file": "am/am2.wav",
+      "name": "GraySlate / AM / Harp 02",
+      "root": 64,
+      "gain": 1.20065,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.59,
+      "sha256": "f236c3502268677fd61277f9a2cd83a76dfdfe0ff99104f3822563ea7672540a"
+    },
+    {
+      "file": "am/am3.wav",
+      "name": "GraySlate / AM / Harp 03",
+      "root": 69,
+      "gain": 1.28963,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "83e16602f005e69a528434caddaa65ccfb7e26dc72f45b442ac820aa0c20e742"
+    },
+    {
+      "file": "am/am4.wav",
+      "name": "GraySlate / AM / Harp 04",
+      "root": 72,
+      "gain": 1.05904,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "afe17fa0d509a3d381b6b0799795f2f0ab5649e09d5881271760dab1575ab1cd"
+    },
+    {
+      "file": "am/am5.wav",
+      "name": "GraySlate / AM / Harp 05",
+      "root": 76,
+      "gain": 1.19006,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.63,
+      "sha256": "4fca9b90224aca051db3e86e23168b01848a5cc685f2e74920de6c50fb26bb62"
+    },
+    {
+      "file": "am/am6.wav",
+      "name": "GraySlate / AM / Harp 06",
+      "root": 81,
+      "gain": 1.50437,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "23ee985588093325417b03304ff6c4c4e54dc6e0dfb58274f20db5649a1fc103"
+    },
+    {
+      "file": "am/am7.wav",
+      "name": "GraySlate / AM / Harp 07",
+      "root": 84,
+      "gain": 1.50248,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.41,
+      "sha256": "9c6b82924beae1972df636dfe4907525d9ff17b8b21b2ed3ed61130d3325476f"
+    },
+    {
+      "file": "am/am8.wav",
+      "name": "GraySlate / AM / Harp 08",
+      "root": 88,
+      "gain": 2.15951,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.49,
+      "sha256": "81d479670f3c5256797129d9d5f775d831d3a863705c026234db34fb343491fe"
+    },
+    {
+      "file": "am/am9.wav",
+      "name": "GraySlate / AM / Harp 09",
+      "root": 93,
+      "gain": 3.36732,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.24,
+      "sha256": "9492e8b03ba5d53233cc916ebfc437cbb6758576bcbcbefc7c0ca9aaaabe42f9"
+    },
+    {
+      "file": "b/b-chord.wav",
+      "name": "GraySlate / B / Chord",
+      "root": 59,
+      "gain": 0.76962,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 10.66,
+      "sha256": "9b0143a1aae98e8bdfd334caf63b6bb6fb5b85a48bfce775a0bb6df7e41da631"
+    },
+    {
+      "file": "b/b0.wav",
+      "name": "GraySlate / B / Harp 00",
+      "root": 59,
+      "gain": 1.69928,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.54,
+      "sha256": "d4635c0d3710671af1cd6d6c6e3e20539968fabc89dcfead810f464f8db4cd69"
+    },
+    {
+      "file": "b/b1.wav",
+      "name": "GraySlate / B / Harp 01",
+      "root": 63,
+      "gain": 1.33892,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.81,
+      "sha256": "3e685357af38f4d70123b8a19ddfb5f06630d7fb9bf86b240e58546d25534b9e"
+    },
+    {
+      "file": "b/b10.wav",
+      "name": "GraySlate / B / Harp 10",
+      "root": 99,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "078c05598ee88ed8d2ffb0c07d80661d34a9cca35622495f6ff194fef2165484"
+    },
+    {
+      "file": "b/b11.wav",
+      "name": "GraySlate / B / Harp 11",
+      "root": 90,
+      "gain": 2.48122,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.27,
+      "sha256": "834afd5bcb46203e017d924b25d39574d1b8eb82d44c370497efd816ee6bdff0"
+    },
+    {
+      "file": "b/b2.wav",
+      "name": "GraySlate / B / Harp 02",
+      "root": 54,
+      "gain": 1.66701,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.79,
+      "sha256": "b17edd1906ba24b82ec0a4aed4ea539bcd40a3cb384d1c3aec1529a71b9f1fd3"
+    },
+    {
+      "file": "b/b3.wav",
+      "name": "GraySlate / B / Harp 03",
+      "root": 71,
+      "gain": 1.52149,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.54,
+      "sha256": "738e52a6656e1416f2da091b11a5c7c526fa54ba4a6f760be9914c4aff4de788"
+    },
+    {
+      "file": "b/b4.wav",
+      "name": "GraySlate / B / Harp 04",
+      "root": 75,
+      "gain": 1.43549,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.77,
+      "sha256": "2751af054a1bec20bd372ac4bae7bc2ceb7e9b9f0d50768498df3de742a60533"
+    },
+    {
+      "file": "b/b5.wav",
+      "name": "GraySlate / B / Harp 05",
+      "root": 66,
+      "gain": 1.25318,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.79,
+      "sha256": "f061577cf9919b04b7ced270526f40896c8e969ee75d6b7e30f6083fc5ad5c6f"
+    },
+    {
+      "file": "b/b6.wav",
+      "name": "GraySlate / B / Harp 06",
+      "root": 83,
+      "gain": 2.5792,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.4,
+      "sha256": "be8ffcbb085fa15fbcb7107189b830fa051df5de8cb702fd5cf65f3feb7d4046"
+    },
+    {
+      "file": "b/b7.wav",
+      "name": "GraySlate / B / Harp 07",
+      "root": 87,
+      "gain": 2.86963,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.52,
+      "sha256": "d79e72221599a2e45896c414fa6f64ad611e5e7b44ff93c351a98b0755eede01"
+    },
+    {
+      "file": "b/b8.wav",
+      "name": "GraySlate / B / Harp 08",
+      "root": 78,
+      "gain": 1.4707,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.79,
+      "sha256": "6ad66176a510c88eecc36c4639a5c03e64265c722e1b7c0032a15aad2687402b"
+    },
+    {
+      "file": "b/b9.wav",
+      "name": "GraySlate / B / Harp 09",
+      "root": 95,
+      "gain": 5.96719,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "b93277740cc63ee89c71e8fe5c3f7e8079d5fc53637b205ed5934e7eb0cc1b4f"
+    },
+    {
+      "file": "b7/b7-chord.wav",
+      "name": "GraySlate / B7 / Chord",
+      "root": 59,
+      "gain": 0.77431,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 11.58,
+      "sha256": "79d1097fd23956bb02ff6745ec8cb7ec0a1bb8d37553106f81e0db8f65394b03"
+    },
+    {
+      "file": "b7/b70.wav",
+      "name": "GraySlate / B7 / Harp 00",
+      "root": 59,
+      "gain": 2.09055,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.31,
+      "sha256": "683caaab53d5b183dca1063fdd3cba4a1fdfbbbe54bcc4c1c551f02ea3daa785"
+    },
+    {
+      "file": "b7/b71.wav",
+      "name": "GraySlate / B7 / Harp 01",
+      "root": 63,
+      "gain": 1.68174,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.62,
+      "sha256": "bd5168322bc05b77d2b40d9945b954b41c12d65f06862824b46ce4a3690d9d29"
+    },
+    {
+      "file": "b7/b710.wav",
+      "name": "GraySlate / B7 / Harp 10",
+      "root": 99,
+      "gain": 4.52038,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.08,
+      "sha256": "550362642965af255c12c6bee84d152e93d5f3e377c18ed6f98e0cc89aa0e7c5"
+    },
+    {
+      "file": "b7/b711.wav",
+      "name": "GraySlate / B7 / Harp 11",
+      "root": 93,
+      "gain": 2.40887,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.33,
+      "sha256": "4111b068080ff537fe32ce544602ae081b7d82f5233bf3562b57002fa060be1b"
+    },
+    {
+      "file": "b7/b72.wav",
+      "name": "GraySlate / B7 / Harp 02",
+      "root": 57,
+      "gain": 1.78319,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.03,
+      "sha256": "e6ee134a8728633580f8b3fbc6f5d788cef281a70d2d91fd31350476e657a315"
+    },
+    {
+      "file": "b7/b73.wav",
+      "name": "GraySlate / B7 / Harp 03",
+      "root": 71,
+      "gain": 1.76855,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.53,
+      "sha256": "b374e441814153554608780fdf669397294701f21d1ac25544c70389297c034d"
+    },
+    {
+      "file": "b7/b74.wav",
+      "name": "GraySlate / B7 / Harp 04",
+      "root": 75,
+      "gain": 1.64394,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.26,
+      "sha256": "cca420e85bbde2ca20be65c993abd91785769f46655dd8c0351864568c8a09e7"
+    },
+    {
+      "file": "b7/b75.wav",
+      "name": "GraySlate / B7 / Harp 05",
+      "root": 69,
+      "gain": 1.3434,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.7,
+      "sha256": "e5c5ae4c571230761633d3357f134f004e51eaeca1c2efaf720fb1f04f26d78c"
+    },
+    {
+      "file": "b7/b76.wav",
+      "name": "GraySlate / B7 / Harp 06",
+      "root": 83,
+      "gain": 2.36296,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.72,
+      "sha256": "1dc9f861895f8023250ab0787462e4aa6eed54aaac73631bdd62f687e37daac4"
+    },
+    {
+      "file": "b7/b77.wav",
+      "name": "GraySlate / B7 / Harp 07",
+      "root": 87,
+      "gain": 2.13776,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.64,
+      "sha256": "25ff69738f6e0ef8c2c62a98cacb794cf9420df7b260d086c8ead7490d349879"
+    },
+    {
+      "file": "b7/b78.wav",
+      "name": "GraySlate / B7 / Harp 08",
+      "root": 81,
+      "gain": 1.2826,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.75,
+      "sha256": "41d023010ca8885dcf7e5d4075914ae399a3722b68721d956bdd2c94031d4f51"
+    },
+    {
+      "file": "b7/b79.wav",
+      "name": "GraySlate / B7 / Harp 09",
+      "root": 95,
+      "gain": 4.84311,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.14,
+      "sha256": "bec9e9a4e70fbd0318727f2a92c4b0a3be6611c52cbfeb0175cb7d38ab56b49d"
+    },
+    {
+      "file": "bb/bb-chord.wav",
+      "name": "GraySlate / BB / Chord",
+      "root": 58,
+      "gain": 0.50569,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 13.05,
+      "sha256": "42b285cd21df1697264fba21f6e3963b210588b02992d2742e22126b3127c129"
+    },
+    {
+      "file": "bb/bb0.wav",
+      "name": "GraySlate / BB / Harp 00",
+      "root": 58,
+      "gain": 1.67692,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.64,
+      "sha256": "767839c9f8f8ca41afe31544ac7155e75c926b8b32f14191f455374005a3c565"
+    },
+    {
+      "file": "bb/bb1.wav",
+      "name": "GraySlate / BB / Harp 01",
+      "root": 62,
+      "gain": 1.26561,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.92,
+      "sha256": "6cb589b8c267db373627bf20ee0e2cef3ab19f854d1d9d872313bff9d415bcef"
+    },
+    {
+      "file": "bb/bb10.wav",
+      "name": "GraySlate / BB / Harp 10",
+      "root": 98,
+      "gain": 4.15478,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.12,
+      "sha256": "6a58a87541daa5813bc32e4a83688dbed7a1a6d957d12d58437b314f05580709"
+    },
+    {
+      "file": "bb/bb2.wav",
+      "name": "GraySlate / BB / Harp 02",
+      "root": 65,
+      "gain": 1.29316,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.74,
+      "sha256": "09d78b7a462fd020b2e6e9415f683a1ea0757967dd4a03926d12af0f48d14339"
+    },
+    {
+      "file": "bb/bb3.wav",
+      "name": "GraySlate / BB / Harp 03",
+      "root": 70,
+      "gain": 1.31367,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.77,
+      "sha256": "7c70575f29a5e52a6061fcb01daace4c8abdf525c6c11c49b01fd7cecd9d6ff9"
+    },
+    {
+      "file": "bb/bb4.wav",
+      "name": "GraySlate / BB / Harp 04",
+      "root": 74,
+      "gain": 1.16751,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.8,
+      "sha256": "519f5bbb269b0552997026b1c2b87b8e8380f1feffe30650494ba7025915d4ff"
+    },
+    {
+      "file": "bb/bb5.wav",
+      "name": "GraySlate / BB / Harp 05",
+      "root": 77,
+      "gain": 1.42215,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.61,
+      "sha256": "b7853aa64307221288fa4d4e65dc0042c4a8192005aa7c4eba9a36b068fcfdfc"
+    },
+    {
+      "file": "bb/bb6.wav",
+      "name": "GraySlate / BB / Harp 06",
+      "root": 82,
+      "gain": 1.77121,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.78,
+      "sha256": "af5bd570e7f747c1e38dcb31ee219d2bc9206ce79c52279bcfef5cbd2b21cdcd"
+    },
+    {
+      "file": "bb/bb7.wav",
+      "name": "GraySlate / BB / Harp 07",
+      "root": 86,
+      "gain": 1.89203,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.36,
+      "sha256": "b6e3e63777ac842ff30214b015b4f3bfc026494460aba8c605bff22a33d5382a"
+    },
+    {
+      "file": "bb/bb8.wav",
+      "name": "GraySlate / BB / Harp 08",
+      "root": 89,
+      "gain": 2.38577,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.34,
+      "sha256": "8c186af8d042416753f9c6ae7189f6f53ca0417ecef40fb58b9983eb2449a501"
+    },
+    {
+      "file": "bb/bb9.wav",
+      "name": "GraySlate / BB / Harp 09",
+      "root": 94,
+      "gain": 4.22926,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.11,
+      "sha256": "37f397af379eb89a9de374153f394d3de7d26a8e13e7b91adaf8cb22266d8f3a"
+    },
+    {
+      "file": "bb7/bb7-chord.wav",
+      "name": "GraySlate / BB7 / Chord",
+      "root": 58,
+      "gain": 0.51289,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 10.77,
+      "sha256": "c193dee6e111c618f7405d78aec601bccf48c43e42c12039e6ff2e9dde490051"
+    },
+    {
+      "file": "bb7/bb70.wav",
+      "name": "GraySlate / BB7 / Harp 00",
+      "root": 58,
+      "gain": 1.47958,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.74,
+      "sha256": "c49420a49bbbe0614df260f11a11bd40687440a905472b7dc57c42d8f17deb49"
+    },
+    {
+      "file": "bb7/bb71.wav",
+      "name": "GraySlate / BB7 / Harp 01",
+      "root": 62,
+      "gain": 1.24003,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.11,
+      "sha256": "bbceec3f22e791c98cfd475c9ba0ff26c1ad8f67b96c1e78df88d267be69163a"
+    },
+    {
+      "file": "bb7/bb710.wav",
+      "name": "GraySlate / BB7 / Harp 10",
+      "root": 98,
+      "gain": 4.34175,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "8f46119fb04b30ebd81b81d3ed6d3449f2b4c34e99865bd68317beabae375678"
+    },
+    {
+      "file": "bb7/bb711.wav",
+      "name": "GraySlate / BB7 / Harp 11",
+      "root": 92,
+      "gain": 2.17528,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.6,
+      "sha256": "66f75bb877bdc712345d4f3e2086dfdc152b1f6f70174273423b90e32d6253ae"
+    },
+    {
+      "file": "bb7/bb72.wav",
+      "name": "GraySlate / BB7 / Harp 02",
+      "root": 56,
+      "gain": 1.43765,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.1,
+      "sha256": "b0be410346c0a2269c1c74a4300d63361e7a3569f4d4c4db5a43a5515106d071"
+    },
+    {
+      "file": "bb7/bb73.wav",
+      "name": "GraySlate / BB7 / Harp 03",
+      "root": 70,
+      "gain": 1.28954,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.76,
+      "sha256": "16757355eae0de54e33584fb94a9e13dd57bbdfabc9ccbd3c047bb56b3720bb0"
+    },
+    {
+      "file": "bb7/bb74.wav",
+      "name": "GraySlate / BB7 / Harp 04",
+      "root": 74,
+      "gain": 1.15475,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.75,
+      "sha256": "664111500c492adc9695d5a71d6d8bb7f334566aa49bfa52dbfeb0d4c85847fc"
+    },
+    {
+      "file": "bb7/bb75.wav",
+      "name": "GraySlate / BB7 / Harp 05",
+      "root": 68,
+      "gain": 1.04461,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.83,
+      "sha256": "4d12023e5f357a63a5f7be23433c3c0b3770a6bac1d2251c6cc9fdd7c73a4f8a"
+    },
+    {
+      "file": "bb7/bb76.wav",
+      "name": "GraySlate / BB7 / Harp 06",
+      "root": 82,
+      "gain": 1.77753,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.76,
+      "sha256": "d4ea0db5b47d9c1a2b688b65e47018ea526b0b36f72cf42e5fff7f648580e8e6"
+    },
+    {
+      "file": "bb7/bb77.wav",
+      "name": "GraySlate / BB7 / Harp 07",
+      "root": 86,
+      "gain": 1.9313,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.6,
+      "sha256": "60775a8979e5a82590c8ec3d515a7eec3732b14495db019deda6db96fe5d1d5f"
+    },
+    {
+      "file": "bb7/bb78.wav",
+      "name": "GraySlate / BB7 / Harp 08",
+      "root": 80,
+      "gain": 1.3794,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.84,
+      "sha256": "07c3cbc3a4ebc621b7a908251d1be4e50e746a2ecd11dc3d4e373bf4283d305f"
+    },
+    {
+      "file": "bb7/bb79.wav",
+      "name": "GraySlate / BB7 / Harp 09",
+      "root": 94,
+      "gain": 4.10891,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "4f3f3e1fe6549d50f152bfb34d0b2b050391223e496caf11920441184b265f48"
+    },
+    {
+      "file": "bbm/bbm-chord.wav",
+      "name": "GraySlate / BBM / Chord",
+      "root": 58,
+      "gain": 0.39052,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 10.14,
+      "sha256": "6f04e8c3f6a716a9b4ed1e5d83e2182d08593390e3fcfc87ccb564dea4eaa05f"
+    },
+    {
+      "file": "bbm/bbm0.wav",
+      "name": "GraySlate / BBM / Harp 00",
+      "root": 58,
+      "gain": 1.06008,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.95,
+      "sha256": "3ffd1d9a94c779d4d9e6498399dce57da9e2a9f9c6da674c773bd45046c87284"
+    },
+    {
+      "file": "bbm/bbm1.wav",
+      "name": "GraySlate / BBM / Harp 01",
+      "root": 61,
+      "gain": 1.00424,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.17,
+      "sha256": "ac4bca9bc68ea9f4e08ec5d2bd7c84adbf10638c6b76bdd19f196dc7c7687494"
+    },
+    {
+      "file": "bbm/bbm10.wav",
+      "name": "GraySlate / BBM / Harp 10",
+      "root": 97,
+      "gain": 2.75393,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.34,
+      "sha256": "e7a39797f76185a2846cd00fcfad84fc8dd0695fece883b027e5bf80c8350889"
+    },
+    {
+      "file": "bbm/bbm11.wav",
+      "name": "GraySlate / BBM / Harp 11",
+      "root": 101,
+      "gain": 4.62589,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "55d004f533bdb874b3670b16296b1d8d6f23ce120a9344b0036d9d7d57bc5089"
+    },
+    {
+      "file": "bbm/bbm2.wav",
+      "name": "GraySlate / BBM / Harp 02",
+      "root": 65,
+      "gain": 1.01424,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.81,
+      "sha256": "af5ccafb7201ff5ed4f20a778c35d681e95366d4926adac4e025430ce0b2d844"
+    },
+    {
+      "file": "bbm/bbm3.wav",
+      "name": "GraySlate / BBM / Harp 03",
+      "root": 70,
+      "gain": 0.99313,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.89,
+      "sha256": "31e477fb0cc9b6142512bbb6b5048fb39ad45567941b1d6a7dda1d9bcc13df0a"
+    },
+    {
+      "file": "bbm/bbm4.wav",
+      "name": "GraySlate / BBM / Harp 04",
+      "root": 73,
+      "gain": 0.8533,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.81,
+      "sha256": "6b297b772d1364e2d6e203fe6f870156baf863621212206d85a22da4ecd5bffb"
+    },
+    {
+      "file": "bbm/bbm5.wav",
+      "name": "GraySlate / BBM / Harp 05",
+      "root": 77,
+      "gain": 1.05031,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.82,
+      "sha256": "468900da411cecab1820c81a5e46d9a4267c942d8e5bdda2d8cec619dd4a2200"
+    },
+    {
+      "file": "bbm/bbm6.wav",
+      "name": "GraySlate / BBM / Harp 06",
+      "root": 82,
+      "gain": 1.44278,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.8,
+      "sha256": "04112948557a58593764d15b87688947d20d85b304833d0e4dd8b5fc3987bcf8"
+    },
+    {
+      "file": "bbm/bbm7.wav",
+      "name": "GraySlate / BBM / Harp 07",
+      "root": 85,
+      "gain": 1.34058,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.82,
+      "sha256": "11031b03f8968cd566cf876d0ad29871d8a421333f0d46e5d46ab4c738470499"
+    },
+    {
+      "file": "bbm/bbm8.wav",
+      "name": "GraySlate / BBM / Harp 08",
+      "root": 89,
+      "gain": 1.97974,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.45,
+      "sha256": "eb281c9e9cd42b0b609798859090367c4eb09814e222685b34cb6dc1db2c93d4"
+    },
+    {
+      "file": "bbm/bbm9.wav",
+      "name": "GraySlate / BBM / Harp 09",
+      "root": 94,
+      "gain": 3.02599,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.07,
+      "sha256": "022bfa04e59d613ab15fcf398de891e0bdb69a7997b42b07a3dc757e8c4d2e71"
+    },
+    {
+      "file": "bm/bm-chord.wav",
+      "name": "GraySlate / BM / Chord",
+      "root": 59,
+      "gain": 0.6168,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 12.29133,
+      "sha256": "25020f4561409944a13c9b476d07f4895f7b8813fe4368a30d7d6c71fb5958fa"
+    },
+    {
+      "file": "bm/bm0.wav",
+      "name": "GraySlate / BM / Harp 00",
+      "root": 59,
+      "gain": 0.72715,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.15188,
+      "sha256": "d8e2eb043a8d88226953ccd654542357534382f1bb968e3dbed53cc2e2020e71"
+    },
+    {
+      "file": "bm/bm1.wav",
+      "name": "GraySlate / BM / Harp 01",
+      "root": 62,
+      "gain": 0.66713,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.0,
+      "sha256": "a52fcdd05b54cbcc2122d9c4c6cc2a3f2bf2d8d7e3dcb3936ba22af80629917c"
+    },
+    {
+      "file": "bm/bm10.wav",
+      "name": "GraySlate / BM / Harp 10",
+      "root": 98,
+      "gain": 3.4049,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.38464,
+      "sha256": "dbd9448eba2d25d81c86417115837a1a1f34a51b4575c4cc8f6873f8b99d2db2"
+    },
+    {
+      "file": "bm/bm11.wav",
+      "name": "GraySlate / BM / Harp 11",
+      "root": 90,
+      "gain": 0.93622,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.94451,
+      "sha256": "1f79cbb3fbe969bd891ce3601ddc83c57da63b2cf4268c5426eddcf2ed05b065"
+    },
+    {
+      "file": "bm/bm2.wav",
+      "name": "GraySlate / BM / Harp 02",
+      "root": 54,
+      "gain": 0.81337,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.71642,
+      "sha256": "a101ee753bc3573a47e95d774a224dbb9226d54eb09159f3d6e84da6ebe62d78"
+    },
+    {
+      "file": "bm/bm3.wav",
+      "name": "GraySlate / BM / Harp 03",
+      "root": 71,
+      "gain": 0.70284,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.1726,
+      "sha256": "027124c78da5e79a34e076dbe57ca79f5bfc398a1b10b0e1ffbf960e1c090180"
+    },
+    {
+      "file": "bm/bm4.wav",
+      "name": "GraySlate / BM / Harp 04",
+      "root": 74,
+      "gain": 0.64956,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.15188,
+      "sha256": "3bfb1349ad8ae19f20a41233d89232a95fe4f8c9c01ac3ddc1a54a426093022d"
+    },
+    {
+      "file": "bm/bm5.wav",
+      "name": "GraySlate / BM / Harp 05",
+      "root": 66,
+      "gain": 0.53963,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.31776,
+      "sha256": "8360058bda64640c8a778baab14fd23fbb8cbb80d0b27f736a254d27c5369fc7"
+    },
+    {
+      "file": "bm/bm6.wav",
+      "name": "GraySlate / BM / Harp 06",
+      "root": 83,
+      "gain": 1.12106,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.82009,
+      "sha256": "bb96c3c9dd17060a585044579fa02ee6a08d9c37edc83a9500b01ffe45e231ea"
+    },
+    {
+      "file": "bm/bm7.wav",
+      "name": "GraySlate / BM / Harp 07",
+      "root": 86,
+      "gain": 1.15719,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.592,
+      "sha256": "3e16df84f33ad427ebfbd4d1563ff216cbe1f5906e6ceb05d03c93689bbabfd6"
+    },
+    {
+      "file": "bm/bm8.wav",
+      "name": "GraySlate / BM / Harp 08",
+      "root": 78,
+      "gain": 0.61251,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.31776,
+      "sha256": "9fbc1412a2fb55c5e2d46b634f43f6cbf06e10c2aab08643a529728935354437"
+    },
+    {
+      "file": "bm/bm9.wav",
+      "name": "GraySlate / BM / Harp 09",
+      "root": 95,
+      "gain": 3.05182,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.34317,
+      "sha256": "48afb3af713db41fe0373cc9c52940819acf6a86b7121975e26bc7f03c3c3fc9"
+    },
+    {
+      "file": "c/c-chord.wav",
+      "name": "GraySlate / C / Chord",
+      "root": 48,
+      "gain": 0.62583,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 12.97936,
+      "sha256": "9f05da8afdfb9a055795ab8d3f245478744fb2def027c54f14deae70e5899759"
+    },
+    {
+      "file": "c/c0.wav",
+      "name": "GraySlate / C / Harp 00",
+      "root": 60,
+      "gain": 0.66776,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.96271,
+      "sha256": "b6e03d077af2b56db09faceed3e0b3a0df12a25990d2dbb8d9948c3da034ab08"
+    },
+    {
+      "file": "c/c1.wav",
+      "name": "GraySlate / C / Harp 01",
+      "root": 64,
+      "gain": 0.65989,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.96271,
+      "sha256": "6d5788dd3579f4d70748f5e746477a5b6df074290e75ed7acac89744dd7162d7"
+    },
+    {
+      "file": "c/c10.wav",
+      "name": "GraySlate / C / Harp 10",
+      "root": 100,
+      "gain": 4.73495,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.97203,
+      "sha256": "4b31d49d0967069a636ba70bfec8cde769ed9ad7b025e12ee069c4aa86d3ce05"
+    },
+    {
+      "file": "c/c11.wav",
+      "name": "GraySlate / C / Harp 11",
+      "root": 91,
+      "gain": 0.84709,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.71504,
+      "sha256": "85e2c33d6ad0c3d223a575106551c715efde3a322b7bcca88495ae10d2dae410"
+    },
+    {
+      "file": "c/c2.wav",
+      "name": "GraySlate / C / Harp 02",
+      "root": 55,
+      "gain": 0.7187,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.83887,
+      "sha256": "5d87242f78fcf92a743c9e0f1fca0373f088aac35a0434eb9dc81f5cfc82ab16"
+    },
+    {
+      "file": "c/c3.wav",
+      "name": "GraySlate / C / Harp 03",
+      "root": 72,
+      "gain": 0.71947,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.65313,
+      "sha256": "bb7416f07261dc36adaf6ff72986edf633882b0cb131b60f47760f2443e845a2"
+    },
+    {
+      "file": "c/c4.wav",
+      "name": "GraySlate / C / Harp 04",
+      "root": 72,
+      "gain": 0.75022,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.71504,
+      "sha256": "de6a460c101e4a110cc1d6327db0904b39189ec0004d6767aa95c99f4c2d3743"
+    },
+    {
+      "file": "c/c5.wav",
+      "name": "GraySlate / C / Harp 05",
+      "root": 67,
+      "gain": 0.52263,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.83887,
+      "sha256": "464a31d3620c3f0918a0d72d3d2fa46c0752309e3fe35df7c3aa9557ada383f5"
+    },
+    {
+      "file": "c/c6.wav",
+      "name": "GraySlate / C / Harp 06",
+      "root": 84,
+      "gain": 1.18873,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.59121,
+      "sha256": "20d8be7510b6e2ebe31046e2460cbb9b1ffdffe108c2fd987676ccdc82a40665"
+    },
+    {
+      "file": "c/c7.wav",
+      "name": "GraySlate / C / Harp 07",
+      "root": 88,
+      "gain": 1.27328,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.2197,
+      "sha256": "41fe3e8855273d3ce41485352b404c572011ebf885bcee815e5b70c1189b26ea"
+    },
+    {
+      "file": "c/c8.wav",
+      "name": "GraySlate / C / Harp 08",
+      "root": 79,
+      "gain": 0.61762,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.65313,
+      "sha256": "0b70e605bdc55938a4e7112558dbc84d63a296164a8a560ce1d2418eea613a51"
+    },
+    {
+      "file": "c/c9.wav",
+      "name": "GraySlate / C / Harp 09",
+      "root": 96,
+      "gain": 3.65007,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.2197,
+      "sha256": "a31d9bad7394bfa5d5f78a54f52b17406e0d4ff9a7c18dfeaa62f66d4fd4fe01"
+    },
+    {
+      "file": "c7/c7-chord.wav",
+      "name": "GraySlate / C7 / Chord",
+      "root": 48,
+      "gain": 0.62171,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 11.0,
+      "sha256": "5811a172def1db6d514ea611d96bd83fac90123d6a6d91037803043c1ef10f23"
+    },
+    {
+      "file": "c7/c70.wav",
+      "name": "GraySlate / C7 / Harp 00",
+      "root": 60,
+      "gain": 1.49852,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "9bca3f24901a4b09fc601d817ed7d68b7bf6eb2445acba041c170b3095035a9a"
+    },
+    {
+      "file": "c7/c71.wav",
+      "name": "GraySlate / C7 / Harp 01",
+      "root": 64,
+      "gain": 2.24342,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.33256,
+      "sha256": "daa8d9e97290e0c4b5593f45c90569b273ac906b7c9f4b149bd3c54b915069d8"
+    },
+    {
+      "file": "c7/c710.wav",
+      "name": "GraySlate / C7 / Harp 10",
+      "root": 100,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.64711,
+      "sha256": "0fa3fd0637be86f4c8575941518cd76d4911281181f8a4632c1fbf3180a61053"
+    },
+    {
+      "file": "c7/c711.wav",
+      "name": "GraySlate / C7 / Harp 11",
+      "root": 94,
+      "gain": 4.62194,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "8a5fe9ff55860acb586bb3d2b488c9134cdc1d8866fa6ee4e1633e3b6300dad1"
+    },
+    {
+      "file": "c7/c72.wav",
+      "name": "GraySlate / C7 / Harp 02",
+      "root": 58,
+      "gain": 2.29567,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "3172ef12b5e2fbb57d40af770c739ce5e0953bf7b74195884ff7c703bcdf3f43"
+    },
+    {
+      "file": "c7/c73.wav",
+      "name": "GraySlate / C7 / Harp 03",
+      "root": 72,
+      "gain": 2.17812,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "b19488fce850d73641323b26c730dcf7fa90403424090e194d1280c44c7e88a6"
+    },
+    {
+      "file": "c7/c74.wav",
+      "name": "GraySlate / C7 / Harp 04",
+      "root": 76,
+      "gain": 1.49101,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.69062,
+      "sha256": "52a89345a2f9eb3f2eb787e60ba67807f747e7607b8aa9472947a09b4edd3a58"
+    },
+    {
+      "file": "c7/c75.wav",
+      "name": "GraySlate / C7 / Harp 05",
+      "root": 70,
+      "gain": 1.25769,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5474,
+      "sha256": "07d68c527461f1bfef5b511a26a30a951844fbd14484b29860c71606760c3699"
+    },
+    {
+      "file": "c7/c76.wav",
+      "name": "GraySlate / C7 / Harp 06",
+      "root": 84,
+      "gain": 2.65782,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.10749,
+      "sha256": "b7d751cd33781601ab81cf98338ecf96d140ff4ca1afb4babe2d5858a0925416"
+    },
+    {
+      "file": "c7/c77.wav",
+      "name": "GraySlate / C7 / Harp 07",
+      "root": 88,
+      "gain": 4.36783,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.84149,
+      "sha256": "acfa5a0fc2797632052ea815743805e2b2fc389c2dd5f7f455a2fd3325ae121f"
+    },
+    {
+      "file": "c7/c78.wav",
+      "name": "GraySlate / C7 / Harp 08",
+      "root": 82,
+      "gain": 1.54353,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.23025,
+      "sha256": "978ff9c9538a6438d8b62f7d9b9b9ba20e0a4f019ea88d2a5f78c78eaac819a7"
+    },
+    {
+      "file": "c7/c79.wav",
+      "name": "GraySlate / C7 / Harp 09",
+      "root": 96,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "84d426a6beb983e250928535834bdcf1f5d6e0978b400e6a50dd325cd48b0aa4"
+    },
+    {
+      "file": "cm/cm-chord.wav",
+      "name": "GraySlate / CM / Chord",
+      "root": 48,
+      "gain": 0.62134,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 12.21472,
+      "sha256": "28624e979676172b69c8675ee5f4ca7b1b2d4b35d77691cdede5370d503532b2"
+    },
+    {
+      "file": "cm/cm0.wav",
+      "name": "GraySlate / CM / Harp 00",
+      "root": 60,
+      "gain": 1.71276,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.75201,
+      "sha256": "9f30b8340f888ec9d96eb0cfe5b6d493773d390e4565b3d37693eacc5014cbfb"
+    },
+    {
+      "file": "cm/cm1.wav",
+      "name": "GraySlate / CM / Harp 01",
+      "root": 63,
+      "gain": 1.00746,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.13054,
+      "sha256": "6e5d86ffe79d4d51d0d16284b508f7dcf7180c1258a6e3d6ca39d2999629dca5"
+    },
+    {
+      "file": "cm/cm10.wav",
+      "name": "GraySlate / CM / Harp 10",
+      "root": 99,
+      "gain": 5.9257,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.97449,
+      "sha256": "3299ccf52c730e243d1c4afb6547cf23b9971d422c9ee4c5453aa93873a8567e"
+    },
+    {
+      "file": "cm/cm11.wav",
+      "name": "GraySlate / CM / Harp 11",
+      "root": 91,
+      "gain": 1.17781,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.69062,
+      "sha256": "e1733c5b1444f974cf137d2eb1b29c3abc91d8ae67322f8ca9199982d4be3ca4"
+    },
+    {
+      "file": "cm/cm2.wav",
+      "name": "GraySlate / CM / Harp 02",
+      "root": 55,
+      "gain": 0.95238,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.02823,
+      "sha256": "bab3139b6ebd77d22e7b44db3774e1be19d516e9e97bd6cb66a53978e7d1d850"
+    },
+    {
+      "file": "cm/cm3.wav",
+      "name": "GraySlate / CM / Harp 03",
+      "root": 72,
+      "gain": 1.0522,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.63947,
+      "sha256": "2ab8e77cae7505f8e68ee040c5be74232a9ff594d5d593f56bc3eb34d5f8361f"
+    },
+    {
+      "file": "cm/cm4.wav",
+      "name": "GraySlate / CM / Harp 04",
+      "root": 75,
+      "gain": 0.88559,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.73155,
+      "sha256": "9c483bd50078fa5cf527a6b219ed09f605603768333ba93940917e0dce6c6db2"
+    },
+    {
+      "file": "cm/cm5.wav",
+      "name": "GraySlate / CM / Harp 05",
+      "root": 67,
+      "gain": 0.66428,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.12031,
+      "sha256": "49d8edd8442eae8931079a493d4ff51260df50cfb26d2dd4a9662083e4d86047"
+    },
+    {
+      "file": "cm/cm6.wav",
+      "name": "GraySlate / CM / Harp 06",
+      "root": 84,
+      "gain": 1.60404,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.86454,
+      "sha256": "9d0d2b81463487fd5e8f1cad77e1c606f9d98bf1fb3c5c271d79b76e5bc7b4b4"
+    },
+    {
+      "file": "cm/cm7.wav",
+      "name": "GraySlate / CM / Harp 07",
+      "root": 87,
+      "gain": 1.82671,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.27118,
+      "sha256": "52246b60a14a56a1d2c1b5ebac0cd130e90716b10fbb6fdcf2a63ba7f146be7c"
+    },
+    {
+      "file": "cm/cm8.wav",
+      "name": "GraySlate / CM / Harp 08",
+      "root": 79,
+      "gain": 0.80502,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.9157,
+      "sha256": "e512560392c5129ec7cd1fe15061e2786e2c17c27beaed8fa431a98dab15193c"
+    },
+    {
+      "file": "cm/cm9.wav",
+      "name": "GraySlate / CM / Harp 09",
+      "root": 96,
+      "gain": 4.77443,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.96426,
+      "sha256": "7f8dc6e30606c92943fc14cd8017eaeb8009a57b39a266bcfb2c15027f0cc8a7"
+    },
+    {
+      "file": "d/d-chord.wav",
+      "name": "GraySlate / D / Chord",
+      "root": 50,
+      "gain": 0.6782,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 11.8727,
+      "sha256": "5c1160e26a4b1bbaf8ab99d8e61d29e1ea26b524d9d2c16f6d4e84194c4c6e93"
+    },
+    {
+      "file": "d/d0.wav",
+      "name": "GraySlate / D / Harp 00",
+      "root": 62,
+      "gain": 0.86276,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.11007,
+      "sha256": "8d3b9c4ee72e7377aef91efcf996760a340a391a311000b11e701bfcdef30c6e"
+    },
+    {
+      "file": "d/d1.wav",
+      "name": "GraySlate / D / Harp 01",
+      "root": 54,
+      "gain": 0.9384,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.08961,
+      "sha256": "116da53a55f928b4207d483beb095370c0a91abf4f7d97c3c6421d1f432982ea"
+    },
+    {
+      "file": "d/d10.wav",
+      "name": "GraySlate / D / Harp 10",
+      "root": 90,
+      "gain": 1.1146,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.92593,
+      "sha256": "4adcf5d7c6d4129d3b577c927a4811207205f0d8f5ae58c3f16436541cadf540"
+    },
+    {
+      "file": "d/d11.wav",
+      "name": "GraySlate / D / Harp 11",
+      "root": 93,
+      "gain": 1.62995,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.71108,
+      "sha256": "20ca3f96573939f1eb338a0fa5f38349a23ca38e032d513c4df8b17567c594d5"
+    },
+    {
+      "file": "d/d2.wav",
+      "name": "GraySlate / D / Harp 02",
+      "root": 57,
+      "gain": 0.89135,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.30446,
+      "sha256": "f2d42911010ad9dc62da2b88d6517b39458af56e7f413b97ac1ff7f4ca91d52d"
+    },
+    {
+      "file": "d/d3.wav",
+      "name": "GraySlate / D / Harp 03",
+      "root": 74,
+      "gain": 1.07345,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.99754,
+      "sha256": "2e5fb00fe426c7e835d4724fbbfe06ee3808db171a0fc29184a1e9b6c36bc7e3"
+    },
+    {
+      "file": "d/d4.wav",
+      "name": "GraySlate / D / Harp 04",
+      "root": 66,
+      "gain": 0.63598,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.13054,
+      "sha256": "fbe8d86c7a835ad1e953db78e916663b2103293272adef4e568228cff2477c52"
+    },
+    {
+      "file": "d/d5.wav",
+      "name": "GraySlate / D / Harp 05",
+      "root": 69,
+      "gain": 0.6945,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.88501,
+      "sha256": "235a4271fdf570fe2d7778dc5be93fe160d2d0f30d18e0b573755b5f93c4847a"
+    },
+    {
+      "file": "d/d6.wav",
+      "name": "GraySlate / D / Harp 06",
+      "root": 86,
+      "gain": 1.73095,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.64971,
+      "sha256": "8a14a8d305203b07d35363f99878f439b128bd75f4005ce955f2721b04d682cf"
+    },
+    {
+      "file": "d/d7.wav",
+      "name": "GraySlate / D / Harp 07",
+      "root": 78,
+      "gain": 0.90912,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.77247,
+      "sha256": "847dece9ae1074b4f2e8a9391285dabf9252659f4185ad6211de9dbee8c0609b"
+    },
+    {
+      "file": "d/d8.wav",
+      "name": "GraySlate / D / Harp 08",
+      "root": 81,
+      "gain": 0.93695,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.94639,
+      "sha256": "307f5a742f5e23dd4b09c5709060bfdf0cbdf32524b99af7c32b58d58ef28c43"
+    },
+    {
+      "file": "d/d9.wav",
+      "name": "GraySlate / D / Harp 09",
+      "root": 98,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.96426,
+      "sha256": "0c1b3bd6d3dae5540a7ff8db84264f6e077257577bb688dc3c74eddf71548053"
+    },
+    {
+      "file": "d7/d7-chord.wav",
+      "name": "GraySlate / D7 / Chord",
+      "root": 50,
+      "gain": 0.67348,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 9.19072,
+      "sha256": "b03f716a8b51fb4a3f55a7b05187a620bfce63265169731192c9b8ab5634f1fa"
+    },
+    {
+      "file": "d7/d70.wav",
+      "name": "GraySlate / D7 / Harp 00",
+      "root": 62,
+      "gain": 0.79685,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.31469,
+      "sha256": "2005fcd07a05f1cd4da17cae9f11ffca95f571f9508f6714a1dd71f1ecfab81c"
+    },
+    {
+      "file": "d7/d71.wav",
+      "name": "GraySlate / D7 / Harp 01",
+      "root": 54,
+      "gain": 2.85673,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "8c909290a0955182443f72db5b72828ac916deddaec837946ffc46c2da34c42f"
+    },
+    {
+      "file": "d7/d710.wav",
+      "name": "GraySlate / D7 / Harp 10",
+      "root": 90,
+      "gain": 0.77275,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.66,
+      "sha256": "b8389e14532e0315f958b4e10a8d5d2c87928c84a3ce874aedec70ce1e09bb85"
+    },
+    {
+      "file": "d7/d711.wav",
+      "name": "GraySlate / D7 / Harp 11",
+      "root": 96,
+      "gain": 2.71531,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "8ae3c7b92069f6735a2db190e3f587c821b7c4dd81070541a861b023b4165318"
+    },
+    {
+      "file": "d7/d72.wav",
+      "name": "GraySlate / D7 / Harp 02",
+      "root": 60,
+      "gain": 2.52023,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "e027965c0b6d0944ff7947e4bba16a254be35b749a6e8aa3fa7b1a35279bca28"
+    },
+    {
+      "file": "d7/d73.wav",
+      "name": "GraySlate / D7 / Harp 03",
+      "root": 74,
+      "gain": 0.70551,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "e8eef4f03a8a2f7c8e897a8f49ed51bd6a22922ed3ee5088d00b3a5284543ec0"
+    },
+    {
+      "file": "d7/d74.wav",
+      "name": "GraySlate / D7 / Harp 04",
+      "root": 66,
+      "gain": 0.43743,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.0,
+      "sha256": "eb3c7f213cdc2377390e1506c65d8518be92f87d6a1cdb83be7ad211a19eac66"
+    },
+    {
+      "file": "d7/d75.wav",
+      "name": "GraySlate / D7 / Harp 05",
+      "root": 72,
+      "gain": 0.51169,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.79,
+      "sha256": "016ffe1291c426bd96539aeab9dbcdbd81bbeefcaea1fc2cceed2583471415bd"
+    },
+    {
+      "file": "d7/d76.wav",
+      "name": "GraySlate / D7 / Harp 06",
+      "root": 86,
+      "gain": 1.19733,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.25,
+      "sha256": "a55fe2cba2d9bdf60fea64b0a35289b787e08272a208738a61a279da33e2a1bc"
+    },
+    {
+      "file": "d7/d77.wav",
+      "name": "GraySlate / D7 / Harp 07",
+      "root": 78,
+      "gain": 0.49868,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.97,
+      "sha256": "5684c259a887b72dcb12aa96196b9d685ee3c0ef628e3061a27093f8f6e91bff"
+    },
+    {
+      "file": "d7/d78.wav",
+      "name": "GraySlate / D7 / Harp 08",
+      "root": 84,
+      "gain": 0.83334,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.63,
+      "sha256": "cd6c5f0d07ee407890ba0aad42afdacdd0e04f017a3b92f6f84c37f538b30d60"
+    },
+    {
+      "file": "d7/d79.wav",
+      "name": "GraySlate / D7 / Harp 09",
+      "root": 98,
+      "gain": 4.6147,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.04,
+      "sha256": "cce318ef9e0a1d70e455c0c57102ea2550ae98688ab1ae252f2da37bd94c6821"
+    },
+    {
+      "file": "db/db-chord.wav",
+      "name": "GraySlate / DB / Chord",
+      "root": 49,
+      "gain": 1.74351,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 10.5,
+      "sha256": "c004fb997f99288ecb8342ff39498a293656e27e3d87514ecc3116b4e7d56624"
+    },
+    {
+      "file": "db/db0.wav",
+      "name": "GraySlate / DB / Harp 00",
+      "root": 61,
+      "gain": 1.78845,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.12,
+      "sha256": "1b3d0dcb894d41f945aa67aa89eb393ee3c6a8a385304a2b70fefb8617432cb4"
+    },
+    {
+      "file": "db/db1.wav",
+      "name": "GraySlate / DB / Harp 01",
+      "root": 65,
+      "gain": 1.88232,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.91,
+      "sha256": "6c53dd70d2bceb4d2b2e5e4cc3d393362b43de272588ee0ee8d3fb00baede661"
+    },
+    {
+      "file": "db/db10.wav",
+      "name": "GraySlate / DB / Harp 10",
+      "root": 101,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.02,
+      "sha256": "4c4c197847c52c62f51a317fddeec31ac0c785d2b5faa654a6591beaac77e6dd"
+    },
+    {
+      "file": "db/db11.wav",
+      "name": "GraySlate / DB / Harp 11",
+      "root": 92,
+      "gain": 3.14871,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.45,
+      "sha256": "3595a810b68ccbc21cfb96c3c5c5dd3556fd30c8f4d77af9080bf4755a250cca"
+    },
+    {
+      "file": "db/db2.wav",
+      "name": "GraySlate / DB / Harp 02",
+      "root": 56,
+      "gain": 2.05776,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.9,
+      "sha256": "ea1c669b3e72bd864fb4e4d3b226458cbbe628379b4402af486b03892acf2bce"
+    },
+    {
+      "file": "db/db3.wav",
+      "name": "GraySlate / DB / Harp 03",
+      "root": 73,
+      "gain": 2.17757,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.82,
+      "sha256": "8b284e6229c25467f6d8bf5ff22cba8deb2cee7d342b95f861b977bf1c518806"
+    },
+    {
+      "file": "db/db4.wav",
+      "name": "GraySlate / DB / Harp 04",
+      "root": 77,
+      "gain": 1.82937,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.77,
+      "sha256": "f8eee2a9043c196c34031dfa57b1e64ecee6db022b802db245a6d8be2ef764f0"
+    },
+    {
+      "file": "db/db5.wav",
+      "name": "GraySlate / DB / Harp 05",
+      "root": 68,
+      "gain": 1.36023,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.29,
+      "sha256": "cb8be8bd4224d3d9586fd9f314b63179997ae5bd3398817c2c8053c17b4afc41"
+    },
+    {
+      "file": "db/db6.wav",
+      "name": "GraySlate / DB / Harp 06",
+      "root": 85,
+      "gain": 3.19574,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.66,
+      "sha256": "b676f35398509a6c76d12f285246a0eb0dd77a75e93593793630ec49360e3dc0"
+    },
+    {
+      "file": "db/db7.wav",
+      "name": "GraySlate / DB / Harp 07",
+      "root": 89,
+      "gain": 4.16813,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.34,
+      "sha256": "404006cbdd812932aad5a3af4d0eb7c97ac052a8c0971fdeef204a44cb89ccf3"
+    },
+    {
+      "file": "db/db8.wav",
+      "name": "GraySlate / DB / Harp 08",
+      "root": 80,
+      "gain": 1.75367,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.1,
+      "sha256": "317e3c06be148b0aa062df2574e0ab8531f0c1a1d3a3fff7eab3712d35154409"
+    },
+    {
+      "file": "db/db9.wav",
+      "name": "GraySlate / DB / Harp 09",
+      "root": 97,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.04,
+      "sha256": "9cff288b1fced51b97f87b0d83d03b9c388d7e9f57308332e06cd6c091991ca9"
+    },
+    {
+      "file": "db7/db7-chord.wav",
+      "name": "GraySlate / DB7 / Chord",
+      "root": 49,
+      "gain": 1.73482,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 13.91,
+      "sha256": "eeb06be1092600c344962af7cc342e6a25b5d6dca3cbc5fb6a7ceef274bb6ad8"
+    },
+    {
+      "file": "db7/db70.wav",
+      "name": "GraySlate / DB7 / Harp 00",
+      "root": 61,
+      "gain": 1.81889,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.22,
+      "sha256": "d7a22346ab9ed3ebb645681c1aa3b85a9734ed7d70a0e87878173d28ee14d562"
+    },
+    {
+      "file": "db7/db71.wav",
+      "name": "GraySlate / DB7 / Harp 01",
+      "root": 65,
+      "gain": 1.83315,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.02,
+      "sha256": "29771d26697fd6e96a66e1375090ab4dee69a4b0730212659de880aeff306a8d"
+    },
+    {
+      "file": "db7/db710.wav",
+      "name": "GraySlate / DB7 / Harp 10",
+      "root": 101,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.89,
+      "sha256": "5cf975f0eda87ef66c15dff6a00da57421bc64b0fe5672906536a00ffbf37952"
+    },
+    {
+      "file": "db7/db711.wav",
+      "name": "GraySlate / DB7 / Harp 11",
+      "root": 95,
+      "gain": 5.24994,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.99,
+      "sha256": "bad418927f52976a10a3e7d832f34f4a3527b4e23af633b7fff02dc482a3b31c"
+    },
+    {
+      "file": "db7/db72.wav",
+      "name": "GraySlate / DB7 / Harp 02",
+      "root": 59,
+      "gain": 2.0109,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.25,
+      "sha256": "35928dd7c31a80f86862a3ac12794083c9aea05bdfe5724bc19960c872337736"
+    },
+    {
+      "file": "db7/db73.wav",
+      "name": "GraySlate / DB7 / Harp 03",
+      "root": 73,
+      "gain": 2.34439,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.89,
+      "sha256": "7e73f99f17784b59343132d1ce47ca7b0b3d9145ea4362d0b650ab146d6fcb25"
+    },
+    {
+      "file": "db7/db74.wav",
+      "name": "GraySlate / DB7 / Harp 04",
+      "root": 77,
+      "gain": 2.21056,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.84,
+      "sha256": "198a11bd1cf69ecc335cf932711e7d14aa3eb3a4104b1ae2a5b17f300cb10b67"
+    },
+    {
+      "file": "db7/db75.wav",
+      "name": "GraySlate / DB7 / Harp 05",
+      "root": 71,
+      "gain": 1.50419,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.01,
+      "sha256": "1a67b9070284de36ffd93b985cd53b8f258582a298f3472e8df925a8f68ffbc7"
+    },
+    {
+      "file": "db7/db76.wav",
+      "name": "GraySlate / DB7 / Harp 06",
+      "root": 85,
+      "gain": 3.25449,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.29,
+      "sha256": "2284d618f2ed7342e580d4132bfd9cbce45b400ef0d1bf3730a25ad0ac4e8ab7"
+    },
+    {
+      "file": "db7/db77.wav",
+      "name": "GraySlate / DB7 / Harp 07",
+      "root": 89,
+      "gain": 3.32837,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "7c403dc4298b31323740e30a816e457df6a12042b0387b0dd80c096d0c15cbd6"
+    },
+    {
+      "file": "db7/db78.wav",
+      "name": "GraySlate / DB7 / Harp 08",
+      "root": 83,
+      "gain": 2.19157,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.52,
+      "sha256": "1a6d77f3481bc6679a667a67d5145ae85b6192f958f73facbba27cf16a62485d"
+    },
+    {
+      "file": "db7/db79.wav",
+      "name": "GraySlate / DB7 / Harp 09",
+      "root": 97,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.22,
+      "sha256": "2f146c22f10cef7f70eb3231c5d78072df7c7af10784e04a672ef0bb483030c3"
+    },
+    {
+      "file": "dbm/dbm-chord.wav",
+      "name": "GraySlate / DBM / Chord",
+      "root": 49,
+      "gain": 1.7492,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 12.18,
+      "sha256": "9b20740fec509abe00b2ade93f00bf3978ad385707c2a2aac7787e655da90b1a"
+    },
+    {
+      "file": "dbm/dbm0.wav",
+      "name": "GraySlate / DBM / Harp 00",
+      "root": 61,
+      "gain": 1.95928,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.08,
+      "sha256": "f703b03a76c297174df8e99b71a3845d866a8bbf9bb91a21875701ff1fbf89f9"
+    },
+    {
+      "file": "dbm/dbm1.wav",
+      "name": "GraySlate / DBM / Harp 01",
+      "root": 64,
+      "gain": 1.83654,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.85,
+      "sha256": "f21db1c4aa84ad5ea3989338a5627ab06a2b73ce27623b0327f14cb0f02d6b48"
+    },
+    {
+      "file": "dbm/dbm10.wav",
+      "name": "GraySlate / DBM / Harp 10",
+      "root": 100,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.76,
+      "sha256": "a28ecde2866a709d505e32a42a17129c17da0ecc1a065f97f90be7462a859443"
+    },
+    {
+      "file": "dbm/dbm11.wav",
+      "name": "GraySlate / DBM / Harp 11",
+      "root": 92,
+      "gain": 3.19946,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.51,
+      "sha256": "db3265f8455780620f23e0dc0bdc43fece8a4707dee0f9da0076145272875b48"
+    },
+    {
+      "file": "dbm/dbm2.wav",
+      "name": "GraySlate / DBM / Harp 02",
+      "root": 56,
+      "gain": 1.91557,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.27,
+      "sha256": "63298b999ad026d49102f050325f829b15c4b9c3d0bf3764c9b082e672c11433"
+    },
+    {
+      "file": "dbm/dbm3.wav",
+      "name": "GraySlate / DBM / Harp 03",
+      "root": 73,
+      "gain": 2.19947,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.41,
+      "sha256": "88dc7a01d3bdd2a99f86049ecf6f0eda025704ac6c9525e979ebc4338a9f7cc1"
+    },
+    {
+      "file": "dbm/dbm4.wav",
+      "name": "GraySlate / DBM / Harp 04",
+      "root": 76,
+      "gain": 2.00234,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.76,
+      "sha256": "e604b2f75e39d5f053a28bf116e84173db3f90d4b93c9c2366b3df896e8c6c83"
+    },
+    {
+      "file": "dbm/dbm5.wav",
+      "name": "GraySlate / DBM / Harp 05",
+      "root": 68,
+      "gain": 1.40284,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.23,
+      "sha256": "d5ee03d6dba7f25c2a43c91352b5338a47f7f481530748e76a6878581ebec0e2"
+    },
+    {
+      "file": "dbm/dbm6.wav",
+      "name": "GraySlate / DBM / Harp 06",
+      "root": 85,
+      "gain": 3.17744,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.67,
+      "sha256": "e93804ae98e916c75b4964e0db48618118653043130a34cab9c18accb9ed37f5"
+    },
+    {
+      "file": "dbm/dbm7.wav",
+      "name": "GraySlate / DBM / Harp 07",
+      "root": 88,
+      "gain": 3.91709,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.35,
+      "sha256": "99e43cbe66237a7dca4e6c8772385f734476992125364d3f23a8ec2b1251baea"
+    },
+    {
+      "file": "dbm/dbm8.wav",
+      "name": "GraySlate / DBM / Harp 08",
+      "root": 80,
+      "gain": 1.74764,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.71,
+      "sha256": "9391027ee7e99bca0106fb98fbe2c323c4c51c642ba4bee98afa3eb19a7ccc19"
+    },
+    {
+      "file": "dbm/dbm9.wav",
+      "name": "GraySlate / DBM / Harp 09",
+      "root": 97,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.12,
+      "sha256": "03ff3327fbc1bb52f0e20ad8bd61955af02f62d243336ec263ec928541c9d718"
+    },
+    {
+      "file": "dm/dm-chord.wav",
+      "name": "GraySlate / DM / Chord",
+      "root": 50,
+      "gain": 0.66719,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 10.97056,
+      "sha256": "6d3ff0f67487b1d413483875787d6c22ce3a82e59936e9d4c5376dead7f08794"
+    },
+    {
+      "file": "dm/dm0.wav",
+      "name": "GraySlate / DM / Harp 00",
+      "root": 62,
+      "gain": 0.58963,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.95,
+      "sha256": "04f9380ca50f5545f905f409291e25b8b0ea57cc337823a7c18727369759308c"
+    },
+    {
+      "file": "dm/dm1.wav",
+      "name": "GraySlate / DM / Harp 01",
+      "root": 65,
+      "gain": 1.70106,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "dce2bb0054c5f73ea685afb9df88504157f00ea9f2969ba685cc2e3b7e158a7b"
+    },
+    {
+      "file": "dm/dm10.wav",
+      "name": "GraySlate / DM / Harp 10",
+      "root": 101,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "30804b8d4e92466646245840ee52f38284d4e37bc67e77f73155d546be9c0a8b"
+    },
+    {
+      "file": "dm/dm11.wav",
+      "name": "GraySlate / DM / Harp 11",
+      "root": 93,
+      "gain": 3.89819,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "a551742b87da0f345c6cd0cbf1f1016691ae2cbe47ab311e8941c031c6bd40f9"
+    },
+    {
+      "file": "dm/dm2.wav",
+      "name": "GraySlate / DM / Harp 02",
+      "root": 57,
+      "gain": 1.88522,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "2df283feffe76ee6b24b24d05fff753d90f37573a4e06d3afffd2dbcc0a1b435"
+    },
+    {
+      "file": "dm/dm3.wav",
+      "name": "GraySlate / DM / Harp 03",
+      "root": 74,
+      "gain": 2.08963,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "d2d238a255b9b9d7d3d8853227bfb6ab5faa195620556dfafb3fee14388a3c2f"
+    },
+    {
+      "file": "dm/dm4.wav",
+      "name": "GraySlate / DM / Harp 04",
+      "root": 77,
+      "gain": 1.89504,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.31,
+      "sha256": "c0315756af32acd873dae0c30cca86102bc160b4682e30e50068bc57e24800bd"
+    },
+    {
+      "file": "dm/dm5.wav",
+      "name": "GraySlate / DM / Harp 05",
+      "root": 69,
+      "gain": 1.47532,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.83,
+      "sha256": "9f8d8a5505b9fe10cc2e4479b31cc23ee1619284e512f8fe17a99bd87cb948e7"
+    },
+    {
+      "file": "dm/dm6.wav",
+      "name": "GraySlate / DM / Harp 06",
+      "root": 86,
+      "gain": 3.47715,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.26,
+      "sha256": "21f32f36fd1a73e36f5b1ee09643aca15069d47a508810f8f60e999cf02be8ec"
+    },
+    {
+      "file": "dm/dm7.wav",
+      "name": "GraySlate / DM / Harp 07",
+      "root": 89,
+      "gain": 3.44665,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.23,
+      "sha256": "00e81ec774adc4d2871fe94ed29379eeed4e8def1ea77a3aad5adffb9d310b03"
+    },
+    {
+      "file": "dm/dm8.wav",
+      "name": "GraySlate / DM / Harp 08",
+      "root": 81,
+      "gain": 1.9842,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.47,
+      "sha256": "369c96c40ff488f9591508ea0b2cd0f72e5f70775ef135f36f7fccce019de88f"
+    },
+    {
+      "file": "dm/dm9.wav",
+      "name": "GraySlate / DM / Harp 09",
+      "root": 98,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.97,
+      "sha256": "a8ccb8ea4f0f4c912e2d861c8b5bf87711113714b8fbe8dedc00d770712f8776"
+    },
+    {
+      "file": "e/e-chord.wav",
+      "name": "GraySlate / E / Chord",
+      "root": 52,
+      "gain": 0.72802,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 8.98336,
+      "sha256": "e2ac65440ef534687f960823f5e40bc3ab5624c4dca9af38ab4d888ae2375dba"
+    },
+    {
+      "file": "e/e0.wav",
+      "name": "GraySlate / E / Harp 00",
+      "root": 64,
+      "gain": 1.85874,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.87,
+      "sha256": "5b5f2d5ee8b671d0b2b34affd454f54798b93600a065a612ef84a468622e5321"
+    },
+    {
+      "file": "e/e1.wav",
+      "name": "GraySlate / E / Harp 01",
+      "root": 56,
+      "gain": 1.86225,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.0,
+      "sha256": "03394eab8ab4dac16c64540856db48a9383181463e55237b5c205e75067dafe4"
+    },
+    {
+      "file": "e/e10.wav",
+      "name": "GraySlate / E / Harp 10",
+      "root": 92,
+      "gain": 2.76171,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.32,
+      "sha256": "2bccea9f6fd0f13d812d26b491fef1d5b18793b3da239d874f643bf1cdecae4d"
+    },
+    {
+      "file": "e/e11.wav",
+      "name": "GraySlate / E / Harp 11",
+      "root": 95,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.02,
+      "sha256": "b2643b3f98c2db43c4f41c14349fdc80c6d16e76adb2b46c79e69b6c9f0b8e9b"
+    },
+    {
+      "file": "e/e2.wav",
+      "name": "GraySlate / E / Harp 02",
+      "root": 59,
+      "gain": 1.90156,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.77,
+      "sha256": "19af5356129af8336da670cbd6dd6581ba2e24d5fd60df37363849ec3e0b8771"
+    },
+    {
+      "file": "e/e3.wav",
+      "name": "GraySlate / E / Harp 03",
+      "root": 76,
+      "gain": 2.33787,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.59,
+      "sha256": "06ac517bf665e8504522c88ac9004377bd53ff00e0c459ed1f2e367b7f76a967"
+    },
+    {
+      "file": "e/e4.wav",
+      "name": "GraySlate / E / Harp 04",
+      "root": 68,
+      "gain": 1.41804,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.82,
+      "sha256": "e8fb2076e98def2e800f761df2d9992399d10dbdde4e8a98cc66024ef5d4f967"
+    },
+    {
+      "file": "e/e5.wav",
+      "name": "GraySlate / E / Harp 05",
+      "root": 71,
+      "gain": 1.49392,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.68,
+      "sha256": "db02398b299960fad3ef82e8375017d6746151437a9f9e84a307739ad3bcf5b7"
+    },
+    {
+      "file": "e/e6.wav",
+      "name": "GraySlate / E / Harp 06",
+      "root": 88,
+      "gain": 4.06676,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.97,
+      "sha256": "ddfa7bee9e609e8040e7001029c93e05962f07d20caa6148afacd105e548e3a4"
+    },
+    {
+      "file": "e/e7.wav",
+      "name": "GraySlate / E / Harp 07",
+      "root": 80,
+      "gain": 1.82786,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.55,
+      "sha256": "64249b14e9d84b6f8a150a3efc1a4e1471b8e88cbd12bbee782a0895b423716b"
+    },
+    {
+      "file": "e/e8.wav",
+      "name": "GraySlate / E / Harp 08",
+      "root": 83,
+      "gain": 2.2172,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "c0bed943d6ee52eea7fa0a3580bd53c8be2d1672112ca9d7b909417eb08319cd"
+    },
+    {
+      "file": "e/e9.wav",
+      "name": "GraySlate / E / Harp 09",
+      "root": 100,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.22,
+      "sha256": "d2386f9574cb8931ffb4014731de43a7f68221d715bd14dac81227758ebcfd4b"
+    },
+    {
+      "file": "e7/e7-chord.wav",
+      "name": "GraySlate / E7 / Chord",
+      "root": 52,
+      "gain": 0.72141,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 9.3808,
+      "sha256": "1212cd7b462d983119c66843c16b7299f9e5ed3b410a0c32df43cbdde07ff01a"
+    },
+    {
+      "file": "e7/e70.wav",
+      "name": "GraySlate / E7 / Harp 00",
+      "root": 64,
+      "gain": 1.90835,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.68,
+      "sha256": "118dc07174c307a08592852e19b6cb626041498ac6fa2e3f2bb0038e89b2b3cf"
+    },
+    {
+      "file": "e7/e71.wav",
+      "name": "GraySlate / E7 / Harp 01",
+      "root": 56,
+      "gain": 1.86651,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.07,
+      "sha256": "23eed13b3d23a80539d2ca1634e26a2e20fa9885ed5d104fe32043e808f25802"
+    },
+    {
+      "file": "e7/e710.wav",
+      "name": "GraySlate / E7 / Harp 10",
+      "root": 92,
+      "gain": 2.56202,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.48,
+      "sha256": "575947a39781abefd2937c9a3a6768567cc7c2e11adfaae4bad2c6111261f1e2"
+    },
+    {
+      "file": "e7/e711.wav",
+      "name": "GraySlate / E7 / Harp 11",
+      "root": 98,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.09,
+      "sha256": "b7926d63e748ac78919a613810d7709116ec9bfc9b94d5cef427d2e8a6ce79ec"
+    },
+    {
+      "file": "e7/e72.wav",
+      "name": "GraySlate / E7 / Harp 02",
+      "root": 62,
+      "gain": 1.78916,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.44,
+      "sha256": "9da06ccd367c18227749186ab161003c1e56d9ed728739362451cdad0740d635"
+    },
+    {
+      "file": "e7/e73.wav",
+      "name": "GraySlate / E7 / Harp 03",
+      "root": 76,
+      "gain": 2.30976,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.68,
+      "sha256": "5ff43b1ea5ee1b7b679250f1b40590c2fbb3347d6dc93351eb3771e0eb3fd3a1"
+    },
+    {
+      "file": "e7/e74.wav",
+      "name": "GraySlate / E7 / Harp 04",
+      "root": 68,
+      "gain": 1.43155,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.6,
+      "sha256": "e75bf377f54011ea256858f63ab346e83e0c240de45254449dd2ca14d0665d4d"
+    },
+    {
+      "file": "e7/e75.wav",
+      "name": "GraySlate / E7 / Harp 05",
+      "root": 74,
+      "gain": 1.6846,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.85,
+      "sha256": "5839a2e141bcc97ae01a14dbf3c8c19e31af6ee6289d2036ad46843fbf2822af"
+    },
+    {
+      "file": "e7/e76.wav",
+      "name": "GraySlate / E7 / Harp 06",
+      "root": 88,
+      "gain": 4.1146,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.1,
+      "sha256": "75982e2984802878e9e3536fd5c4cbf33a67387bb993ab3b56cea1148f4a361a"
+    },
+    {
+      "file": "e7/e77.wav",
+      "name": "GraySlate / E7 / Harp 07",
+      "root": 80,
+      "gain": 1.83035,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.92,
+      "sha256": "e34c70ea10a6f5c652235c74c7d04dc09e8f5aaa1bb421bd3c8bfbd2a6ee1a23"
+    },
+    {
+      "file": "e7/e78.wav",
+      "name": "GraySlate / E7 / Harp 08",
+      "root": 86,
+      "gain": 3.13852,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.23,
+      "sha256": "7905ec450ecfe2a7554f063ea7d7c538bc941351d9fd454167359cec9389f7cd"
+    },
+    {
+      "file": "e7/e79.wav",
+      "name": "GraySlate / E7 / Harp 09",
+      "root": 100,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.33,
+      "sha256": "e6de2493daca261c55f54171cef0a7e563b5f941a7973cdcc873ceaf9e51c1c6"
+    },
+    {
+      "file": "eb/eb-chord.wav",
+      "name": "GraySlate / EB / Chord",
+      "root": 51,
+      "gain": 0.70035,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 11.73087,
+      "sha256": "0e705e9b63c602bb1d0cbab8852e7a9ec1778aebed5578ace200957b590661ff"
+    },
+    {
+      "file": "eb/eb0.wav",
+      "name": "GraySlate / EB / Harp 00",
+      "root": 63,
+      "gain": 1.87311,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.54,
+      "sha256": "865952557a3b820d930c38f8e9f3fb9da8c3666862337092848763393d016d5a"
+    },
+    {
+      "file": "eb/eb1.wav",
+      "name": "GraySlate / EB / Harp 01",
+      "root": 55,
+      "gain": 1.90111,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.14,
+      "sha256": "25d61f39379e5d9844a9d31635fd02b64ab6210ff7397508fb418003f2c2d750"
+    },
+    {
+      "file": "eb/eb10.wav",
+      "name": "GraySlate / EB / Harp 10",
+      "root": 91,
+      "gain": 2.6295,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.39,
+      "sha256": "8eb5c7609e8efefede608bf9761c016956d90f616468be168c40749501d4223f"
+    },
+    {
+      "file": "eb/eb11.wav",
+      "name": "GraySlate / EB / Harp 11",
+      "root": 91,
+      "gain": 2.44579,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.51,
+      "sha256": "227721272e6e77ace0bceeba4bb1aac95e5009d84a3547218dab296dc6478e4b"
+    },
+    {
+      "file": "eb/eb2.wav",
+      "name": "GraySlate / EB / Harp 02",
+      "root": 61,
+      "gain": 1.72204,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.72,
+      "sha256": "894da9ade60290ea8767b66ed200e749ebb21a93bbe5fd67ea963f78434ea9b6"
+    },
+    {
+      "file": "eb/eb3.wav",
+      "name": "GraySlate / EB / Harp 03",
+      "root": 75,
+      "gain": 2.1988,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.84,
+      "sha256": "a82b468df1b8f70e41356ebe746cccca90f083a5336e97be132d6112efb77640"
+    },
+    {
+      "file": "eb/eb4.wav",
+      "name": "GraySlate / EB / Harp 04",
+      "root": 67,
+      "gain": 1.38764,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.89,
+      "sha256": "bc193af23627a03a86f5df223e65f5973b1fd74ffd1be5f68d9768e06644d9d3"
+    },
+    {
+      "file": "eb/eb5.wav",
+      "name": "GraySlate / EB / Harp 05",
+      "root": 73,
+      "gain": 1.68487,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.65,
+      "sha256": "2d12996232997f8b9d47cba28aecf38515d160de04234eda916dc6702443be04"
+    },
+    {
+      "file": "eb/eb6.wav",
+      "name": "GraySlate / EB / Harp 06",
+      "root": 87,
+      "gain": 3.7258,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.25,
+      "sha256": "3b9d9daf30d683650058609a9ebc07e486aaad4f551ee8ff1e18db2e4dcbc87e"
+    },
+    {
+      "file": "eb/eb7.wav",
+      "name": "GraySlate / EB / Harp 07",
+      "root": 79,
+      "gain": 1.76381,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.81,
+      "sha256": "220cdfeff021516b7c40b2b5b7fb4abd82fc63ffc453bba6bbd345814c1fbc0c"
+    },
+    {
+      "file": "eb/eb8.wav",
+      "name": "GraySlate / EB / Harp 08",
+      "root": 85,
+      "gain": 2.61377,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.07,
+      "sha256": "b14d5c3d98d027c539d777a0e0f97f17aff43151396b6694084187067a60d588"
+    },
+    {
+      "file": "eb/eb9.wav",
+      "name": "GraySlate / EB / Harp 09",
+      "root": 99,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.2,
+      "sha256": "77df9f9248ad744b77cd0d38c191f11cd663def175c2a2cfe166afff742c9cc3"
+    },
+    {
+      "file": "eb7/eb7-chord.wav",
+      "name": "GraySlate / EB7 / Chord",
+      "root": 51,
+      "gain": 1.94735,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 9.02,
+      "sha256": "226199d575bd9eb3c530a170fc0a770882243f4967de4a9895f7b996c6814aac"
+    },
+    {
+      "file": "eb7/eb70.wav",
+      "name": "GraySlate / EB7 / Harp 00",
+      "root": 63,
+      "gain": 1.95471,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.64,
+      "sha256": "cccb4104fe90a3e71d500e6891f9d7925f383d59b9dce11fa842e699c8e30def"
+    },
+    {
+      "file": "eb7/eb71.wav",
+      "name": "GraySlate / EB7 / Harp 01",
+      "root": 55,
+      "gain": 2.05555,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.03,
+      "sha256": "60d737449a2f5f7450c3bdfd59a495a1c427324ead760a0e0770c483b97569da"
+    },
+    {
+      "file": "eb7/eb710.wav",
+      "name": "GraySlate / EB7 / Harp 10",
+      "root": 91,
+      "gain": 2.45801,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.6,
+      "sha256": "6033d87baf5ee0ec01a939e5ae405cbc9a1ec744ba6ba886584de3030563b1a3"
+    },
+    {
+      "file": "eb7/eb711.wav",
+      "name": "GraySlate / EB7 / Harp 11",
+      "root": 97,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.23,
+      "sha256": "494a54c36414e63e0f72d3f4b6658db129c5c174ebb535a379cedc1a79b13539"
+    },
+    {
+      "file": "eb7/eb72.wav",
+      "name": "GraySlate / EB7 / Harp 02",
+      "root": 61,
+      "gain": 1.8886,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.96,
+      "sha256": "dd03bc54798f4a77f70c6295b75a8caf23ea23dfc64f6ae943e621f8b387787c"
+    },
+    {
+      "file": "eb7/eb73.wav",
+      "name": "GraySlate / EB7 / Harp 03",
+      "root": 75,
+      "gain": 2.23689,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.86,
+      "sha256": "ec06514f53724fcb9945254910d45d1add884412054b84f37c395351673fda18"
+    },
+    {
+      "file": "eb7/eb74.wav",
+      "name": "GraySlate / EB7 / Harp 04",
+      "root": 67,
+      "gain": 1.45631,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.94,
+      "sha256": "d564f75cc0f413bc0d22502a4fc30e686b99b66fed38206c428b1785ecc85915"
+    },
+    {
+      "file": "eb7/eb75.wav",
+      "name": "GraySlate / EB7 / Harp 05",
+      "root": 73,
+      "gain": 1.62153,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.78,
+      "sha256": "00c1191bddb3cd5d1e095e393043c90d1f44a4d59ccb62031ee254722b57f14c"
+    },
+    {
+      "file": "eb7/eb76.wav",
+      "name": "GraySlate / EB7 / Harp 06",
+      "root": 87,
+      "gain": 4.11206,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.18,
+      "sha256": "4c56c35fc4faba9469b0372450793bcfc89bb04e06b1cf771e244c08114735c5"
+    },
+    {
+      "file": "eb7/eb77.wav",
+      "name": "GraySlate / EB7 / Harp 07",
+      "root": 79,
+      "gain": 1.87952,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.69,
+      "sha256": "9619966af0e978fa1ba2fea75b8b88c2561a779be15b133d1ff007608e6d9529"
+    },
+    {
+      "file": "eb7/eb78.wav",
+      "name": "GraySlate / EB7 / Harp 08",
+      "root": 85,
+      "gain": 2.66726,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.39,
+      "sha256": "27ad253e6e4e8b3db3b29d1cd15a5f0a683b040b6a497f3a62e7579e9a815584"
+    },
+    {
+      "file": "eb7/eb79.wav",
+      "name": "GraySlate / EB7 / Harp 09",
+      "root": 99,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.1,
+      "sha256": "849c9e78d510c26e97221cb7ff3a0c1bce917ea209cf92aa819e2e4e3e59d313"
+    },
+    {
+      "file": "ebm/ebm-chord.wav",
+      "name": "GraySlate / EBM / Chord",
+      "root": 51,
+      "gain": 1.92111,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 10.1,
+      "sha256": "0749548a35e5b9c553c571961f6271d09fbb97edbf7bb1626df82862e10d8ccf"
+    },
+    {
+      "file": "ebm/ebm0.wav",
+      "name": "GraySlate / EBM / Harp 00",
+      "root": 63,
+      "gain": 1.81168,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.0,
+      "sha256": "4683a56de4692ca9062ebf5e4dd1396f52ec709b690988b29e8fb575dee1e3d7"
+    },
+    {
+      "file": "ebm/ebm1.wav",
+      "name": "GraySlate / EBM / Harp 01",
+      "root": 54,
+      "gain": 2.40959,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.85,
+      "sha256": "a2bddcc9a6531bb743f37691b0dd1667abc40a493fd2267da014078cca3b4e25"
+    },
+    {
+      "file": "ebm/ebm10.wav",
+      "name": "GraySlate / EBM / Harp 10",
+      "root": 90,
+      "gain": 2.55461,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.52,
+      "sha256": "4682fded790055e65011ff9c5a05a1d600dbba7814190cefd5a80da0d0fdf383"
+    },
+    {
+      "file": "ebm/ebm11.wav",
+      "name": "GraySlate / EBM / Harp 11",
+      "root": 94,
+      "gain": 4.47925,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.15,
+      "sha256": "7a310d2935b1d4efaa0121b000785439794c8680babd99842eb570e9ff245bf9"
+    },
+    {
+      "file": "ebm/ebm2.wav",
+      "name": "GraySlate / EBM / Harp 02",
+      "root": 58,
+      "gain": 1.86696,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.63,
+      "sha256": "c5bf7fd2c84e361fa7aaa395596d6d06a68b255e1be00b6139dab113cf4a15f4"
+    },
+    {
+      "file": "ebm/ebm3.wav",
+      "name": "GraySlate / EBM / Harp 03",
+      "root": 75,
+      "gain": 2.21605,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.66,
+      "sha256": "6d87f737885acbd12871e13126b6d8c58c669f3c2b50eea7411c5f4d726b5406"
+    },
+    {
+      "file": "ebm/ebm4.wav",
+      "name": "GraySlate / EBM / Harp 04",
+      "root": 66,
+      "gain": 1.40904,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.07,
+      "sha256": "bc0a2c2e1af0030ecbda790c0a8245c6c75a1e9143a2f7396095bc75ef9145bb"
+    },
+    {
+      "file": "ebm/ebm5.wav",
+      "name": "GraySlate / EBM / Harp 05",
+      "root": 70,
+      "gain": 1.48253,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.92,
+      "sha256": "c89dc6268c56917e312a1560a35a06ce79d52619a19782214672554ec4e1a934"
+    },
+    {
+      "file": "ebm/ebm6.wav",
+      "name": "GraySlate / EBM / Harp 06",
+      "root": 87,
+      "gain": 3.89106,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.16,
+      "sha256": "f88af305fb35ca6ab38fa253cc3d4a8586145918fe7106cb1601b2cbd182ef8c"
+    },
+    {
+      "file": "ebm/ebm7.wav",
+      "name": "GraySlate / EBM / Harp 07",
+      "root": 78,
+      "gain": 1.68236,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.93,
+      "sha256": "80fdcb4dca81194f0d6e0e59cf25417b54cd981ad4a65359e4f4db54b733bfdf"
+    },
+    {
+      "file": "ebm/ebm8.wav",
+      "name": "GraySlate / EBM / Harp 08",
+      "root": 82,
+      "gain": 2.05389,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.65,
+      "sha256": "c8465ff21a787df1cd9d0dedab8278cf86c4f6df6b8a5906d5ccb2f9cfadb6b8"
+    },
+    {
+      "file": "ebm/ebm9.wav",
+      "name": "GraySlate / EBM / Harp 09",
+      "root": 99,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.11,
+      "sha256": "d58f30f37297f60658ca6ef6ff77a4f9614fcf0ca0ef815bcd40eea7765f6fa0"
+    },
+    {
+      "file": "em/em-chord.wav",
+      "name": "GraySlate / EM / Chord",
+      "root": 52,
+      "gain": 1.98744,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 13.21,
+      "sha256": "ccd31efba114ae6c6e33825a2e2dba23b819df6034b7488bf827626ff529e0fe"
+    },
+    {
+      "file": "em/em0.wav",
+      "name": "GraySlate / EM / Harp 00",
+      "root": 64,
+      "gain": 1.7707,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.91,
+      "sha256": "d402f2ea066db4ffb761f79c9ba2524823e011dea808c0b32c846063873f5bd2"
+    },
+    {
+      "file": "em/em1.wav",
+      "name": "GraySlate / EM / Harp 01",
+      "root": 55,
+      "gain": 1.95493,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.57,
+      "sha256": "993f75465055d355c1f3e897373784f78d3826a56e0f625a49171e43f9cd5436"
+    },
+    {
+      "file": "em/em10.wav",
+      "name": "GraySlate / EM / Harp 10",
+      "root": 91,
+      "gain": 2.33842,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.76,
+      "sha256": "b0f4a8a073ea25fc5a05e83824b6f828c48de786a9c8019684aa655e1910c933"
+    },
+    {
+      "file": "em/em11.wav",
+      "name": "GraySlate / EM / Harp 11",
+      "root": 95,
+      "gain": 5.38489,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.01,
+      "sha256": "0ff43102e36a029d9690592023f19445896eeb18e21f2bfb47c94ffa5bf677ae"
+    },
+    {
+      "file": "em/em2.wav",
+      "name": "GraySlate / EM / Harp 02",
+      "root": 59,
+      "gain": 1.8391,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.84,
+      "sha256": "0faf0c11fc4537f6888c5496d91dc5c3385081932b463b5f61470f5dd3e724dc"
+    },
+    {
+      "file": "em/em3.wav",
+      "name": "GraySlate / EM / Harp 03",
+      "root": 76,
+      "gain": 2.29016,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.68,
+      "sha256": "a363b2d225f1df7bd3147c7c1106ba40005ac2206ee4623065a605a141dfac1d"
+    },
+    {
+      "file": "em/em4.wav",
+      "name": "GraySlate / EM / Harp 04",
+      "root": 67,
+      "gain": 1.41244,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.92,
+      "sha256": "9cb9286ae918842c47c76f3ee42ff76e513a8bac358cd613776e0d289a0f8f45"
+    },
+    {
+      "file": "em/em5.wav",
+      "name": "GraySlate / EM / Harp 05",
+      "root": 71,
+      "gain": 1.50259,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.9,
+      "sha256": "ba69a547656a9c5ffc2d7b1bd3c816cdb3089bab16ee3613eeec1237406f7115"
+    },
+    {
+      "file": "em/em6.wav",
+      "name": "GraySlate / EM / Harp 06",
+      "root": 88,
+      "gain": 4.2007,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.96,
+      "sha256": "29eab23cfe9107d2716951485cc173058e16b18aa225e21973fb18d1f6ca88af"
+    },
+    {
+      "file": "em/em7.wav",
+      "name": "GraySlate / EM / Harp 07",
+      "root": 79,
+      "gain": 1.69073,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.9,
+      "sha256": "1bea542c6a343397cf7f006768cf4963cf544ad8964a618eba01a903a4182be9"
+    },
+    {
+      "file": "em/em8.wav",
+      "name": "GraySlate / EM / Harp 08",
+      "root": 83,
+      "gain": 2.26468,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.6,
+      "sha256": "31f362d1daca101d50cf1d2c7fecc8c8b1b3771cf1d763647310fcc0b7134dac"
+    },
+    {
+      "file": "em/em9.wav",
+      "name": "GraySlate / EM / Harp 09",
+      "root": 100,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.08,
+      "sha256": "39242aed62c421aaf21005307ebdc8d9b9fdd98aa959c50e4886afbf12922e5a"
+    },
+    {
+      "file": "f#/f#-chord.wav",
+      "name": "GraySlate / F# / Chord",
+      "root": 54,
+      "gain": 1.39499,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 13.12,
+      "sha256": "a99926906d39178e0052440f78aea7a90c3a89399ae18694f89071fc7b434e60"
+    },
+    {
+      "file": "f#/f#0.wav",
+      "name": "GraySlate / F# / Harp 00",
+      "root": 54,
+      "gain": 2.12324,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.01,
+      "sha256": "9d1abe6e02204c1a1ff9cbeee3d833b84e4aa77c250ce7c9ce83c6dcce6a25aa"
+    },
+    {
+      "file": "f#/f#1.wav",
+      "name": "GraySlate / F# / Harp 01",
+      "root": 58,
+      "gain": 1.99166,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.0,
+      "sha256": "801a65a57f8d228f274e5b860f85dba8610c793b4e2b9a8084e27aed4ebc1eae"
+    },
+    {
+      "file": "f#/f#10.wav",
+      "name": "GraySlate / F# / Harp 10",
+      "root": 94,
+      "gain": 4.18025,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.44,
+      "sha256": "1a2571661856093df65706ad0441e2062b9ef10701177c8c5534472c3171762e"
+    },
+    {
+      "file": "f#/f#11.wav",
+      "name": "GraySlate / F# / Harp 11",
+      "root": 97,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.16,
+      "sha256": "b2d9015a4086da120a05a6acf9887b8e5f6e924d8c3ff48328cdd859f45dd2a4"
+    },
+    {
+      "file": "f#/f#2.wav",
+      "name": "GraySlate / F# / Harp 02",
+      "root": 61,
+      "gain": 1.96011,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.86,
+      "sha256": "df2e8eab9e45ff5f2606cfeefd69e6fee1a100ee85da431f0c32836044faa2e0"
+    },
+    {
+      "file": "f#/f#3.wav",
+      "name": "GraySlate / F# / Harp 03",
+      "root": 66,
+      "gain": 1.9696,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.73,
+      "sha256": "b520fc8750225714ac3e0131365abd41625438be324f79a6a8cbf394835f5b29"
+    },
+    {
+      "file": "f#/f#4.wav",
+      "name": "GraySlate / F# / Harp 04",
+      "root": 70,
+      "gain": 1.41245,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.1,
+      "sha256": "d24f5271b5df0f000f0dac78f30d66d075f669e5e6c400e93119fb0a2a15d761"
+    },
+    {
+      "file": "f#/f#5.wav",
+      "name": "GraySlate / F# / Harp 05",
+      "root": 73,
+      "gain": 1.55923,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.63,
+      "sha256": "68bd6b5f2efa5ad12586823ffee585c6277bc60cd9807020272d7211340e485b"
+    },
+    {
+      "file": "f#/f#6.wav",
+      "name": "GraySlate / F# / Harp 06",
+      "root": 78,
+      "gain": 1.9611,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.7,
+      "sha256": "8e852677cff44586a35bd07e0314d374910a6d65565723dfead84012f1c7dbbd"
+    },
+    {
+      "file": "f#/f#7.wav",
+      "name": "GraySlate / F# / Harp 07",
+      "root": 82,
+      "gain": 2.0942,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.07,
+      "sha256": "336de145accaa6515900b3d31ac8fc3cd961cdb4091934821313fa39f6fa8329"
+    },
+    {
+      "file": "f#/f#8.wav",
+      "name": "GraySlate / F# / Harp 08",
+      "root": 85,
+      "gain": 2.76055,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.46,
+      "sha256": "a8373ecad03417119c4aac4e76de7eacec1cfc1e454fa9e04c1682ecc808c125"
+    },
+    {
+      "file": "f#/f#9.wav",
+      "name": "GraySlate / F# / Harp 09",
+      "root": 90,
+      "gain": 3.2422,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.43,
+      "sha256": "c69f1a8eb0406b413964ac252fa8a1d96b56f5a5ad3af290716b11adcc513a26"
+    },
+    {
+      "file": "f#7/f#7-chord.wav",
+      "name": "GraySlate / F#7 / Chord",
+      "root": 54,
+      "gain": 1.41162,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 14.86,
+      "sha256": "0828b2db920c1976f592145648c75ae635a0dfd0cc9b97a3845b57cac746c25e"
+    },
+    {
+      "file": "f#7/f#70.wav",
+      "name": "GraySlate / F#7 / Harp 00",
+      "root": 54,
+      "gain": 2.12064,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.24,
+      "sha256": "0b8fdea041e90afc64fd86614df2a83dc6ed5fe9214ead0ec380edae118957ac"
+    },
+    {
+      "file": "f#7/f#71.wav",
+      "name": "GraySlate / F#7 / Harp 01",
+      "root": 58,
+      "gain": 1.84186,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.27,
+      "sha256": "66b5c609ac2125da449d4e216e20a3e65844730c365a8910a84a233700b8a0dd"
+    },
+    {
+      "file": "f#7/f#710.wav",
+      "name": "GraySlate / F#7 / Harp 10",
+      "root": 94,
+      "gain": 4.00743,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.31,
+      "sha256": "744144d359dcdbc8c63dee05be880b225eeff30df46668ac76e0c9c029a3bbe7"
+    },
+    {
+      "file": "f#7/f#711.wav",
+      "name": "GraySlate / F#7 / Harp 11",
+      "root": 100,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.13,
+      "sha256": "ebf7edf2615beee30e98fd9018edf3d77fc778e16b8e16dfdce6e844e91e267c"
+    },
+    {
+      "file": "f#7/f#72.wav",
+      "name": "GraySlate / F#7 / Harp 02",
+      "root": 64,
+      "gain": 1.78507,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.08,
+      "sha256": "e75d31178ed80a5bbdd229c56e92929e0eb7495c10fd0abbdec6717991de5606"
+    },
+    {
+      "file": "f#7/f#73.wav",
+      "name": "GraySlate / F#7 / Harp 03",
+      "root": 66,
+      "gain": 1.6468,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.93,
+      "sha256": "906634c0ae612ddf20a42926b707d8c97bd994868d23c3e71f6c0b54bc7dc96d"
+    },
+    {
+      "file": "f#7/f#74.wav",
+      "name": "GraySlate / F#7 / Harp 04",
+      "root": 70,
+      "gain": 1.43488,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.02,
+      "sha256": "e11ec54e3a32c7e9fc1d0b5f44d7510eae944c4a50965bce3a39adc9838c77b0"
+    },
+    {
+      "file": "f#7/f#75.wav",
+      "name": "GraySlate / F#7 / Harp 05",
+      "root": 76,
+      "gain": 1.84966,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.92,
+      "sha256": "2f6b286913391c27c6ac72b279c166523a993100cedd7be95a05cd70290547f0"
+    },
+    {
+      "file": "f#7/f#76.wav",
+      "name": "GraySlate / F#7 / Harp 06",
+      "root": 78,
+      "gain": 1.86845,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.65,
+      "sha256": "9f9613d0a1ea8688dcfd68cd977a163f2a91edbc30266afb1f57fce4a1314416"
+    },
+    {
+      "file": "f#7/f#77.wav",
+      "name": "GraySlate / F#7 / Harp 07",
+      "root": 82,
+      "gain": 2.01146,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.61,
+      "sha256": "a560fdb173e2d253cce8357c076e2b6b17e608fddbf9b95d14aea398a80b8eed"
+    },
+    {
+      "file": "f#7/f#78.wav",
+      "name": "GraySlate / F#7 / Harp 08",
+      "root": 88,
+      "gain": 3.13498,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "7d7ae2d3ca31b735295b0c121d9072c5b149a7dc80aceb8fa029b417a646c5b9"
+    },
+    {
+      "file": "f#7/f#79.wav",
+      "name": "GraySlate / F#7 / Harp 09",
+      "root": 90,
+      "gain": 3.25936,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.38,
+      "sha256": "ce8612e3e63e8a66d4d9c0150a4bc9ab0620688f86cc5c0dbab995cdb9bb9784"
+    },
+    {
+      "file": "f#m/f#m-chord.wav",
+      "name": "GraySlate / F#M / Chord",
+      "root": 54,
+      "gain": 1.43077,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 12.32,
+      "sha256": "de35fe7f3429414b9cac4c9fd0f786d5dd574e44b217530a46dbe906922162ea"
+    },
+    {
+      "file": "f#m/f#m0.wav",
+      "name": "GraySlate / F#M / Harp 00",
+      "root": 54,
+      "gain": 1.92306,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.25,
+      "sha256": "37dec8855bb71bc29c3b37254cedc66b5cb1423385e76695268ecdb04dbbf15b"
+    },
+    {
+      "file": "f#m/f#m1.wav",
+      "name": "GraySlate / F#M / Harp 01",
+      "root": 57,
+      "gain": 1.80646,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.03,
+      "sha256": "91f1f0d2696c4ff1ed873632bfeaa3d5acd8845ef7db5e4d173d4e7e12ee7ed4"
+    },
+    {
+      "file": "f#m/f#m10.wav",
+      "name": "GraySlate / F#M / Harp 10",
+      "root": 93,
+      "gain": 3.36083,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.41,
+      "sha256": "6c2fbb7a9dc4605578f749d5b5d77c3153131f8203c48b4e22fc31777cdeb245"
+    },
+    {
+      "file": "f#m/f#m11.wav",
+      "name": "GraySlate / F#M / Harp 11",
+      "root": 97,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.14,
+      "sha256": "e2fff51df0f79fb58617c60a9043f97ec7ab941bac3b32df15eee5e0b4254cad"
+    },
+    {
+      "file": "f#m/f#m2.wav",
+      "name": "GraySlate / F#M / Harp 02",
+      "root": 61,
+      "gain": 1.82938,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.79,
+      "sha256": "8896932f22c2f44eaa16e004e3bb7a2d48db1d897bcfd55c31c6d8e293105b5f"
+    },
+    {
+      "file": "f#m/f#m3.wav",
+      "name": "GraySlate / F#M / Harp 03",
+      "root": 66,
+      "gain": 1.68243,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.07,
+      "sha256": "b0c7f3aea75ec34ed106c9dede5aa4ab6801fcc51c3a3df0b75f8c05afc2b4e9"
+    },
+    {
+      "file": "f#m/f#m4.wav",
+      "name": "GraySlate / F#M / Harp 04",
+      "root": 69,
+      "gain": 1.45756,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.95,
+      "sha256": "5328fc8b2b2672642f0f2b450d3371d6c56a048f965072cc55897283883b5f57"
+    },
+    {
+      "file": "f#m/f#m5.wav",
+      "name": "GraySlate / F#M / Harp 05",
+      "root": 73,
+      "gain": 1.57666,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.24,
+      "sha256": "13dab0efe7e195885d9bd5718da6878e00a8c9760abbb015f51a60e10826d99f"
+    },
+    {
+      "file": "f#m/f#m6.wav",
+      "name": "GraySlate / F#M / Harp 06",
+      "root": 78,
+      "gain": 1.94412,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.94,
+      "sha256": "e27c0d21858202e06be576428505534460d19d6e604e4d79faa384f656b2119c"
+    },
+    {
+      "file": "f#m/f#m7.wav",
+      "name": "GraySlate / F#M / Harp 07",
+      "root": 81,
+      "gain": 1.97144,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.96,
+      "sha256": "a72d5d7724bc0d22c00fc864870b56661c1feda3700224e1651e2b7dd0608e8d"
+    },
+    {
+      "file": "f#m/f#m8.wav",
+      "name": "GraySlate / F#M / Harp 08",
+      "root": 85,
+      "gain": 2.55321,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.68,
+      "sha256": "c9609dcef4e92d457b542d5b945fa7bd46f329500ab0b52cea0ebd83732af0af"
+    },
+    {
+      "file": "f#m/f#m9.wav",
+      "name": "GraySlate / F#M / Harp 09",
+      "root": 90,
+      "gain": 3.928,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.35,
+      "sha256": "5f30c66098216dd9ff13e3a505325f6f93a48e6bafcdd5a27f3f542d7c43a122"
+    },
+    {
+      "file": "f/f-chord.wav",
+      "name": "GraySlate / F / Chord",
+      "root": 53,
+      "gain": 2.03153,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 12.98,
+      "sha256": "12700703b07ebc02dca86c8a5a7535d87737f8179204b9c9900fe27873f40820"
+    },
+    {
+      "file": "f/f0.wav",
+      "name": "GraySlate / F / Harp 00",
+      "root": 65,
+      "gain": 1.76722,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.92,
+      "sha256": "fb41a0b674da5449a99c8c3fe5239a923c657046b8ca6e4795783a8d99a4b40e"
+    },
+    {
+      "file": "f/f1.wav",
+      "name": "GraySlate / F / Harp 01",
+      "root": 57,
+      "gain": 1.79654,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.29,
+      "sha256": "0b300202385c1383036772a88304e5aea4fecdcd0f7ee4f6970cd3e688881837"
+    },
+    {
+      "file": "f/f10.wav",
+      "name": "GraySlate / F / Harp 10",
+      "root": 93,
+      "gain": 3.30412,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.45,
+      "sha256": "9a8d4177e266d68cecea2ee10553f6d1f6cf3d23f0d75850d55742af6540234c"
+    },
+    {
+      "file": "f/f11.wav",
+      "name": "GraySlate / F / Harp 11",
+      "root": 96,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.1,
+      "sha256": "c21f3466c591dbe6f92b0a0bb2b187d432ed220801a08316d5a7af4a3fa71d5e"
+    },
+    {
+      "file": "f/f2.wav",
+      "name": "GraySlate / F / Harp 02",
+      "root": 60,
+      "gain": 1.73724,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.98,
+      "sha256": "e244c736bae19015f2a77a2790806bec12c2dbf5ed9193c8c67939972bf8e37d"
+    },
+    {
+      "file": "f/f3.wav",
+      "name": "GraySlate / F / Harp 03",
+      "root": 77,
+      "gain": 2.40512,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.57,
+      "sha256": "7867b02c05102ec1e3ef96e1b9351e3b6aa4cd443ea24774998832726892110f"
+    },
+    {
+      "file": "f/f4.wav",
+      "name": "GraySlate / F / Harp 04",
+      "root": 69,
+      "gain": 1.40071,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.89,
+      "sha256": "01797a703e70134105e727837ebef286938c65fa3bb4fd49bb3d9459182ef981"
+    },
+    {
+      "file": "f/f5.wav",
+      "name": "GraySlate / F / Harp 05",
+      "root": 72,
+      "gain": 1.54496,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.96,
+      "sha256": "dd0920ce130a8de8ff95ed14dbe3f1c3104e8ce25b0ee9575d25aa51b82ed7b9"
+    },
+    {
+      "file": "f/f6.wav",
+      "name": "GraySlate / F / Harp 06",
+      "root": 89,
+      "gain": 4.18022,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.12,
+      "sha256": "acabab3912d47c86b994ae06db0649d6423bc96610d5e8a555fbc7ad94895247"
+    },
+    {
+      "file": "f/f7.wav",
+      "name": "GraySlate / F / Harp 07",
+      "root": 81,
+      "gain": 2.03673,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.52,
+      "sha256": "b5e506272069fcc7bcf9ec579aae87972a922ad3133bf8665796a164379fe772"
+    },
+    {
+      "file": "f/f8.wav",
+      "name": "GraySlate / F / Harp 08",
+      "root": 84,
+      "gain": 2.46597,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.53,
+      "sha256": "773a9fced200f053705db0e2fa6c1a009341cb40ca4128c0da3ed8fe9a48f2cd"
+    },
+    {
+      "file": "f/f9.wav",
+      "name": "GraySlate / F / Harp 09",
+      "root": 101,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.47,
+      "sha256": "c1081cfef0cf67bd54f1b3f69768630bfe9859feb0a08a91ab745d53ed1b8f8a"
+    },
+    {
+      "file": "f7/f7-chord.wav",
+      "name": "GraySlate / F7 / Chord",
+      "root": 53,
+      "gain": 2.02167,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 8.98,
+      "sha256": "a032d8e11f1b118c0b7e49c11fa71deaec3568bef5b7adb8978d48023acf03a4"
+    },
+    {
+      "file": "f7/f70.wav",
+      "name": "GraySlate / F7 / Harp 00",
+      "root": 65,
+      "gain": 1.99837,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.1,
+      "sha256": "42e4f46decf9b1ca7dcdf2e2be4fe757acf67a6dac35b392efbcc6a2226d3529"
+    },
+    {
+      "file": "f7/f71.wav",
+      "name": "GraySlate / F7 / Harp 01",
+      "root": 57,
+      "gain": 1.83538,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.01,
+      "sha256": "93c4a06301fdea228d761867c6d76c5e2dc175577ef93d30df92e766549685c6"
+    },
+    {
+      "file": "f7/f710.wav",
+      "name": "GraySlate / F7 / Harp 10",
+      "root": 93,
+      "gain": 3.36748,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.62,
+      "sha256": "b03ff28d888d5abf23c45329314a7bfdcd6977b155aec6a10ea32fbe5a7a4f44"
+    },
+    {
+      "file": "f7/f711.wav",
+      "name": "GraySlate / F7 / Harp 11",
+      "root": 99,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.18,
+      "sha256": "93ef603fd65a5f5b83355dd23dda62c52dddd6e8ded8565d568687408253bbe2"
+    },
+    {
+      "file": "f7/f72.wav",
+      "name": "GraySlate / F7 / Harp 02",
+      "root": 63,
+      "gain": 1.73371,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.25,
+      "sha256": "61270d310f53face72bf055551ccfce3a8c9738d58c44c00023f827afc097aca"
+    },
+    {
+      "file": "f7/f73.wav",
+      "name": "GraySlate / F7 / Harp 03",
+      "root": 77,
+      "gain": 2.40848,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.81,
+      "sha256": "145f2e029becfa20cbcf8880b05638c2af6cfe2393f8153ffed7ae076517b4bd"
+    },
+    {
+      "file": "f7/f74.wav",
+      "name": "GraySlate / F7 / Harp 04",
+      "root": 69,
+      "gain": 1.42362,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.53,
+      "sha256": "c06035e0136397a22eb698c685f1f2384202939889ca6049b8153625458b5bd8"
+    },
+    {
+      "file": "f7/f75.wav",
+      "name": "GraySlate / F7 / Harp 05",
+      "root": 75,
+      "gain": 1.7301,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.8,
+      "sha256": "2f74085321053d1d2021701abadd7309cb9bf8feb8ee5e6b7dca1afccc0d25fb"
+    },
+    {
+      "file": "f7/f76.wav",
+      "name": "GraySlate / F7 / Harp 06",
+      "root": 89,
+      "gain": 4.32255,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.29,
+      "sha256": "03a273b52b7393182da600b6f6f46fdc9679ff7b90d1a634696d46a4ad1daeab"
+    },
+    {
+      "file": "f7/f77.wav",
+      "name": "GraySlate / F7 / Harp 07",
+      "root": 81,
+      "gain": 1.97293,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.68,
+      "sha256": "b9aba4cdfb4b86f246e57e253d09506c156e4cef71a58506328935393da596b0"
+    },
+    {
+      "file": "f7/f78.wav",
+      "name": "GraySlate / F7 / Harp 08",
+      "root": 87,
+      "gain": 2.96229,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.26,
+      "sha256": "2752bd6d90d279e163c644cc9f0ebaae4fee05283edf0b255010200e0c65ab08"
+    },
+    {
+      "file": "f7/f79.wav",
+      "name": "GraySlate / F7 / Harp 09",
+      "root": 101,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.99,
+      "sha256": "ad5f3c6323a5f24b02f3877c10cf320437915877c4c1ff80b8763bf3fb81281a"
+    },
+    {
+      "file": "fm/fm-chord.wav",
+      "name": "GraySlate / FM / Chord",
+      "root": 53,
+      "gain": 2.03584,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 8.84,
+      "sha256": "9174cbcb41b68b34b2a8e2b2608a9020d7130d9169bc1b6228181bbcda33e139"
+    },
+    {
+      "file": "fm/fm0.wav",
+      "name": "GraySlate / FM / Harp 00",
+      "root": 65,
+      "gain": 1.72715,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.98,
+      "sha256": "c9a75c4de17a98f55dc488f4dc35f5eae786be8b726ceca8a584a47c9260b776"
+    },
+    {
+      "file": "fm/fm1.wav",
+      "name": "GraySlate / FM / Harp 01",
+      "root": 56,
+      "gain": 1.79717,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.34,
+      "sha256": "7e86db32fd6df6f5504e5914c47def2066413330df759530516700f757dffdd8"
+    },
+    {
+      "file": "fm/fm10.wav",
+      "name": "GraySlate / FM / Harp 10",
+      "root": 92,
+      "gain": 2.66994,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.62,
+      "sha256": "2345832888845c170e947c713fb7ed73ffea652ee2654c1ab28b67fedeb0f62b"
+    },
+    {
+      "file": "fm/fm11.wav",
+      "name": "GraySlate / FM / Harp 11",
+      "root": 96,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.0,
+      "sha256": "da4bf1b122b10ef5679bf2908da4937ba62ca9b7f101f8c663b9a0e13064bc5b"
+    },
+    {
+      "file": "fm/fm2.wav",
+      "name": "GraySlate / FM / Harp 02",
+      "root": 60,
+      "gain": 1.76587,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.17,
+      "sha256": "6cc60637cc53755a8c3172403703b545442d329a5cb5da11e9df46d90e1063e6"
+    },
+    {
+      "file": "fm/fm3.wav",
+      "name": "GraySlate / FM / Harp 03",
+      "root": 77,
+      "gain": 2.35731,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.49,
+      "sha256": "9fd567acf0a320423b9e3ea6c8fa958df90ef660210145abd6a11a3ab4416208"
+    },
+    {
+      "file": "fm/fm4.wav",
+      "name": "GraySlate / FM / Harp 04",
+      "root": 68,
+      "gain": 1.40907,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.76,
+      "sha256": "d3692f991df2ac355d72bc0831e1e31f797ecfa08827005b97dc2612c2667468"
+    },
+    {
+      "file": "fm/fm5.wav",
+      "name": "GraySlate / FM / Harp 05",
+      "root": 72,
+      "gain": 1.68454,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.6,
+      "sha256": "7e501bcc8d26f52df3891c1dfe4a820ed1ac6dbedad66fa15a8bb90b3f8b6d1f"
+    },
+    {
+      "file": "fm/fm6.wav",
+      "name": "GraySlate / FM / Harp 06",
+      "root": 89,
+      "gain": 4.54988,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.06,
+      "sha256": "9d4244e1bbda3be82e24a0bea897f01540b6997334af1ef7a4bc2e06cc8313e2"
+    },
+    {
+      "file": "fm/fm7.wav",
+      "name": "GraySlate / FM / Harp 07",
+      "root": 80,
+      "gain": 2.03213,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.89,
+      "sha256": "8d218ecd9de8da861ad24e4fe01b0adf4bad7649848a823ae3bed34b8a498c7a"
+    },
+    {
+      "file": "fm/fm8.wav",
+      "name": "GraySlate / FM / Harp 08",
+      "root": 84,
+      "gain": 2.40206,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.59,
+      "sha256": "f43a60a97798e85f3d9a87bf195eeb48f7c575ce35a59024a84e0374f7a4454c"
+    },
+    {
+      "file": "fm/fm9.wav",
+      "name": "GraySlate / FM / Harp 09",
+      "root": 101,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.19,
+      "sha256": "6ce3d04003e8d6ffdb68be614ecea7d5ae302b60aeecf92f7c3a97b5126a8a2a"
+    },
+    {
+      "file": "g/g-chord.wav",
+      "name": "GraySlate / G / Chord",
+      "root": 55,
+      "gain": 1.44091,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 11.59,
+      "sha256": "b517bb2ad301985c8456ad90ed73d130d7129b8bd71410b5392f963864eb8ad1"
+    },
+    {
+      "file": "g/g0.wav",
+      "name": "GraySlate / G / Harp 00",
+      "root": 55,
+      "gain": 1.88129,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.41,
+      "sha256": "27ec06fca6fe14bd947a8564a4c468345f16f3bffd31202e1b8190ecf8a00b34"
+    },
+    {
+      "file": "g/g1.wav",
+      "name": "GraySlate / G / Harp 01",
+      "root": 59,
+      "gain": 1.67795,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.10376,
+      "sha256": "c4758fb75d467e38aab71a41f8fb4588e08dd1e71a2e406fb4e198a46db28161"
+    },
+    {
+      "file": "g/g10.wav",
+      "name": "GraySlate / G / Harp 10",
+      "root": 95,
+      "gain": 4.86941,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.03,
+      "sha256": "a119862378b962249eeedb303c9e074165063f8ff3b461fa896e99348ea3597a"
+    },
+    {
+      "file": "g/g11.wav",
+      "name": "GraySlate / G / Harp 11",
+      "root": 98,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 2.99,
+      "sha256": "2095b03ef5e81e05a24fde6c999e3e3f25e187855eaed0a3904c7c7511539615"
+    },
+    {
+      "file": "g/g2.wav",
+      "name": "GraySlate / G / Harp 02",
+      "root": 62,
+      "gain": 1.73697,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.82,
+      "sha256": "939cef1b39a6ca05d77c5774bd2e46305f5b566a4dd2818645d98a055e72284b"
+    },
+    {
+      "file": "g/g3.wav",
+      "name": "GraySlate / G / Harp 03",
+      "root": 67,
+      "gain": 1.66972,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.71,
+      "sha256": "ad2d5b167301db96407218f2fc91d51b4f561a40b2d9bbecd4970884ef2f605a"
+    },
+    {
+      "file": "g/g4.wav",
+      "name": "GraySlate / G / Harp 04",
+      "root": 71,
+      "gain": 1.47687,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.78,
+      "sha256": "8c13b083654aaa2649921ed9627b64ab6fc18e28d5862c6878ceea150ce9b071"
+    },
+    {
+      "file": "g/g5.wav",
+      "name": "GraySlate / G / Harp 05",
+      "root": 74,
+      "gain": 1.57726,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.78,
+      "sha256": "b26d8afe7d016840ea4049e0b4984236c7b414cc5fe3141afd5487d94a512752"
+    },
+    {
+      "file": "g/g6.wav",
+      "name": "GraySlate / G / Harp 06",
+      "root": 79,
+      "gain": 2.0974,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.62,
+      "sha256": "56f508751283881350f13224606190a72eae0167464f5f7611521f9659f137a8"
+    },
+    {
+      "file": "g/g7.wav",
+      "name": "GraySlate / G / Harp 07",
+      "root": 83,
+      "gain": 2.27587,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.53,
+      "sha256": "7bd1321a27f18a45b4c59a1d4a47ff16d076a295a504c4b85fb1c384b3903646"
+    },
+    {
+      "file": "g/g8.wav",
+      "name": "GraySlate / G / Harp 08",
+      "root": 86,
+      "gain": 2.68334,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.49,
+      "sha256": "0c45100f7d2735d4e3649ad142c82d2d6391b7794ff5badf9ab01f9812b6bbc5"
+    },
+    {
+      "file": "g/g9.wav",
+      "name": "GraySlate / G / Harp 09",
+      "root": 91,
+      "gain": 3.6129,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.43,
+      "sha256": "b011c943f2f5d3c9a68ebed45391f7470db733534b856b6fca4e53276a5f0de2"
+    },
+    {
+      "file": "g7/g7-chord.wav",
+      "name": "GraySlate / G7 / Chord",
+      "root": 55,
+      "gain": 1.44047,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 12.73,
+      "sha256": "fd52099864b79f00b50258d3225d1f292d3d7c3fd20bc9b2d7c23cb279d31685"
+    },
+    {
+      "file": "g7/g70.wav",
+      "name": "GraySlate / G7 / Harp 00",
+      "root": 55,
+      "gain": 1.93433,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.25,
+      "sha256": "b9628fb86409ec499c54dcf35f25185e2ce9304418e47c4c6b513e98d6ae5e59"
+    },
+    {
+      "file": "g7/g71.wav",
+      "name": "GraySlate / G7 / Harp 01",
+      "root": 59,
+      "gain": 1.67326,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.98,
+      "sha256": "ea5004128d4ba273ae0978af5bf45140e39763b044190be1ffc503ded004fc28"
+    },
+    {
+      "file": "g7/g710.wav",
+      "name": "GraySlate / G7 / Harp 10",
+      "root": 95,
+      "gain": 5.03177,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.07,
+      "sha256": "891cf65bbd53db7dde9a3c4dfd28d8c1ff79a71c2c3fae7ecd0b859e1a868e20"
+    },
+    {
+      "file": "g7/g711.wav",
+      "name": "GraySlate / G7 / Harp 11",
+      "root": 101,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.1,
+      "sha256": "28babd515d10cb3186485d08d6afb7a811853d53238b2966a93d9a7bdcfcdbbe"
+    },
+    {
+      "file": "g7/g72.wav",
+      "name": "GraySlate / G7 / Harp 02",
+      "root": 65,
+      "gain": 1.75708,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.09,
+      "sha256": "a62d3463c3bce3a15fc62d1601231f8e6c73bb67fb5c41b4327bc5653ccaad79"
+    },
+    {
+      "file": "g7/g73.wav",
+      "name": "GraySlate / G7 / Harp 03",
+      "root": 67,
+      "gain": 1.75496,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.68,
+      "sha256": "9ed39daf5d36aa4aa1c97b82454c37526945f7c49de2a4bf3a4004a0b8318688"
+    },
+    {
+      "file": "g7/g74.wav",
+      "name": "GraySlate / G7 / Harp 04",
+      "root": 71,
+      "gain": 1.48801,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.74,
+      "sha256": "c8ce13b88c5af88db13d96a046457ad0412bbc4de6b5e5a53f42d75d23aaf7f5"
+    },
+    {
+      "file": "g7/g75.wav",
+      "name": "GraySlate / G7 / Harp 05",
+      "root": 77,
+      "gain": 1.83841,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.5,
+      "sha256": "25010a27b27a85197d381da7a94fb3c3cc29410c2e3a9f12e44931be9f652dd4"
+    },
+    {
+      "file": "g7/g76.wav",
+      "name": "GraySlate / G7 / Harp 06",
+      "root": 79,
+      "gain": 2.02654,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.88,
+      "sha256": "8d5b7c34f127f24620973f7b32008beea09d1e3ed67d076ab76a1e7e16a4d675"
+    },
+    {
+      "file": "g7/g77.wav",
+      "name": "GraySlate / G7 / Harp 07",
+      "root": 83,
+      "gain": 2.4862,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.54166,
+      "sha256": "f18889180356625515009506c109e0baf476487856e762bd530f969ff3dcb6fa"
+    },
+    {
+      "file": "g7/g78.wav",
+      "name": "GraySlate / G7 / Harp 08",
+      "root": 89,
+      "gain": 3.37024,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.16,
+      "sha256": "6a3db47f430d8d4d4f792ffada1090e628f1d986b15b4ef370a7a4b1432e17f3"
+    },
+    {
+      "file": "g7/g79.wav",
+      "name": "GraySlate / G7 / Harp 09",
+      "root": 91,
+      "gain": 3.54591,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.4,
+      "sha256": "9b9b17d6936c0d86c65337c08161e766ab25f61eaf7da5d8ab5901c92a7d8a55"
+    },
+    {
+      "file": "gm/gm-chord.wav",
+      "name": "GraySlate / GM / Chord",
+      "root": 55,
+      "gain": 1.45564,
+      "wholeChord": true,
+      "loop": true,
+      "seconds": 9.15,
+      "sha256": "e99db40eb2b6bd47965a6fc61da62146292845d1c16e60e0061c437214b175c5"
+    },
+    {
+      "file": "gm/gm0.wav",
+      "name": "GraySlate / GM / Harp 00",
+      "root": 55,
+      "gain": 1.84181,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.02,
+      "sha256": "d67eba5024d4df5cce451c0d21a16617280d8ced86e4fe2473248b818c9861c1"
+    },
+    {
+      "file": "gm/gm1.wav",
+      "name": "GraySlate / GM / Harp 01",
+      "root": 58,
+      "gain": 1.83298,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 4.00605,
+      "sha256": "54d4236a5bd8429e90afbaca65346ef401d325fbc48e07b870dce961a4ccd180"
+    },
+    {
+      "file": "gm/gm10.wav",
+      "name": "GraySlate / GM / Harp 10",
+      "root": 94,
+      "gain": 3.91286,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.24,
+      "sha256": "d82a09db59ef92c6e9d0c60fbe4f9f40192cdae251c04b11e83cd52b0b1b2e12"
+    },
+    {
+      "file": "gm/gm11.wav",
+      "name": "GraySlate / GM / Harp 11",
+      "root": 98,
+      "gain": 6.0,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.09,
+      "sha256": "dccc10f9722743a244670e9690f0682da0646970c00797b16c7dc8f44b9190ad"
+    },
+    {
+      "file": "gm/gm2.wav",
+      "name": "GraySlate / GM / Harp 02",
+      "root": 62,
+      "gain": 1.66044,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.72,
+      "sha256": "bce5e47c6f3fb7d4ebb7a42fb04ed03cb3f00c6cdf1c61a0df8d866a9592af09"
+    },
+    {
+      "file": "gm/gm3.wav",
+      "name": "GraySlate / GM / Harp 03",
+      "root": 67,
+      "gain": 1.64605,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.77,
+      "sha256": "55429c5f8adc5eb5c3a5af3cd64b32bf943a136dfdd6b24ffa282821b14b45c0"
+    },
+    {
+      "file": "gm/gm4.wav",
+      "name": "GraySlate / GM / Harp 04",
+      "root": 70,
+      "gain": 1.44283,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.87,
+      "sha256": "3519827dd5942fae8e5f7bc9f584c635774b21c22ffb659c850d8c41cbce921e"
+    },
+    {
+      "file": "gm/gm5.wav",
+      "name": "GraySlate / GM / Harp 05",
+      "root": 74,
+      "gain": 1.55725,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.79,
+      "sha256": "de5b34cbe92eded95299c22d5f150cecca93a63add6c9e4835aa715b1576f201"
+    },
+    {
+      "file": "gm/gm6.wav",
+      "name": "GraySlate / GM / Harp 06",
+      "root": 79,
+      "gain": 1.9611,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.47,
+      "sha256": "957d60d560aef19870ebc0133242693e0a08fa03674950e14ac31ed7b97ef6e9"
+    },
+    {
+      "file": "gm/gm7.wav",
+      "name": "GraySlate / GM / Harp 07",
+      "root": 82,
+      "gain": 2.02295,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.63,
+      "sha256": "de427c00846044c43886d14d7115528dd23f2557945a7056101afa69f6ef2135"
+    },
+    {
+      "file": "gm/gm8.wav",
+      "name": "GraySlate / GM / Harp 08",
+      "root": 86,
+      "gain": 2.71562,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.36,
+      "sha256": "626fb4ab3142aebaba191afc6f8638520eaa992bb45e4fe9a61384384101b09b"
+    },
+    {
+      "file": "gm/gm9.wav",
+      "name": "GraySlate / GM / Harp 09",
+      "root": 91,
+      "gain": 3.70909,
+      "wholeChord": false,
+      "loop": false,
+      "seconds": 3.32,
+      "sha256": "2ee5a9876929b290bcaffc5a5be097eafa651c0a3dc28fecb4fe6d9157e05926"
+    },
+    {
+      "file": "rhythm/blues.wav",
+      "name": "GraySlate / RHYTHM / Rhythm blues",
+      "root": 60,
+      "gain": 2.04314,
+      "wholeChord": true,
+      "loop": false,
+      "seconds": 4.53,
+      "sha256": "f67b99cd941bfb63830a7394525412bcac3dea410ee9bccc7eee874e9af37548"
+    },
+    {
+      "file": "rhythm/country.wav",
+      "name": "GraySlate / RHYTHM / Rhythm country",
+      "root": 60,
+      "gain": 2.44831,
+      "wholeChord": true,
+      "loop": false,
+      "seconds": 5.78,
+      "sha256": "92aaa857929812dce08d3931dc6100ea0d80df9b8c279e4c1317653315c12584"
+    },
+    {
+      "file": "rhythm/disco.wav",
+      "name": "GraySlate / RHYTHM / Rhythm disco",
+      "root": 60,
+      "gain": 1.76572,
+      "wholeChord": true,
+      "loop": false,
+      "seconds": 5.59,
+      "sha256": "e91a2096a7a67572cec83be08657bd54a6dda19376190b7340171498e9b5ef9e"
+    },
+    {
+      "file": "rhythm/latin.wav",
+      "name": "GraySlate / RHYTHM / Rhythm latin",
+      "root": 60,
+      "gain": 2.43293,
+      "wholeChord": true,
+      "loop": false,
+      "seconds": 3.34,
+      "sha256": "0a851178c3924b05630afec9f8f9950a222edc87a228078b204d477a83cacd2f"
+    },
+    {
+      "file": "rhythm/march.wav",
+      "name": "GraySlate / RHYTHM / Rhythm march",
+      "root": 60,
+      "gain": 2.47312,
+      "wholeChord": true,
+      "loop": false,
+      "seconds": 5.77,
+      "sha256": "0fd380937225a041ada3eff42eda3ef67da0fd15d3abc6cbbe7e25bd473e3845"
+    },
+    {
+      "file": "rhythm/rock 1.wav",
+      "name": "GraySlate / RHYTHM / Rhythm rock 1",
+      "root": 60,
+      "gain": 2.03581,
+      "wholeChord": true,
+      "loop": false,
+      "seconds": 3.35,
+      "sha256": "385d2f807e0a9873cb3a2f653c71311d6ad4f8333a85be33ac697d81f0a1f8eb"
+    },
+    {
+      "file": "rhythm/rock 2.wav",
+      "name": "GraySlate / RHYTHM / Rhythm rock 2",
+      "root": 60,
+      "gain": 2.03522,
+      "wholeChord": true,
+      "loop": false,
+      "seconds": 4.54761,
+      "sha256": "20c5dc350123edbfbff02432325d9ecfc69d3124bb155f1141e2617648f204a4"
+    },
+    {
+      "file": "rhythm/swing.wav",
+      "name": "GraySlate / RHYTHM / Rhythm swing",
+      "root": 60,
+      "gain": 2.42661,
+      "wholeChord": true,
+      "loop": false,
+      "seconds": 2.79,
+      "sha256": "e2cda7f7da11d12aa1d577cde33b06e0e5c5991f9f76962252b2bb1a575367ef"
+    },
+    {
+      "file": "rhythm/tango.wav",
+      "name": "GraySlate / RHYTHM / Rhythm tango",
+      "root": 60,
+      "gain": 1.77066,
+      "wholeChord": true,
+      "loop": false,
+      "seconds": 5.62,
+      "sha256": "5fa07e3215bb08ba189f21aaf689421ec52d56c997184fb5b47df454cbf8fecd"
+    },
+    {
+      "file": "rhythm/waltz.wav",
+      "name": "GraySlate / RHYTHM / Rhythm waltz",
+      "root": 60,
+      "gain": 2.48439,
+      "wholeChord": true,
+      "loop": false,
+      "seconds": 4.5449,
+      "sha256": "c311e9eb0ba3f453f39ddb2c0941c431cf4b488a879e8745625fb6a87305f3d2"
+    }
+  ]
+}

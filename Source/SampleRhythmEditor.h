@@ -1,6 +1,7 @@
 #pragma once
 #include "PluginProcessor.h"
 #include "Themes.h"
+#include <map>
 
 namespace sampleui {
 inline void import(ChordHarpProcessor& processor,juce::Component& owner,std::unique_ptr<juce::FileChooser>& chooser) {
@@ -70,7 +71,14 @@ private:
     void timerCallback() override {
         if(revision!=processor.getSampleRevision()) {
             revision=processor.getSampleRevision();const auto choices=processor.sampleChoices();sound.clear(juce::dontSendNotification);
-            for(const auto& item:choices)sound.addItem(item.second,item.first+1);
+            std::map<juce::String,juce::PopupMenu> groups;
+            for(const auto& item:choices) {
+                if(item.second.startsWith("GraySlate / ")) {
+                    const auto group=item.second.fromFirstOccurrenceOf(" / ",false,false).upToFirstOccurrenceOf(" / ",false,false);
+                    groups[group].addItem(item.first+1,item.second);
+                } else sound.addItem(item.second,item.first+1);
+            }
+            if(!groups.empty()){juce::PopupMenu bank;for(auto& group:groups)bank.addSubMenu(group.first,group.second);sound.getRootMenu()->addSubMenu("GraySlate Omnichord",bank);}
             status.setText(choices.empty()?"Carga un ZIP con tus instrumentos":juce::String(static_cast<int>(choices.size()))+" instrumentos disponibles",juce::dontSendNotification);
         }
         sound.setSelectedId(static_cast<int>(processor.state.getRawParameterValue("organSample")->load())+1,juce::dontSendNotification);

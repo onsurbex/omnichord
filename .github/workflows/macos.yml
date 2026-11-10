@@ -51,6 +51,10 @@ jobs:
           codesign --force --deep --sign - build/Omnichord_artefacts/Release/Standalone/Omnichord.app
           codesign --verify --deep --strict build/Omnichord_artefacts/Release/VST3/Omnichord.vst3
           codesign --verify --deep --strict build/Omnichord_artefacts/Release/Standalone/Omnichord.app
+          for bundle in build/Omnichord_artefacts/Release/VST3/Omnichord.vst3 build/Omnichord_artefacts/Release/Standalone/Omnichord.app; do
+            cmp build/GraySlateSamples.zip "$bundle/Contents/Resources/GraySlateSamples.zip"
+            cmp samples/grayslate-index.json "$bundle/Contents/Resources/grayslate-index.json"
+          done
       - name: Create macOS PKG installer
         run: bash scripts/build-macos-pkg.sh build .
       - name: Verify PKG installation and replacement
@@ -64,6 +68,10 @@ jobs:
           icon_name=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' /Applications/Omnichord.app/Contents/Info.plist)
           test -s "/Applications/Omnichord.app/Contents/Resources/$icon_name"
           cmp "build/Omnichord_artefacts/Release/Standalone/Omnichord.app/Contents/Resources/$icon_name" "/Applications/Omnichord.app/Contents/Resources/$icon_name"
+          for bundle in /Library/Audio/Plug-Ins/VST3/Omnichord.vst3 /Applications/Omnichord.app; do
+            cmp build/GraySlateSamples.zip "$bundle/Contents/Resources/GraySlateSamples.zip"
+            cmp samples/grayslate-index.json "$bundle/Contents/Resources/grayslate-index.json"
+          done
           pkgutil --pkg-info audio.chordharp.instrument.pkg
       - name: Package for testing
         run: |
