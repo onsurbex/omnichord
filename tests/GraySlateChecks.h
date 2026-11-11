@@ -89,7 +89,7 @@ static void checkGraySlateSamples() {
     auto* target=dynamic_cast<juce::ComboBox*>(findComponent(*editor,"fm-target"));auto* enabled=dynamic_cast<juce::TextButton*>(findComponent(*editor,"fm-enabled"));
     require(target && enabled,"FM source controls must exist");target->setSelectedId(1,juce::sendNotificationSync);juce::MessageManager::getInstance()->runDispatchLoopUntil(150);
     require(!enabled->getToggleState(),"Harp must not display FM as active when the recorded bank overrides the previous FM patch");
-    auto* panel=builder.findGuiItemWithId("sound-controls")->getWrappedComponent();auto* tabs=findTabBar(*panel);require(tabs!=nullptr,"Bank previews need the main tabs");
+    auto* panel=builder.findGuiItemWithId("sound-controls");auto* tabs=findTabBar(*panel);require(tabs!=nullptr,"Bank previews need the main tabs");
     for(const auto& page:std::array<std::pair<int,const char*>,2>{{{1,"harp"},{4,"samples"}}}) {
         tabs->setCurrentTabIndex(page.first);juce::MessageManager::getInstance()->runDispatchLoopUntil(120);
         auto output=juce::File::getCurrentWorkingDirectory().getChildFile(juce::String("Omnichord-grayslate-")+page.second+"-panel-preview.png").createOutputStream();juce::PNGImageFormat png;
