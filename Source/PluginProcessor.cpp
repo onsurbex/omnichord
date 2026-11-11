@@ -173,6 +173,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChordHarpProcessor::paramete
     p.add(std::make_unique<DiscreteIntParameter>(juce::ParameterID{"computerOctave",1},"Mac Piano Octave (Ableton)",-2,6,3));
     p.add(std::make_unique<DiscreteIntParameter>(juce::ParameterID{"rhythmLength",1},"Rhythm Length (steps)",1,16,16));
     p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"masterClipper",1},"Master Soft Clipper",true));
+    p.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"harpGraySlate",1},"Harp Grayslate Samples",false));
     return p;
 }
 ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot,juce::File sampleBank):AudioProcessor(BusesProperties().withOutput("Output",juce::AudioChannelSet::stereo(),true)),state(*this,nullptr,"ChordHarp",parameters()),presetHome(presetRoot==juce::File{}?defaultPresetHome():presetRoot) {
@@ -210,7 +211,7 @@ ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot,juce::File sampleBa
     const char* organIDs[]{"organUnison","organDetune","organWidth","organDrift","organCutoff","organResonance","organFilterType"};
     for(size_t i=0;i<organRefs.size();++i)organRefs[i]=state.getRawParameterValue(organIDs[i]);
     const char* filterIDs[]{"sampleCutoff","sampleResonance","sampleFilterType"};for(size_t i=0;i<3;++i)sampleFilterRefs[i]=state.getRawParameterValue(filterIDs[i]);
-    masterClipperRaw=state.getRawParameterValue("masterClipper");
+    masterClipperRaw=state.getRawParameterValue("masterClipper");grayHarpRaw=state.getRawParameterValue("harpGraySlate");
     fmLayer.fm=true;
     chordParameter=state.getParameter("chord");
     major7Parameter=state.getParameter("major7");
@@ -249,6 +250,7 @@ ChordHarpProcessor::ChordHarpProcessor(juce::File presetRoot,juce::File sampleBa
 void ChordHarpProcessor::prepareToPlay(double rate,int blockSize) {
     juce::String sampleError;ensureSampleLoaded(static_cast<int>(rhythmRaw[6]->load()),sampleError);
     readSynthParameters();readMixerParameters();engine.prepare(rate);organLayer.prepare(rate);fmLayer.prepare(rate);mixer.prepare(rate);
+    grayHarpPlayer.prepare(rate,engine.latencySamples());grayChordPlayer.prepare(rate,engine.latencySamples());grayHarpFilter.prepare(rate);grayHarpDC.prepare(rate);
     setLatencySamples(engine.latencySamples());
     rhythm.prepare(rate,engine.latencySamples());sampleChords.prepare(rate,engine.latencySamples());sampleFilter.prepare(rate);sampleDC.prepare(rate);
     rhythmMuted=false;lastRhythmEnabled=false;lastRhythmHostPlay=false;
@@ -268,7 +270,7 @@ bool ChordHarpProcessor::isBusesLayoutSupported(const BusesLayout& b) const {
 void ChordHarpProcessor::strum(int index) {
     const int chord=selectedChord();
     int a,n,b,m; fifo.prepareToWrite(1,a,n,b,m);
-    if(n>0) notes[static_cast<size_t>(a)]=chordharp::chordNote(chord%12,chord/12,juce::jlimit(0,11,index));
+    if(n>0) notes[static_cast<size_t>(a)]=chord*12+juce::jlimit(0,11,index);
     fifo.finishedWrite(n);
 }
 void ChordHarpProcessor::setChordFromMidi(int value) {
@@ -317,14 +319,21 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
         releaseLiveNotes();heldChords.clear();guiChordLatched=false;organSilenced=false;
         guiChordKeys.reset();computerKeys.reset();guiChordMidi.clear();computerMidi.clear();
     }
+    const bool harpChanged=lastGrayHarp!=graySlateHarp(),sampleChanged=lastGraySamples!=graySamplesActive;
+    const bool harpReady=graySlateHarp() && grayHarpPlayer.bank,sampleReady=graySamplesActive && grayHarpBank;
+    if(harpChanged){engine.releaseAllHarp();grayHarpPlayer.releaseAll();}
+    if(sampleChanged){sampleChords.releaseAll();grayChordPlayer.releaseAll();}
     for(size_t layer=0;layer<4;++layer) {
         const bool active=mixer.channels[layer].enabled && (layer==0 || chords);
-        if(chromatic && active && !lastSources[layer])restoreHeldLayer(static_cast<int>(layer));
+        const bool changed=layer==0?(harpChanged || (harpReady && !lastGrayHarpReady)):layer==3?(sampleChanged || (sampleReady && !lastGraySampleReady)):false;
+        if(chromatic && active && (!lastSources[layer] || changed))restoreHeldLayer(static_cast<int>(layer));
         if(!active && lastSources[layer]) {
-            if(layer==0)engine.releaseAllHarp();else if(layer==1)organLayer.releaseAll();else if(layer==2)fmLayer.releaseAll();else sampleChords.releaseAll();
+            if(layer==0){engine.releaseAllHarp();grayHarpPlayer.releaseAll();}else if(layer==1)organLayer.releaseAll();else if(layer==2)fmLayer.releaseAll();else {sampleChords.releaseAll();grayChordPlayer.releaseAll();}
         }
         lastSources[layer]=active;
     }
+    lastGrayHarp=graySlateHarp();lastGraySamples=graySamplesActive;
+    lastGrayHarpReady=harpReady;lastGraySampleReady=sampleReady;
     int activeChord=selectedChord(),held=heldChords.latest();
     if(chordRetrigger.exchange(false) || activeChord!=lastChord || chords!=lastPad || sustain!=lastChordSustain)organSilenced=false;
     if(!sustain && held>=0){activeChord=held;setChordFromMidi(held);}
@@ -332,10 +341,13 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
         const bool gate=chords && !organSilenced && ((sustain && (!chromatic || guiChordLatched)) || held>=0);
         organLayer.chord(activeChord%12,activeChord/12,gate && mixer.channels[1].enabled);
         fmLayer.chord(activeChord%12,activeChord/12,gate && mixer.channels[2].enabled);
-        sampleChords.chord(activeChord%12,activeChord/12,gate && mixer.channels[3].enabled,static_cast<int>(mixerRaw[8]->load())-1);
+        const int sampleOctave=static_cast<int>(mixerRaw[8]->load())-1;
+        sampleChords.chord(activeChord%12,activeChord/12,gate && mixer.channels[3].enabled && !graySamplesActive,sampleOctave);
+        grayChordPlayer.release=sampleChords.release;grayChordPlayer.loop=sampleChords.loop;
+        grayChordPlayer.chord(activeChord%12,activeChord/12,gate && mixer.channels[3].enabled && graySamplesActive && !chromatic,sampleOctave);
     };
     const auto silence=[&](bool keepHostRhythm=false) {
-        engine.reset();organLayer.reset();fmLayer.reset();sampleChords.reset();sampleFilter.reset();sampleDC.reset();
+        engine.reset();organLayer.reset();fmLayer.reset();sampleChords.reset();grayChordPlayer.reset();grayHarpPlayer.reset();grayHarpFilter.reset();grayHarpDC.reset();sampleFilter.reset();sampleDC.reset();
         if(!keepHostRhythm){delay.reset();reverb.reset();tape.reset();}
         heldChords.clear();held=-1;liveNotes={};pedals={};guiChordLatched=false;
         organSilenced=true;tapeMuted=!keepHostRhythm;if(!keepHostRhythm){rhythmMuted=true;rhythm.enabled=false;rhythm.reset();}
@@ -348,8 +360,9 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
     refresh();int a,n,b,m;fifo.prepareToRead(fifo.getNumReady(),a,n,b,m);
     if(!stop && !presetChanged && mixer.channels[0].enabled) {
         if(n+m>0)tapeMuted=false;
-        for(int i=0;i<n;++i)engine.pluck(notes[static_cast<size_t>(a+i)]);
-        for(int i=0;i<m;++i)engine.pluck(notes[static_cast<size_t>(b+i)]);
+        const auto pluck=[&](int encoded){const int chord=encoded/12,index=encoded%12;pluckHarp(chordharp::chordNote(chord%12,chord/12,index),.8f,-1,chord,index);};
+        for(int i=0;i<n;++i)pluck(notes[static_cast<size_t>(a+i)]);
+        for(int i=0;i<m;++i)pluck(notes[static_cast<size_t>(b+i)]);
     }
     fifo.finishedRead(n+m);
     const auto selector=[&](const juce::MidiMessage& message,bool gui) {
@@ -373,9 +386,9 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
                 if(was && !down)for(int note=0;note<128;++note){const int id=channel*128+note;const auto& key=liveNotes[static_cast<size_t>(id)];if(!key.down && key.sustained)liveNoteOff(id);}
             }
         } else {
-            if(message.isNoteOff() && message.getNoteNumber()>=72)engine.releaseHarp(source);
+            if(message.isNoteOff() && message.getNoteNumber()>=72){engine.releaseHarp(source);grayHarpPlayer.noteOff(source);}
             if(message.isNoteOn() && message.getNoteNumber()>=72 && mixer.channels[0].enabled) {
-                engine.pluck(chordharp::harpFromMidi(message.getNoteNumber(),activeChord,value(HarpQuantize)>.5f),message.getFloatVelocity(),source);tapeMuted=false;
+                pluckHarp(chordharp::harpFromMidi(message.getNoteNumber(),activeChord,value(HarpQuantize)>.5f),message.getFloatVelocity(),source,activeChord,value(HarpQuantize)>.5f?message.getNoteNumber()-72:-1);tapeMuted=false;
             }
         }
     };
@@ -392,8 +405,11 @@ void ChordHarpProcessor::processBlock(juce::AudioBuffer<float>& buffer,juce::Mid
         auto computerEnd=computerEvent;while(computerEnd!=computerMidi.cend() && (*computerEnd).samplePosition<=sample)++computerEnd;
         for(auto it=computerEvent;it!=computerEnd;++it)performance((*it).getMessage(),true);computerEvent=computerEnd;
         engine.next();const auto organ=organLayer.next(),fm=fmLayer.next();if((sample&15)==0)sampleFilter.tick();
-        auto pcm=sampleChords.next();pcm={sampleFilter.next(sampleDC.next(pcm[0],0),0),sampleFilter.next(sampleDC.next(pcm[1],1),1)};
-        const auto sends=mixer.feed({{{engine.leftOutput,engine.rightOutput},organ,fm,pcm,rhythm.next()}});
+        auto pcm=sampleChords.next();const auto recorded=grayChordPlayer.next();if(graySamplesActive)pcm=recorded;pcm={sampleFilter.next(sampleDC.next(pcm[0],0),0),sampleFilter.next(sampleDC.next(pcm[1],1),1)};
+        auto harp=grayHarpPlayer.next();if((sample&15)==0)grayHarpFilter.tick();
+        harp={grayHarpFilter.next(grayHarpDC.next(harp[0],0),0),grayHarpFilter.next(grayHarpDC.next(harp[1],1),1)};
+        if(!graySlateHarp())harp={engine.leftOutput,engine.rightOutput};
+        const auto sends=mixer.feed({{harp,organ,fm,pcm,rhythm.next()}});
         auto d=sends.delay,r=sends.reverb;delay.process(d[0],d[1]);reverb.process(r[0],r[1]);
         auto out=mixer.sumReturns(sends.dry,{{d,r}});tape.process(out[0],out[1],!tapeMuted);out=mixer.output(out);
         if(buffer.getNumChannels()==1)buffer.setSample(0,sample,(out[0]+out[1])*.5f);

@@ -1,11 +1,9 @@
-Omnichord 0.7.4 para macOS, Apple Silicon e Intel.
+Omnichord 0.7.5 para macOS, Apple Silicon e Intel.
 
-- Corrige el contraste de los valores de Delay: texto claro sobre fondo gris oscuro en milisegundos, divisiones de nota, BPM y desplegable.
-- Integra las 477 grabaciones de GraySlate en Samples, junto a los 15 samples originales: 36 acordes, 431 notas de arpa y 10 grabaciones rítmicas.
-- Menú agrupado por acorde, notas raíz y niveles iniciales medidos. Los acordes completos conservan la calidad grabada; las notas de arpa pueden generar los acordes seleccionados.
-- Carga bajo demanda de una grabación por instancia, fuera del callback de audio. Soporte para los 103 WAV float64, manteniendo los 96 kHz originales.
-- WAV originales intactos, empaquetados sin pérdida y verificados por SHA-256. El VST3, standalone y PKG llevan el banco dentro de sus recursos.
-- Presets y proyectos conservan la selección del banco mediante la referencia portable de fábrica. El selector amplía su rango; las automatizaciones normalizadas antiguas de selección pueden necesitar ajuste.
+- Corrige GraySlate: una sola opción «Grayslate samples» en Samples reproduce el acorde grabado correspondiente a cada botón/MIDI, sin construir tríadas a partir de un acorde.
+- La misma opción en Harp reproduce las 12 grabaciones de arpa del acorde seleccionado a su pitch original. Fuera de esas posiciones se transpone el sample correspondiente.
+- Bancos precargados y compartidos entre instancias: los cambios de acorde no leen archivos. PCM16 compacto, canales mono compartidos y soporte IEEE float64, conservando los 96 kHz.
+- Excepciones del material disponible: Bb no tiene la última nota de arpa, que se obtiene transponiendo una vecina. Maj7 combina el mayor grabado con una séptima mayor; su arpa adapta las séptimas dominantes.
+- Conserva los sonidos originales, los efectos, el contraste mejorado de Delay y los presets completos. Selecciones individuales GraySlate de la 0.7.4 pasan al banco automático.
 
-Las diez grabaciones rítmicas nuevas son one-shots en Samples; su BPM no está confirmado y no sustituyen a los loops sincronizados anteriores.
-Windows queda pendiente para una futura 0.8 y no forma parte de estos cambios.
+Los diez ritmos GraySlate quedan archivados, sin mostrarse como instrumentos separados. Windows sigue pendiente para la futura 0.8.

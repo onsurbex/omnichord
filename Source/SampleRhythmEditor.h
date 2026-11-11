@@ -1,7 +1,6 @@
 #pragma once
 #include "PluginProcessor.h"
 #include "Themes.h"
-#include <map>
 
 namespace sampleui {
 inline void import(ChordHarpProcessor& processor,juce::Component& owner,std::unique_ptr<juce::FileChooser>& chooser) {
@@ -71,17 +70,13 @@ private:
     void timerCallback() override {
         if(revision!=processor.getSampleRevision()) {
             revision=processor.getSampleRevision();const auto choices=processor.sampleChoices();sound.clear(juce::dontSendNotification);
-            std::map<juce::String,juce::PopupMenu> groups;
-            for(const auto& item:choices) {
-                if(item.second.startsWith("GraySlate / ")) {
-                    const auto group=item.second.fromFirstOccurrenceOf(" / ",false,false).upToFirstOccurrenceOf(" / ",false,false);
-                    groups[group].addItem(item.first+1,item.second);
-                } else sound.addItem(item.second,item.first+1);
-            }
-            if(!groups.empty()){juce::PopupMenu bank;for(auto& group:groups)bank.addSubMenu(group.first,group.second);sound.getRootMenu()->addSubMenu("GraySlate Omnichord",bank);}
+            for(const auto& item:choices)sound.addItem(item.second,item.first+1);
             status.setText(choices.empty()?"Carga un ZIP con tus instrumentos":juce::String(static_cast<int>(choices.size()))+" instrumentos disponibles",juce::dontSendNotification);
         }
-        sound.setSelectedId(static_cast<int>(processor.state.getRawParameterValue("organSample")->load())+1,juce::dontSendNotification);
+        sound.setSelectedId(processor.currentSampleChoice()+1,juce::dontSendNotification);
+        const bool bank=processor.graySlateSamples();root.setEnabled(!bank);whole.setEnabled(!bank);
+        help.setText(bank?"Grayslate samples sigue el acorde seleccionado: una grabacion completa por acorde.\nEl arpa grabada se elige por separado en la pestaña Harp.":"Nota aislada: crea Maj, min, 7 y Maj7. Acorde grabado: conserva sus intervalos.\nVolumen en Mixer. La octava y el filtro se ajustan aqui. Activa CHORDS para tocar.",juce::dontSendNotification);
+        whole.setTooltip(bank?"Grayslate samples reproduce el acorde grabado correspondiente al acorde seleccionado.":"Para una grabacion de un acorde completo.");
         activate.setToggleState(processor.state.getRawParameterValue("samplesEnabled")->load()>.5f,juce::dontSendNotification);sampleui::colours(processor,*this);
     }
 };

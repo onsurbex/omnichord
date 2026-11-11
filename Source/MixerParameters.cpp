@@ -73,11 +73,11 @@ void ChordHarpProcessor::readMixerParameters() {
 void ChordHarpProcessor::liveNoteOn(int note,int source,float velocity) {
     if(source<0 || source>=static_cast<int>(liveNotes.size()))return;
     auto& key=liveNotes[static_cast<size_t>(source)];key.velocity=velocity;key.down=true;key.sustained=false;
-    if(mixer.channels[0].enabled)engine.pluck(note,velocity,source);
+    if(mixer.channels[0].enabled)pluckHarp(note,velocity,source,selectedChord());
     if(raw[Pad]->load()>.5f) {
         if(mixer.channels[1].enabled)organLayer.noteOn(note,source,velocity);
         if(mixer.channels[2].enabled)fmLayer.noteOn(note,source,velocity);
-        if(mixer.channels[3].enabled)sampleChords.noteOn(note,source,velocity,static_cast<int>(mixerRaw[8]->load())-1);
+        if(mixer.channels[3].enabled){if(graySamplesActive)grayChordPlayer.noteOn(selectedChord()%12,selectedChord()/12,note+12*(static_cast<int>(mixerRaw[8]->load())-1),source,velocity);else sampleChords.noteOn(note,source,velocity,static_cast<int>(mixerRaw[8]->load())-1);}
     }
     tapeMuted=false;
 }
@@ -85,18 +85,26 @@ void ChordHarpProcessor::liveNoteOff(int source) {
     if(source<0 || source>=static_cast<int>(liveNotes.size()))return;
     auto& key=liveNotes[static_cast<size_t>(source)];key.down=false;
     if(pedals[static_cast<size_t>(source/128)]){key.sustained=true;return;}
-    key.sustained=false;engine.releaseHarp(source);organLayer.noteOff(source);fmLayer.noteOff(source);sampleChords.noteOff(source);
+    key.sustained=false;engine.releaseHarp(source);grayHarpPlayer.noteOff(source);grayChordPlayer.noteOff(source);organLayer.noteOff(source);fmLayer.noteOff(source);sampleChords.noteOff(source);
 }
 void ChordHarpProcessor::releaseLiveNotes() {
-    liveNotes={};pedals={};engine.releaseAllHarp();organLayer.releaseAll();fmLayer.releaseAll();sampleChords.releaseAll();
+    liveNotes={};pedals={};engine.releaseAllHarp();grayHarpPlayer.releaseAll();grayChordPlayer.releaseAll();organLayer.releaseAll();fmLayer.releaseAll();sampleChords.releaseAll();
 }
 void ChordHarpProcessor::restoreHeldLayer(int layer) {
     for(size_t source=0;source<liveNotes.size();++source) {
         const auto& n=liveNotes[source];if(!n.down && !n.sustained)continue;
         const int note=static_cast<int>(source%128),id=static_cast<int>(source);
-        if(layer==0)engine.pluck(note,n.velocity,id);
+        if(layer==0)pluckHarp(note,n.velocity,id,selectedChord());
         else if(layer==1)organLayer.noteOn(note,id,n.velocity);
         else if(layer==2)fmLayer.noteOn(note,id,n.velocity);
+        else if(graySamplesActive)grayChordPlayer.noteOn(selectedChord()%12,selectedChord()/12,note+12*(static_cast<int>(mixerRaw[8]->load())-1),id,n.velocity);
         else sampleChords.noteOn(note,id,n.velocity,static_cast<int>(mixerRaw[8]->load())-1);
     }
+}
+
+void ChordHarpProcessor::pluckHarp(int note,float velocity,int source,int chord,int position) {
+    if(graySlateHarp()) {
+        if(position>=0)grayHarpPlayer.pluck(chord%12,chord/12,position,velocity,source);
+        else grayHarpPlayer.noteOn(chord%12,chord/12,note,source,velocity);
+    } else engine.pluck(note,velocity,source);
 }

@@ -28,7 +28,7 @@ jobs:
           -DCHORDHARP_PLUGIN_TESTS=ON
           -DCHORDHARP_GUI_EDITOR=OFF
       - name: Build instrument and tests
-        run: cmake --build build --config Release --parallel 3 --target Omnichord_VST3 Omnichord_Standalone engine_tests synthesis_tests mixer_tests processor_tests ambience_tests
+        run: cmake --build build --config Release --parallel 3 --target Omnichord_VST3 Omnichord_Standalone engine_tests synthesis_tests mixer_tests gray_slate_tests processor_tests ambience_tests
       - name: Test engine and JUCE processor
         run: ctest --test-dir build -C Release --output-on-failure
       - name: Render mixer review image
@@ -36,7 +36,7 @@ jobs:
         run: |
           python3 - <<'PYIMAGE'
           import base64, pathlib
-          for name, prefix in [('mixer', 'OMNI_MIXER'), ('fm-simple', 'OMNI_FM_SIMPLE'), ('fm-advanced', 'OMNI_FM_ADVANCED'), ('rhythm', 'OMNI_RHYTHM'), ('rhythm-short', 'OMNI_RHYTHM_SHORT'), ('delay', 'OMNI_DELAY')]:
+          for name, prefix in [('mixer', 'OMNI_MIXER'), ('fm-simple', 'OMNI_FM_SIMPLE'), ('fm-advanced', 'OMNI_FM_ADVANCED'), ('rhythm', 'OMNI_RHYTHM'), ('rhythm-short', 'OMNI_RHYTHM_SHORT'), ('delay', 'OMNI_DELAY'), ('grayslate-harp', 'OMNI_GRAYSLATE_HARP'), ('grayslate-samples', 'OMNI_GRAYSLATE_SAMPLES')]:
               image = pathlib.Path(f'build/Omnichord-{name}-panel-preview.png')
               if image.exists():
                   encoded = base64.b64encode(image.read_bytes()).decode()

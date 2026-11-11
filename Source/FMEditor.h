@@ -108,7 +108,7 @@ public:
         for(int i=0;i<32;++i)algorithm.addItem(juce::String(i+1)+"  ("+juce::String(chordharp::fmCarriers(i))+" portadoras)",i+1);
         target.setComponentID("fm-target");op.setComponentID("fm-operator");algorithm.setComponentID("fm-algorithm");enabled.setComponentID("fm-enabled");
         for(auto* component:std::array<juce::Component*,5>{{&target,&op,&algorithm,&enabled,&description}})addAndMakeVisible(component);
-        enabled.setClickingTogglesState(true);enabled.onClick=[this]{auto* p=processor.state.getParameter(organ?"fmEnabled":"harpSound");p->setValueNotifyingHost(enabled.getToggleState()?1.f:0.f);};
+        enabled.setClickingTogglesState(true);enabled.onClick=[this]{if(!organ)processor.state.getParameter("harpGraySlate")->setValueNotifyingHost(0);auto* p=processor.state.getParameter(organ?"fmEnabled":"harpSound");p->setValueNotifyingHost(enabled.getToggleState()?1.f:0.f);};
         target.onChange=[this]{organ=target.getSelectedId()==2;bind();};op.onChange=[this]{bind();};
         constexpr const char* text[]{"RATIO","FINE","LEVEL","VEL","ATK ms","DEC ms","SUST","REL ms","FDBK","WIDTH","DRIFT"};
         constexpr const char* ids[]{"fm-ratio","fm-fine","fm-level","fm-velocity","fm-attack","fm-decay","fm-sustain","fm-release","fm-feedback","fm-width","fm-drift"};

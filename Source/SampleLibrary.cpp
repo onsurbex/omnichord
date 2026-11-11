@@ -1,6 +1,39 @@
 #include "SampleLibrary.h"
 #include "FactorySamples.h"
 #include <bit>
+#include <map>
+#include <mutex>
+
+std::shared_ptr<const chordharp::GraySlateBank> SampleLibrary::graySlateBank(const juce::File& directory,bool harp,juce::String& error) {
+    static std::mutex mutex;
+    static std::map<juce::String,std::weak_ptr<const chordharp::GraySlateBank>> cache;
+    const std::lock_guard<std::mutex> guard(mutex);
+    const auto key=directory.getFullPathName()+(harp?":harp":":chords");
+    if(auto shared=cache[key].lock())return shared;
+    if(directory==juce::File{}){error="No se encuentra el banco Grayslate samples.";return {};}
+    SampleLibrary catalog;if(!catalog.appendGraySlate(directory,error))return {};
+    auto bank=std::make_shared<chordharp::GraySlateBank>();int count=0;
+    const juce::StringArray roots{"c","db","d","eb","e","f","f#","g","ab","a","bb","b"};
+    for(const auto& entry:catalog.entries) {
+        auto group=entry.recording.getParentDirectory().getFileName();
+        const bool supplement=!harp && !entry.wholeChord && entry.recording.getFileNameWithoutExtension()==group+"0" && !group.endsWith("m") && !group.endsWith("7");
+        if(group=="rhythm" || (entry.wholeChord==harp && !supplement))continue;
+        int quality=0;if(group.endsWith("m")){quality=1;group=group.dropLastCharacters(1);}else if(group.endsWith("7")){quality=2;group=group.dropLastCharacters(1);}
+        const int root=roots.indexOf(group);if(root<0){error="Grupo de acorde GraySlate no valido.";return {};}
+        chordharp::SampleAudio* destination=nullptr;
+        if(supplement)destination=&bank->sevenths[static_cast<size_t>(root)];
+        else if(!harp)destination=&bank->chords[static_cast<size_t>(quality*12+root)];
+        else {
+            const auto step=entry.recording.getFileNameWithoutExtension().substring(entry.recording.getParentDirectory().getFileName().length());
+            const int index=step.getIntValue();if(step.isEmpty() || !step.containsOnly("0123456789") || index<0 || index>11){error="Posicion de arpa GraySlate no valida.";return {};}
+            destination=&bank->harps[static_cast<size_t>(quality*12+root)][static_cast<size_t>(index)];
+        }
+        if(destination->frames()>0 || !decodeRecording(entry.recording,*destination,error,entry.archive))return {};
+        destination->root=entry.audio.root;destination->gain=entry.audio.gain;destination->sustain=entry.audio.sustain;destination->compact(entry.bits==16);++count;
+    }
+    if(count!=(harp?431:48)){error="El banco GraySlate esta incompleto.";return {};}
+    cache[key]=bank;error.clear();return bank;
+}
 
 juce::File SampleLibrary::bundledDirectory() {
     const auto resources=juce::File::getSpecialLocation(juce::File::currentExecutableFile).getParentDirectory().getSiblingFile("Resources");
@@ -22,7 +55,7 @@ bool SampleLibrary::appendGraySlate(const juce::File& directory,juce::String& er
         const int root=static_cast<int>(item["root"]);const float gain=static_cast<float>(item["gain"]);
         const bool available=packed?packed->getIndexOfFileName("GraySlate's Omnichord Pack/"+path)>=0:entry.recording.existsAsFile();
         if(!available || root<0 || root>127 || !std::isfinite(gain) || gain<=0 || gain>6){error="Falta una grabacion o sus metadatos no son validos: "+path;return false;}
-        entry.audio.root=root;entry.audio.gain=gain;entry.audio.sustain=static_cast<bool>(item["loop"]);entry.wholeChord=static_cast<bool>(item["wholeChord"]);
+        entry.audio.root=root;entry.audio.gain=gain;entry.audio.sustain=static_cast<bool>(item["loop"]);entry.wholeChord=static_cast<bool>(item["wholeChord"]);entry.bits=static_cast<int>(item["bits"]);
         added.push_back(std::move(entry));
     }
     for(auto& entry:added){instruments.push_back(static_cast<int>(entries.size()));entries.push_back(std::move(entry));}

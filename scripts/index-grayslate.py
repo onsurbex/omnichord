@@ -54,7 +54,7 @@ for path in sorted(base.rglob('*.wav'), key=lambda p: p.as_posix().lower()):
     label = 'Chord' if chord else ('Rhythm ' + path.stem if rhythm else 'Harp ' + path.stem[len(group):].zfill(2))
     entries.append(dict(file=path.relative_to(base).as_posix(), name='GraySlate / ' + group.upper() + ' / ' + label,
                         root=root, gain=round(gain, 5), wholeChord=chord or rhythm, loop=chord,
-                        seconds=round(seconds, 5), sha256=hashlib.sha256(blob).hexdigest()))
+                        seconds=round(seconds, 5), bits=bits, channels=channels, sha256=hashlib.sha256(blob).hexdigest()))
 catalog = base.parent / 'grayslate-index.json'
 catalog.write_text(json.dumps(dict(format=1, source=base.name, entries=entries), indent=2) + '\n')
 print(f'{len(entries)} recordings indexed; longest {max(e["seconds"] for e in entries):.2f}s')

@@ -22,33 +22,37 @@ afinación usando un reproductor de fragmentos con solapamiento y alineación.
 CMake incrusta el ZIP en ambos formatos del instrumento. Las notas raíz y los
 ajustes iniciales están en `Source/FactorySamples.h`.
 
-## GraySlate's Omnichord Pack (0.7.4)
+## GraySlate's Omnichord Pack (0.7.5)
 
-477 WAV originales aportados por el usuario: 36 acordes completos, 431 notas
-individuales de arpa y 10 grabaciones de ritmos. Se conservan sin modificar.
-374 son PCM de 16 bits estéreo y 103 IEEE float64 mono; todos a 96 kHz.
-El lector convierte float64 al formato interno float32 al cargar, conservando
-la frecuencia de muestreo. No se modifica ningún WAV del repositorio.
+477 WAV originales aportados por el usuario: 36 acordes completos, 431 grabaciones
+de arpa y 10 ritmos. 374 son PCM16 estéreo y 103 IEEE float64 mono, todos a 96 kHz.
+Los originales no se modifican; el banco instalado se empaqueta sin pérdida en ZIP.
 
-En Samples abre **GraySlate Omnichord** y elige un grupo de acordes:
-- **Chord** selecciona el acorde grabado completo y su nota raíz, con loop.
-  Al transponer mantiene la calidad del acorde grabado; para pasar de mayor a
-  menor elige la grabación del grupo correspondiente.
-- **Harp** selecciona un golpe individual, con raíz estimada a partir de su
-  frecuencia dominante. Los botones de acordes generan los intervalos como
-  en el sampler anterior. Puedes corregir la raíz y el nivel manualmente.
-- **RHYTHM** reproduce grabaciones completas como one-shots dentro de Samples.
-  No se añaden al motor de loops sincronizados: su BPM no está confirmado.
+- **Samples → Grayslate samples**: una sola opción. Los botones y octavas MIDI
+  eligen automáticamente el acorde grabado correcto (12 mayores, 12 menores y
+  12 séptimas dominantes). No se construye una tríada usando un acorde como nota.
+- **Harp → Grayslate samples**: una sola opción independiente. Cada posición 0–11
+  toca su WAV numerado dentro del acorde seleccionado, con pitch original.
+  Las posiciones MIDI adicionales transponen la posición correspondiente por octavas.
+- Falta `bb/bb11.wav`: esa posición se obtiene del vecino disponible, transpuesto.
+- El pack no contiene Maj7: Samples combina el acorde mayor grabado con una nota
+  de séptima mayor muestreada. Harp usa el arpa de séptima dominante y sube solo
+  sus notas de séptima un semitono. No se presenta como una grabación Maj7 original.
+- CHROMATIC y FOLLOW CHORDS desactivado usan la nota de arpa más cercana y ajustan
+  su pitch. Cada canal conserva su volumen, panorama, filtro y envíos.
 
-`grayslate-index.json` guarda nombres, raíces, niveles iniciales y SHA-256.
-Los ajustes de nivel equilibran el RMS inicial y limitan el pico estimado.
-`python3 scripts/index-grayslate.py` lo regenera (requiere numpy; solo desarrollo).
-CMake usa el índice ya guardado y Python estándar para verificar todos los hashes
-y generar `GraySlateSamples.zip`. Este ZIP y el índice se incluyen en Resources
-**tanto del VST3 como de la app**, también al instalarlos con el PKG.
+Los bancos necesarios se preparan al elegir el sonido, cargar el preset o preparar
+el procesador. Toda la reproducción y los cambios de acorde posteriores usan
+memoria, sin acceso a disco en el callback de audio. Las instancias comparten bancos
+inmutables. Se conserva PCM16 en memoria y se evita duplicar canales mono; float64
+se convierte al formato interno float32. La frecuencia de muestreo sigue siendo 96 kHz.
 
-El catálogo es ligero; la selección decodifica un solo WAV fuera del callback
-de audio y descarga la grabación anterior. Presets y proyectos usan la referencia
-portable `factory`, manteniendo los índices originales 0–14. El selector se amplía
-a 1024 posiciones; las automatizaciones normalizadas antiguas del selector pueden
-necesitar ajuste. El ZIP original y su importación manual siguen funcionando.
+Se mantienen los 15 samples anteriores, sus índices y sus presets. Las selecciones
+individuales GraySlate de la 0.7.4 se interpretan ahora como el banco de acordes.
+Los diez WAV de ritmos nuevos se conservan en el archivo pero ya no aparecen como
+sonidos individuales de Samples; los cuatro loops sincronizados anteriores siguen.
+
+`grayslate-index.json` contiene metadatos y SHA-256. El script de desarrollo
+`index-grayslate.py` requiere numpy; CMake solo necesita Python estándar para
+verificar y empaquetar los originales. VST3, standalone y PKG llevan ZIP e índice
+en Resources y usan la referencia portable `factory` en presets y proyectos.
