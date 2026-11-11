@@ -164,7 +164,7 @@ private:
         for(auto& label:labels)label.setColour(juce::Label::textColourId,ink);description.setColour(juce::Label::textColourId,ink);
         for(auto* combo:{&target,&op,&algorithm}) {combo->setColour(juce::ComboBox::backgroundColourId,button);combo->setColour(juce::ComboBox::textColourId,ink);}
         advanced.setColour(juce::TextButton::buttonColourId,button);advanced.setColour(juce::TextButton::buttonOnColourId,accent);advanced.setColour(juce::TextButton::textColourOffId,ink);advanced.setColour(juce::TextButton::textColourOnId,ink.contrasting());
-        const bool fm=processor.state.getRawParameterValue(organ?"fmEnabled":"harpSound")->load()>.5f;enabled.setToggleState(fm,juce::dontSendNotification);
+        const bool fm=processor.state.getRawParameterValue(organ?"fmEnabled":"harpSound")->load()>.5f && (organ || !processor.graySlateHarp());enabled.setToggleState(fm,juce::dontSendNotification);
         enabled.setColour(juce::TextButton::buttonColourId,button);enabled.setColour(juce::TextButton::buttonOnColourId,accent);
         const int a=static_cast<int>(processor.state.getRawParameterValue((organ?"organ":"harp")+juce::String("Algorithm"))->load())-1;
         juce::String carriers;for(int i=0;i<6;++i)if(chordharp::fmCarrier(a,i))carriers+=juce::String(i+1)+" ";

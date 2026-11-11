@@ -60,7 +60,7 @@ static void checkGraySlateSamples() {
     require(count==1 && bank==15,"The aggregated choice must preserve legacy sample indices");
     synth.selectSampleSound(bank);require(synth.graySlateSamples() && synth.currentSampleChoice()==bank,"Selecting the bank must enable automatic chord selection");
     const auto harpNames=synth.synthSoundNames(false);require(harpNames.indexOf("Grayslate samples")==harpNames.size()-1,"Harp must expose a single GraySlate option alongside synthesis");
-    synth.selectSynthSound(false,harpNames.size()-1);require(synth.graySlateHarp() && synth.getSynthChoice(false)==harpNames.size()-1,"Harp bank selection must persist as a sound choice");
+    synth.selectSynthSound(false,1);synth.selectSynthSound(false,harpNames.size()-1);require(synth.graySlateHarp() && synth.getSynthChoice(false)==harpNames.size()-1,"Harp bank selection must persist as a sound choice");
     synth.prepareToPlay(48000,512);juce::AudioBuffer<float> audio(2,512);juce::MidiBuffer midi;
     setActual(synth,"chordSustain",0);float peak=0;
     for(int chord:{0,12,24,7,19,31,36}) {
@@ -86,6 +86,9 @@ static void checkGraySlateSamples() {
     auto* harpChoice=dynamic_cast<juce::ComboBox*>(builder.findGuiItemWithId("harpSound")->getWrappedComponent());
     auto* sampleChoice=dynamic_cast<juce::ComboBox*>(findComponent(*editor,"sample-sound"));
     require(harpChoice && sampleChoice && harpChoice->getText()=="Grayslate samples" && sampleChoice->getText()=="Grayslate samples","Both real GUI selectors must display the single aggregated sound");
+    auto* target=dynamic_cast<juce::ComboBox*>(findComponent(*editor,"fm-target"));auto* enabled=dynamic_cast<juce::TextButton*>(findComponent(*editor,"fm-enabled"));
+    require(target && enabled,"FM source controls must exist");target->setSelectedId(1,juce::sendNotificationSync);juce::MessageManager::getInstance()->runDispatchLoopUntil(150);
+    require(!enabled->getToggleState(),"Harp must not display FM as active when the recorded bank overrides the previous FM patch");
     auto* panel=builder.findGuiItemWithId("sound-controls")->getWrappedComponent();auto* tabs=findTabBar(*panel);require(tabs!=nullptr,"Bank previews need the main tabs");
     for(const auto& page:std::array<std::pair<int,const char*>,2>{{{1,"harp"},{4,"samples"}}}) {
         tabs->setCurrentTabIndex(page.first);juce::MessageManager::getInstance()->runDispatchLoopUntil(120);
