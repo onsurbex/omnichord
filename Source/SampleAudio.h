@@ -3,16 +3,23 @@
 #include <array>
 #include <cmath>
 #include <vector>
+#include <cstdint>
 
 namespace chordharp {
 struct SampleAudio {
     std::array<std::vector<float>,2> channel;
+    std::array<std::vector<std::int16_t>,2> pcm16;
     double rate=44100,beats=0;int root=60;float gain=1;
     bool drum=false,sustain=false,openHat=false;
-    size_t frames() const {return channel[0].size();}
+    size_t frames() const {return pcm16[0].empty()?channel[0].size():pcm16[0].size();}
+    size_t storageBytes() const {return (channel[0].size()+channel[1].size())*sizeof(float)+(pcm16[0].size()+pcm16[1].size())*sizeof(std::int16_t);}
+    void compact(bool sixteenBit) {
+        if(channel[0]==channel[1])std::vector<float>().swap(channel[1]);
+        if(sixteenBit)for(size_t c=0;c<2;++c){pcm16[c].reserve(channel[c].size());for(float x:channel[c])pcm16[c].push_back(static_cast<std::int16_t>(std::clamp(std::lrint(x*32768.f),-32768l,32767l)));std::vector<float>().swap(channel[c]);}
+    }
     float read(size_t c,double position) const {
-        const auto& data=channel[c];const auto index=static_cast<long long>(position);const float t=static_cast<float>(position-index);
-        const auto at=[&](long long i){return i<0 || static_cast<unsigned long long>(i)>=data.size()?0.f:data[static_cast<size_t>(i)];};
+        const auto index=static_cast<long long>(position);const float t=static_cast<float>(position-index);
+        const auto at=[&](long long i){if(i<0 || static_cast<unsigned long long>(i)>=frames())return 0.f;const auto n=static_cast<size_t>(i);if(!pcm16[0].empty())return pcm16[pcm16[c].empty()?0:c][n]/32768.f;return channel[channel[c].empty()?0:c][n];};
         const float a=at(index-1),b=at(index),d=at(index+1),e=at(index+2);
         return b+.5f*t*(d-a+t*(2*a-5*b+4*d-e+t*(3*(b-d)+e-a)));
     }

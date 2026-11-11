@@ -15,9 +15,9 @@
 #include "MixerDSP.h"
 #include <atomic>
 
-class ChordHarpProcessor final : public juce::AudioProcessor,private juce::AudioProcessorValueTreeState::Listener {
+class ChordHarpProcessor final : public juce::AudioProcessor,private juce::AudioProcessorValueTreeState::Listener,private juce::Timer {
 public:
-    explicit ChordHarpProcessor(juce::File presetRoot={});
+    explicit ChordHarpProcessor(juce::File presetRoot={},juce::File sampleBank={});
     ~ChordHarpProcessor() override;
     void prepareToPlay(double, int) override;
     void releaseResources() override {}
@@ -88,7 +88,21 @@ public:
     void editRhythmStep(int track,int step,bool on);
     int rhythmPatternLength() const;
     void resizeRhythmPattern(int length);
+    bool ensureSampleLoaded(int index,juce::String& error);
+    int currentSampleChoice() const;
+    bool graySlateSamples() const;
+    bool graySlateHarp() const {return grayHarpRaw->load()>.5f;}
+    bool ensureGraySlateBanks(bool chords,bool harp,juce::String& error);
 private:
+    std::atomic<float>* grayHarpRaw=nullptr;
+    std::shared_ptr<const chordharp::GraySlateBank> grayChordBank,grayHarpBank;
+    chordharp::GraySlatePlayer grayChordPlayer,grayHarpPlayer;
+    chordharp::SynthFilter grayHarpFilter;
+    chordharp::DCBlocker grayHarpDC;
+    bool lastGrayHarp=false,graySamplesActive=false,lastGrayHarpReady=false,lastGraySampleReady=false,lastGraySamples=false;
+    void pluckHarp(int midi,float velocity,int source,int chord,int position=-1);
+    void timerCallback() override;
+    juce::File factoryCatalogRoot;
     static juce::File defaultPresetHome();
     juce::File presetHome;
     juce::ValueTree factoryPreset;

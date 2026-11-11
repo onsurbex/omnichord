@@ -140,7 +140,7 @@ static void checkChordReleaseAndTape() {
 static void checkPresetLibrary() {
     const auto root=juce::File::getSpecialLocation(juce::File::tempDirectory).getNonexistentChildFile("Omnichord preset checks","",true);
     struct Cleanup { juce::File file; ~Cleanup() { file.deleteRecursively(); } } cleanup{root};
-    ChordHarpProcessor source(root);
+    ChordHarpProcessor source(root,juce::File::getCurrentWorkingDirectory());
     std::vector<float> expected;
     for(auto* parameter:source.getParameters()) {
         // JUCE bools retain fractional host values internally, but their legal
@@ -162,7 +162,7 @@ static void checkPresetLibrary() {
     require(source.loadPreset(file,error),"Restore the test snapshot before choosing its default");
     const auto layout=source.magicState.getGuiTree().toXmlString();
     require(source.setStartupPreset(error),"A complete snapshot can be chosen as startup preset");
-    ChordHarpProcessor next(root);
+    ChordHarpProcessor next(root,juce::File::getCurrentWorkingDirectory());
     for(int i=0;i<next.getParameters().size();++i)
         require(std::abs(next.getParameters()[i]->getValue()-expected[static_cast<size_t>(i)])<.001f,"A new instance must start from all chosen default parameters");
     const auto bad=root.getChildFile("corrupt.omnipreset");bad.replaceWithText("<OmnichordPreset formatVersion=\"2\"><PARAM id=\"gain\" value=\"0.1\"/><PARAM id=\"tone\" value=\"nan\"/></OmnichordPreset>");
@@ -175,7 +175,7 @@ static void checkPresetLibrary() {
     for(int i=0;i<ChordHarpProcessor::factoryPresetNames().size();++i) require(next.loadFactoryPreset(i,error),"Every factory preset must load");
     require(source.magicState.getGuiTree().toXmlString()==layout,"Loading sound presets must preserve the edited panel layout");
     require(source.clearStartupPreset(error),"The default can be returned to factory settings");
-    ChordHarpProcessor factory(root);require(factory.state.getRawParameterValue("organModel")->load()==0 && factory.state.getRawParameterValue("organEnabled")->load()==0,"Factory startup must be deterministic and silent");
+    ChordHarpProcessor factory(root,juce::File::getCurrentWorkingDirectory());require(factory.state.getRawParameterValue("organModel")->load()==0 && factory.state.getRawParameterValue("organEnabled")->load()==0,"Factory startup must be deterministic and silent");
 }
 static void checkFMPerformance() {
     ChordHarpProcessor synth;
@@ -538,8 +538,11 @@ static void checkPatternRuler(ChordHarpProcessor& processor,juce::Component& pan
     require(processor.rhythmPatternLength()==16 && findComponent(panel,"rhythmStep0_14")->isVisible(),"Dragging the edge back out must restore all sixteen columns");setActual(processor,"rhythmEnabled",0);
 }
 
+#include "GraySlateChecks.h"
+
 int main() {
     juce::ScopedJuceInitialiser_GUI gui;
+    checkGraySlateSamples();
     checkPatternLengthGainAndClipper();
     checkSoloCleanup();
     checkTransportAndLevels();
@@ -833,6 +836,10 @@ int main() {
     auto* division=dynamic_cast<juce::ComboBox*>(findComponent(*timing,"delay-note"));
     division->setSelectedId(9,juce::sendNotificationSync);
     require(restored.state.getRawParameterValue("delayDivision")->load()==8,"Triplet selection must reach the delay engine");
+    {
+        auto output=juce::File::getCurrentWorkingDirectory().getChildFile("Omnichord-delay-panel-preview.png").createOutputStream();
+        require(output && png.writeImageToStream(panelItem->createComponentSnapshot(panelItem->getLocalBounds()),*output),"Delay contrast review must render");
+    }
     syncButton->setToggleState(false,juce::sendNotificationSync);
     juce::MessageManager::getInstance()->runDispatchLoopUntil(150);
     require(findComponent(*timing,"delay-ms")->isVisible() && !findComponent(*timing,"delay-note")->isVisible(),"Free delay must show milliseconds");

@@ -47,6 +47,12 @@ bool ChordHarpProcessor::applyPreset(const juce::ValueTree& input,juce::String& 
     if(known==0) { error="El preset no contiene parametros reconocidos."; return false; }
     const auto samples=preset.getProperty("sampleLibrary").toString();
     if(samples.isNotEmpty() && !restoreSampleLibrary(samples,error))return false;
+    const auto sampleValue=preset.getChildWithProperty("id","organSample");
+    const int sampleIndex=sampleValue.isValid()?static_cast<int>(sampleValue.getProperty("value")):0;
+    bool recorded=false;{const juce::ScopedLock lock(libraryLock);recorded=sampleLibrary && sampleIndex>=0 && sampleIndex<static_cast<int>(sampleLibrary->entries.size()) && sampleLibrary->entries[static_cast<size_t>(sampleIndex)].recording!=juce::File{};}
+    const bool harp=static_cast<float>(preset.getChildWithProperty("id","harpGraySlate").getProperty("value",0))>.5f;
+    const bool chromatic=static_cast<float>(preset.getChildWithProperty("id","playMode").getProperty("value",0))>.5f;
+    if(!ensureGraySlateBanks(recorded,harp || (chromatic && recorded),error))return false;
     // Validate the complete document before changing any parameter.
     for(auto& updating:synthUpdating)updating.store(true);
     for(auto* parameter:getParameters()) if(auto* ranged=dynamic_cast<juce::RangedAudioParameter*>(parameter)) {

@@ -1,5 +1,34 @@
 #include "PluginProcessor.h"
 
+void ChordHarpProcessor::timerCallback() {
+    juce::String error;ensureSampleLoaded(static_cast<int>(rhythmRaw[6]->load()),error);
+}
+bool ChordHarpProcessor::ensureGraySlateBanks(bool chords,bool harp,juce::String& error) {
+    std::shared_ptr<const chordharp::GraySlateBank> chordBank,harpBank;
+    {const juce::ScopedLock lock(libraryLock);chordBank=grayChordBank;harpBank=grayHarpBank;}
+    // Cache and disk operations finish before taking the audio callback lock.
+    if(chords && !chordBank){chordBank=SampleLibrary::graySlateBank(factoryCatalogRoot,false,error);if(!chordBank)return false;}
+    if(harp && !harpBank){harpBank=SampleLibrary::graySlateBank(factoryCatalogRoot,true,error);if(!harpBank)return false;}
+    const juce::ScopedLock audioLock(getCallbackLock());const juce::ScopedLock lock(libraryLock);
+    if(chordBank)grayChordBank=std::move(chordBank);if(harpBank)grayHarpBank=std::move(harpBank);
+    return true;
+}
+bool ChordHarpProcessor::ensureSampleLoaded(int index,juce::String& error) {
+    bool recorded=false;
+    {const juce::ScopedLock lock(libraryLock);recorded=sampleLibrary && index>=0 && index<static_cast<int>(sampleLibrary->entries.size()) && sampleLibrary->entries[static_cast<size_t>(index)].recording!=juce::File{};}
+    return ensureGraySlateBanks(recorded,graySlateHarp() || (recorded && chromaticMode()),error);
+}
+bool ChordHarpProcessor::graySlateSamples() const {
+    const juce::ScopedLock lock(libraryLock);const int index=static_cast<int>(rhythmRaw[6]->load());
+    return sampleLibrary && index>=0 && index<static_cast<int>(sampleLibrary->entries.size()) && sampleLibrary->entries[static_cast<size_t>(index)].recording!=juce::File{};
+}
+int ChordHarpProcessor::currentSampleChoice() const {
+    const juce::ScopedLock lock(libraryLock);const int selected=static_cast<int>(rhythmRaw[6]->load());
+    if(sampleLibrary && selected>=0 && selected<static_cast<int>(sampleLibrary->entries.size()) && sampleLibrary->entries[static_cast<size_t>(selected)].recording!=juce::File{})
+        for(size_t i=0;i<sampleLibrary->entries.size();++i)if(sampleLibrary->entries[i].recording!=juce::File{})return static_cast<int>(i);
+    return selected;
+}
+
 juce::String ChordHarpProcessor::rhythmStepID(int track,int step) {return "rhythmStep"+juce::String(track)+"_"+juce::String(step);}
 int ChordHarpProcessor::rhythmPatternLength() const {
     return std::min(juce::jlimit(1,16,static_cast<int>(rhythmRaw[11]->load())),static_cast<int>(rhythmRaw[2]->load())==5?12:16);
@@ -35,8 +64,12 @@ bool ChordHarpProcessor::restoreSampleLibrary(const juce::String& reference,juce
 }
 std::vector<std::pair<int,juce::String>> ChordHarpProcessor::sampleChoices(bool loops) const {
     const juce::ScopedLock lock(libraryLock);std::vector<std::pair<int,juce::String>> result;
-    if(sampleLibrary)for(const auto index:loops?sampleLibrary->loops:sampleLibrary->instruments)
-        result.emplace_back(index,sampleLibrary->entries[static_cast<size_t>(index)].name);
+    bool added=false;
+    if(sampleLibrary)for(const auto index:loops?sampleLibrary->loops:sampleLibrary->instruments) {
+        const auto& entry=sampleLibrary->entries[static_cast<size_t>(index)];
+        if(entry.recording!=juce::File{}){if(!added){result.emplace_back(index,"Grayslate samples");added=true;}}
+        else result.emplace_back(index,entry.name);
+    }
     return result;
 }
 std::vector<std::pair<int,juce::String>> ChordHarpProcessor::drumChoices() const {
@@ -49,15 +82,16 @@ std::vector<std::pair<int,juce::String>> ChordHarpProcessor::drumChoices() const
     return result;
 }
 void ChordHarpProcessor::selectSampleSound(int index,bool activate) {
-    int root=60;bool loop=false;
+    juce::String error;if(!ensureSampleLoaded(index,error))return;
+    int root=60;bool loop=false,whole=false;
     {
         const juce::ScopedLock lock(libraryLock);
         if(!sampleLibrary || index<0 || index>=static_cast<int>(sampleLibrary->entries.size()))return;
-        const auto& audio=sampleLibrary->entries[static_cast<size_t>(index)].audio;root=audio.root;loop=audio.sustain;
+        const auto& entry=sampleLibrary->entries[static_cast<size_t>(index)];const auto& audio=entry.audio;root=entry.recording!=juce::File{}?48:audio.root;loop=entry.recording!=juce::File{} || audio.sustain;whole=entry.recording!=juce::File{} || entry.wholeChord;
     }
     const auto set=[&](const char* id,float value){auto* p=state.getParameter(id);p->beginChangeGesture();p->setValueNotifyingHost(p->convertTo0to1(value));p->endChangeGesture();};
     set("organSample",static_cast<float>(index));set("sampleRoot",static_cast<float>(root));
-    set("sampleChord",0);set("sampleLoop",loop?1.f:0.f);set("sampleRelease",loop?800.f:250.f);
+    set("sampleChord",whole?1.f:0.f);set("sampleLoop",loop?1.f:0.f);set("sampleRelease",loop?800.f:250.f);
     if(activate)set("samplesEnabled",1);
 }
 bool ChordHarpProcessor::loadSampleLibrary(const juce::File& file,juce::String& error) {
@@ -72,6 +106,7 @@ bool ChordHarpProcessor::loadSampleLibrary(const juce::File& file,juce::String& 
     const auto cache=presetHome.getChildFile("Samples").getChildFile(juce::String::toHexString(static_cast<juce::int64>(hash))+".zip");
     if(!cache.getParentDirectory().createDirectory().wasOk() || (!cache.existsAsFile() && !file.copyFileTo(cache))) {error="No se ha podido guardar la libreria de samples.";return false;}
     decoded->source=cache.getFullPathName();
+    if(cache.getFullPathName()==factoryLibraryPath && !decoded->appendGraySlate(factoryCatalogRoot,error))return false;
     {
         // Decode and copy outside the callback lock. Swap only while processing
         // is excluded by JUCE's host/standalone wrappers; no file I/O on audio.
@@ -112,12 +147,12 @@ void ChordHarpProcessor::readRhythmParameters(bool hasPpq,double ppq,bool playin
         }
     }
     rhythm.chokeOpenHat=rhythm.samples[3] && rhythm.samples[3]->openHat;
-    sampleChords.sound=nullptr;
+    sampleChords.sound=nullptr;graySamplesActive=false;
     if(sampleLibrary) {
         const int index=static_cast<int>(rhythmRaw[6]->load());
         if(index>=0 && index<static_cast<int>(sampleLibrary->entries.size())) {
-            const auto& audio=sampleLibrary->entries[static_cast<size_t>(index)].audio;
-            if(!audio.drum && audio.beats==0)sampleChords.sound=&audio;
+            const auto& entry=sampleLibrary->entries[static_cast<size_t>(index)];const auto& audio=entry.audio;graySamplesActive=entry.recording!=juce::File{};
+            if(!graySamplesActive && !audio.drum && audio.beats==0)sampleChords.sound=&audio;
         }
     }
     sampleChords.rootNote=static_cast<int>(rhythmRaw[7]->load());sampleChords.release=rhythmRaw[8]->load()*.001f;

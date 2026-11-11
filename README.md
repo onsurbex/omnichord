@@ -1,4 +1,10 @@
-# Omnichord — BLINBLIN · versión 0.7.3
+# Omnichord — BLINBLIN · versión 0.7.5
+
+La versión **0.7.5** corrige GraySlate como un banco único: elige **Grayslate samples**
+en Samples para reproducir el acorde grabado correspondiente, o en Harp para tocar
+sus doce grabaciones de arpa según el acorde seleccionado. Los sonidos anteriores
+siguen disponibles. Los bancos se preparan fuera del audio y se comparten entre
+instancias; los cambios de acorde no leen archivos. Windows queda para la futura 0.8.
 
 Prototipo de instrumento inspirado en el Omnichord para Ableton Live en macOS.
 Incluye 48 acordes (mayores, menores, séptimas y séptimas mayores), una franja de rasgueo de

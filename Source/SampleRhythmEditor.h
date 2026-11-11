@@ -73,7 +73,10 @@ private:
             for(const auto& item:choices)sound.addItem(item.second,item.first+1);
             status.setText(choices.empty()?"Carga un ZIP con tus instrumentos":juce::String(static_cast<int>(choices.size()))+" instrumentos disponibles",juce::dontSendNotification);
         }
-        sound.setSelectedId(static_cast<int>(processor.state.getRawParameterValue("organSample")->load())+1,juce::dontSendNotification);
+        sound.setSelectedId(processor.currentSampleChoice()+1,juce::dontSendNotification);
+        const bool bank=processor.graySlateSamples();root.setEnabled(!bank);whole.setEnabled(!bank);
+        help.setText(bank?"Grayslate samples sigue el acorde seleccionado: una grabacion completa por acorde.\nSelecciona el arpa grabada por separado en Harp.":"Nota aislada: crea Maj, min, 7 y Maj7. Acorde grabado: conserva sus intervalos.\nVolumen en Mixer. La octava y el filtro se ajustan aqui. Activa CHORDS para tocar.",juce::dontSendNotification);
+        whole.setTooltip(bank?"Grayslate samples reproduce el acorde grabado correspondiente al acorde seleccionado.":"Para una grabacion de un acorde completo.");
         activate.setToggleState(processor.state.getRawParameterValue("samplesEnabled")->load()>.5f,juce::dontSendNotification);sampleui::colours(processor,*this);
     }
 };
